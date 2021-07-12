@@ -2,10 +2,6 @@
 
 ### Collider DEX is a non-custodial multi-coin wallet and feature rich trading app that is the central hub of Crypto Collider's unique Crypto experience.
 
-# [![colliderDEX](https://cryptocollider.com/img/login-page-Final-text_500px.png)](https://cryptocollider.com)
-
-### Collider DEX is a non-custodial multi-coin wallet and feature rich trading app that is the central hub of Crypto Collider's unique Crypto experience.
-
 ### Collider DEX is forked from AtomicDEX with added extra integration of Collider's innovative games and trading tools.
 
 ## For more information on Collider DEX and Crypto Collider please visit [cryptocollider.com](https://cryptocollider.com)
