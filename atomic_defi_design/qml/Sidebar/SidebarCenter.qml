@@ -86,6 +86,25 @@ ColumnLayout {
         }
     }
 
+    //creates a sidebar tab in order (so it sits below fiat tab)
+    SidebarLine {
+        section_enabled: false
+        dashboard_index: idx_dashboard_games
+        text_value: sidebar.expanded? qsTr("Games") : ""
+        image: General.image_path + "menu-games-white.svg"
+        Layout.fillWidth: true
+        SidebarTooltip {
+            text_value: qsTr("Games")
+        }
+
+        DefaultTooltip {
+            enabled: false
+            id: games_coming_soon
+            text: qsTr("Coming soon !")
+            visible: parent.mouse_area.containsMouse
+        }
+    }
+
 //    SidebarLine {
 //        dashboard_index: idx_dashboard_news
 //        text_value: qsTr("News")
