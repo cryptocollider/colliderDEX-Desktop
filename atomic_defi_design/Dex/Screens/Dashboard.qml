@@ -1,198 +1,225 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
-import QtGraphicalEffects 1.0
-import QtWebEngine 1.10
 
+import QtGraphicalEffects 1.0
 import "../Components"
 import "../Constants"
-import App 1.0
+
 import "../Dashboard"
 import "../Portfolio"
 import "../Wallet"
 import "../Exchange"
 import "../Settings"
 import "../Support"
-import "../Sidebar" as Sidebar
+import "../Sidebar"
 import "../Fiat"
+import "../Games"
 import "../Settings" as SettingsPage
-import "../Screens"
-import Dex.Themes 1.0 as Dex
-//import Dex.Sidebar 1.0 as Dex
 
 
 Item {
     id: dashboard
 
-    enum PageType
-    {
-        Portfolio,
-        Wallet,
-        DEX,            // DEX == Trading page
-        Addressbook,
-        Support
-    }
+    readonly property int idx_dashboard_portfolio: 0
+    readonly property int idx_dashboard_wallet: 1
+    readonly property int idx_dashboard_exchange: 2
+    readonly property int idx_dashboard_addressbook: 3
+    readonly property int idx_dashboard_news: 4
+    readonly property int idx_dashboard_dapps: 5
+    readonly property int idx_dashboard_settings: 6
+    readonly property int idx_dashboard_support: 7
+    readonly property int idx_dashboard_light_ui: 8
+    readonly property int idx_dashboard_privacy_mode: 9
+    readonly property int idx_dashboard_fiat_ramp: 10
+    readonly property int idx_dashboard_games: 11
 
-    property var currentPage: Dashboard.PageType.Portfolio
-    property var availablePages: [portfolio, wallet, exchange, addressbook, support]
-
-    property alias webEngineView: webEngineView
-
+    //readonly property int idx_exchange_trade: 3
     readonly property int idx_exchange_trade: 0
     readonly property int idx_exchange_orders: 1
     readonly property int idx_exchange_history: 2
 
     property var current_ticker
 
+    property alias notifications_modal: notifications_modal
+    Layout.fillWidth: true
+
+    function openLogsFolder() {
+        Qt.openUrlExternally(General.os_file_prefix + API.app.settings_pg.get_log_folder())
+    }
+
+    readonly property var api_wallet_page: API.app.wallet_pg
+    readonly property var current_ticker_infos: api_wallet_page.ticker_infos
+    readonly property bool can_change_ticker: !api_wallet_page.tx_fetching_busy
+
+    readonly property alias loader: loader
+    readonly property alias current_component: loader.item
+    property int current_page: idx_dashboard_portfolio
+
+
+    readonly property bool is_dex_banned: !API.app.ip_checker.ip_authorized
+
+    function inCurrentPage() {
+        return app.current_page === idx_dashboard
+    }
+
     property var notifications_list: ([])
 
     readonly property var portfolio_mdl: API.app.portfolio_pg.portfolio_mdl
     property var portfolio_coins: portfolio_mdl.portfolio_proxy_mdl
 
-    readonly property var   api_wallet_page: API.app.wallet_pg
-    readonly property var   current_ticker_infos: api_wallet_page.ticker_infos
-    readonly property bool  can_change_ticker: !api_wallet_page.tx_fetching_busy
-    readonly property bool  is_dex_banned: !API.app.ip_checker.ip_authorized
-
-    readonly property alias loader: loader
-    readonly property alias current_component: loader.item
-
-
-    function openLogsFolder()
-    {
-        Qt.openUrlExternally(General.os_file_prefix + API.app.settings_pg.get_log_folder())
+    function resetCoinFilter() {
+        portfolio_coins.setFilterFixedString("")
     }
 
-    function inCurrentPage() { return app.current_page === idx_dashboard }
 
-    function switchPage(page)
-    {
-        if (loader.status === Loader.Ready)
-            currentPage = page
-        else
-            console.warn("Tried to switch to page %1 when loader is not ready yet.".arg(page))
-    }
-
-    function resetCoinFilter() { portfolio_coins.setFilterFixedString("") }
-
-    function openTradeViewWithTicker()
-    {
+    function openTradeViewWithTicker() {
         dashboard.loader.onLoadComplete = () => {
             dashboard.current_component.openTradeView(api_wallet_page.ticker)
         }
     }
-
-    Layout.fillWidth: true
-
-    onCurrentPageChanged: sidebar.currentLineType = currentPage
-
     // Al settings depends this modal
-    SettingsPage.SettingModal { id: setting_modal }
+    SettingsPage.SettingModal {
+        id: setting_modal
+    }
 
     // Force restart modal: opened when the user has more coins enabled than specified in its configuration
     ForceRestartModal {
-        reasonMsg: qsTr("The current number of enabled coins does not match your configuration specification. Your assets configuration will be reset.")
+        reason: qsTr("The current number of enabled coins does not match your configuration specification. Your assets configuration will be reset.")
         Component.onCompleted: {
-            if (API.app.portfolio_pg.portfolio_mdl.length > atomic_settings2.value("MaximumNbCoinsEnabled")) {
+            if (API.app.portfolio_pg.portfolio_mdl.length > atomic_settings2.value("MaximumNbCoinsEnabled"))
+            {
                 open()
-                onTimerEnded = () => {
-                    API.app.settings_pg.reset_coin_cfg()
-                }
+                task_before_restart = () => { API.app.settings_pg.reset_coin_cfg() }
             }
         }
     }
 
     // Right side
-    AnimatedRectangle
-    {
+    AnimatedRectangle {
+        color: theme.backgroundColorDeep
         width: parent.width - sidebar.width
-        height: parent.height
+        height: window.isOsx? parent.height : parent.height-40
+        y: !window.isOsx? 40 : 0
         x: sidebar.width
-        border.color: 'transparent'
 
         // Modals
-        ModalLoader
-        {
+        ModalLoader {
             id: enable_coin_modal
-            sourceComponent: EnableCoinModal
-            {
+            sourceComponent: EnableCoinModal {
                 anchors.centerIn: Overlay.overlay
             }
         }
 
-        Component
-        {
+        Component {
             id: portfolio
 
             Portfolio {}
         }
 
-        Component
-        {
+        Component {
             id: wallet
 
             Wallet {}
         }
 
-        Component
-        {
+        Component {
             id: exchange
 
             Exchange {}
         }
 
-        Component
-        {
+        Component {
             id: addressbook
 
             AddressBook {}
         }
 
-        Component
-        {
+        Component {
+            id: games
+
+            Games {}
+        }
+
+        Component {
+            id: news
+
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                DefaultText {
+                    anchors.centerIn: parent
+                    text_value: qsTr("Content for this section will be added later. Stay tuned!")
+                }
+            }
+        }
+
+        Component {
+            id: dapps
+
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                DefaultText {
+                    anchors.centerIn: parent
+                    text_value: qsTr("Content for this section will be added later. Stay tuned!")
+                }
+            }
+        }
+
+        Component {
             id: settings
 
-            Settings
-            {
+            Settings {
                 Layout.alignment: Qt.AlignCenter
             }
         }
 
-        Component
-        {
+        Component {
             id: support
 
-            Support
-            {
+            Support {
                 Layout.alignment: Qt.AlignCenter
             }
         }
 
-        WebEngineView
-        {
-            id: webEngineView
-            backgroundColor: "transparent"
+        Component {
+            id: fiat_ramp
+
+            FiatRamp {
+
+            }
         }
 
-        DefaultLoader
-        {
+        DefaultLoader {
             id: loader
 
             anchors.fill: parent
             transformOrigin: Item.Center
-            asynchronous: true
 
-            sourceComponent: availablePages[currentPage]
+            sourceComponent: {
+                switch(current_page) {
+                case idx_dashboard_portfolio: return portfolio
+                case idx_dashboard_wallet: return wallet
+                case idx_dashboard_exchange: return exchange
+                case idx_dashboard_addressbook: return addressbook
+                case idx_dashboard_news: return news
+                case idx_dashboard_dapps: return dapps
+                case idx_dashboard_settings: return settings
+                case idx_dashboard_support: return support
+                case idx_dashboard_fiat_ramp: return fiat_ramp
+                case idx_dashboard_games: return games
+                default: return undefined
+                }
+            }
         }
 
-        Item
-        {
+        Item {
             visible: !loader.visible
 
             anchors.fill: parent
 
-            DefaultBusyIndicator
-            {
+            DefaultBusyIndicator {
                 anchors.centerIn: parent
                 running: !loader.visible
             }
@@ -200,43 +227,92 @@ Item {
     }
 
     // Sidebar, left side
-    Sidebar.Main
-    {
+    Sidebar {
         id: sidebar
 
-        enabled: loader.status === Loader.Ready
-
-        onLineSelected: currentPage = lineType;
-        onSettingsClicked: setting_modal.open()
     }
 
-    ModalLoader
-    {
+    // Unread notifications count
+    AnimatedRectangle {
+        radius: 1337
+        width: count_text.height * 1.5
+        height: width
+        z: 1
+
+        x: sidebar.app_logo.x + sidebar.app_logo.width - 20
+        y: sidebar.app_logo.y
+        color: Qt.lighter(notifications_list.length > 0 ? Style.colorRed : theme.backgroundColor, notifications_modal_button.containsMouse ? Style.hoverLightMultiplier : 1)
+
+        DefaultText {
+            id: count_text
+            anchors.centerIn: parent
+            text_value: notifications_list.length
+            font.pixelSize: Style.textSizeSmall1
+            font.weight: Font.Medium
+            color: notifications_list.length > 0 ? theme.foregroundColor : Qt.darker(theme.foregroundColor)
+        }
+    }
+
+    // Notifications panel button
+    DefaultMouseArea {
+        id: notifications_modal_button
+        x: sidebar.app_logo.x
+        y: sidebar.app_logo.y
+        width: sidebar.app_logo.width
+        height: sidebar.app_logo.height
+
+        hoverEnabled: true
+
+        onClicked: notifications_modal.open()
+    }
+
+    DropShadow {
+        anchors.fill: sidebar
+        source: sidebar
+        cached: false
+        horizontalOffset: 0
+        verticalOffset: 0
+        radius: theme.sidebarShadowRadius
+        samples: 32
+        spread: 0
+        color: theme.colorSidebarDropShadow
+        smooth: true
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: '#000'
+        visible: notifications_modal.visible
+        anchors.leftMargin: sidebar.width
+        opacity: .6
+    }
+
+    ModalLoader {
         id: add_custom_coin_modal
         sourceComponent: AddCustomCoinModal {}
     }
 
     // CEX Rates info
-    ModalLoader
-    {
+    ModalLoader {
         id: cex_rates_modal
         sourceComponent: CexInfoModal {}
     }
-    ModalLoader
-    {
+    ModalLoader {
         id: min_trade_modal
         sourceComponent: MinTradeModal {}
     }
 
-    ModalLoader
-    {
+    ModalLoader {
         id: restart_modal
         sourceComponent: RestartModal {}
     }
 
-    function getStatusColor(status)
-    {
-        switch (status) {
+    NotificationsModal {
+        id: notifications_modal
+    }
+
+    function getStatusColor(status) {
+        switch(status) {
             case "matching":
                 return Style.colorYellow
             case "matched":
@@ -244,70 +320,14 @@ Item {
             case "refunding":
                 return Style.colorOrange
             case "successful":
-                return Dex.CurrentTheme.sidebarLineTextHovered
+                return Style.colorGreen
             case "failed":
             default:
-                return DexTheme.redColor
+                return Style.colorRed
         }
     }
 
-    function isSwapDone(status)
-    {
-        switch (status) {
-            case "matching":
-            case "matched":
-            case "ongoing":
-                return false
-            case "successful":
-            case "refunding":
-            case "failed":
-            default:
-                return true
-        }
-    }
-
-    function getStatusStep(status)
-    {
-        switch (status) {
-            case "matching":
-                return "0/3"
-            case "matched":
-                return "1/3"
-            case "ongoing":
-                return "2/3"
-            case "successful":
-                return Style.successCharacter
-            case "refunding":
-                return Style.warningCharacter
-            case "failed":
-                return Style.failureCharacter
-            default:
-                return "?"
-        }
-    }
-
-    function getStatusFontSize(status)
-    {
-        switch (status) {
-            case "matching":
-                return 9
-            case "matched":
-                return 9
-            case "ongoing":
-                return 9
-            case "successful":
-                return 16
-            case "refunding":
-                return 16
-            case "failed":
-                return 12
-            default:
-                return 9
-        }
-    }
-
-    function getStatusText(status, short_text=false)
-    {
+    function getStatusText(status, short_text=false) {
         switch(status) {
             case "matching":
                 return short_text ? qsTr("Matching") : qsTr("Order Matching")
@@ -326,15 +346,45 @@ Item {
         }
     }
 
-    function getStatusTextWithPrefix(status, short_text = false)
-    {
+    function isSwapDone(status) {
+        switch(status) {
+            case "matching":
+            case "matched":
+            case "ongoing":
+                return false
+            case "successful":
+            case "refunding":
+            case "failed":
+            default:
+                return true
+        }
+    }
+
+    function getStatusStep(status) {
+        switch(status) {
+            case "matching":
+                return "0/3"
+            case "matched":
+                return "1/3"
+            case "ongoing":
+                return "2/3"
+            case "successful":
+                return Style.successCharacter
+            case "refunding":
+                return Style.warningCharacter
+            case "failed":
+                return Style.failureCharacter
+            default:
+                return "?"
+        }
+    }
+
+    function getStatusTextWithPrefix(status, short_text=false) {
         return getStatusStep(status) + " " + getStatusText(status, short_text)
     }
 
-    function getEventText(event_name)
-    {
-        switch (event_name)
-        {
+    function getEventText(event_name) {
+        switch(event_name) {
             case "Started":
                 return qsTr("Started")
             case "Negotiated":
