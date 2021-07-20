@@ -740,7 +740,7 @@
       "https://clc.explorer.dexstats.info/"
     ],
     "type": "Smart Chain",
-    "active": false,
+    "active": true,
     "currently_enabled": false
   },
   "COMP-BEP20": {
@@ -859,7 +859,7 @@
     "currently_enabled": false
   },
   "DASH": {
-    "active": false,
+    "active": true,
     "coin": "DASH",
     "name": "Dash",
     "coingecko_id": "dash",
@@ -883,7 +883,7 @@
     "type": "UTXO"
   },
   "DGB": {
-    "active": false,
+    "active": true,
     "coin": "DGB",
     "name": "DigiByte",
     "coinpaprika_id": "dgb-digibyte",
@@ -1008,7 +1008,7 @@
       "https://dogechain.info/"
     ],
     "type": "UTXO",
-    "active": false,
+    "active": true,
     "currently_enabled": false
   },
   "DOGE-BEP20": {
@@ -1839,7 +1839,7 @@
       "currently_enabled": false
   },
   "ETH": {
-    "active": false,
+    "active": true,
     "coin": "ETH",
     "coingecko_id": "ethereum",
     "coinpaprika_id": "eth-ethereum",
@@ -2440,7 +2440,7 @@
     "explorer_url": [
       "https://explorer.chips.cash/"
     ],
-    "active": false,
+    "active": true,
     "currently_enabled": false
   },
   "SCA": {
@@ -2550,7 +2550,7 @@
     "explorer_url": [
       "https://explorer.verus.io/"
     ],
-    "active": false,
+    "active": true,
     "currently_enabled": false
   },
   "ILN": {
@@ -2746,7 +2746,7 @@
       "https://ravencoin.network/"
     ],
     "type": "UTXO",
-    "active": false,
+    "active": true,
     "currently_enabled": false
   },
   "SNX-BEP20": {

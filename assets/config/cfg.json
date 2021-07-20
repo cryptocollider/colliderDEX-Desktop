@@ -81,7 +81,15 @@
   "possible_currencies": [
     "USD",
     "BTC",
+	"CLC",
     "KMD",
-    "LTC"
+    "LTC",
+    "ETH",
+    "DOGE",
+    "VRSC",
+    "DASH",
+    "RVN",
+    "DGB",
+	"CHIPS"
   ]
 }
