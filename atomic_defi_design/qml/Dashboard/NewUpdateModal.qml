@@ -103,12 +103,12 @@ BasicModal
 
         footer:
         [
-            PrimaryButton
-            {
-                text: qsTr("Download")
+//            PrimaryButton
+//            {
+//                text: qsTr("Download")
 
-                onClicked: self_update_service.download_update()
-            },
+//                onClicked: self_update_service.download_update()
+//            },
             DefaultButton
             {
                 text: qsTr("Remind me later")
