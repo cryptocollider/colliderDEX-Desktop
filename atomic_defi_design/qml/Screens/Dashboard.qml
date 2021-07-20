@@ -14,6 +14,7 @@ import "../Settings"
 import "../Support"
 import "../Sidebar"
 import "../Fiat"
+import "../Games"
 import "../Settings" as SettingsPage
 
 
@@ -31,6 +32,7 @@ Item {
     readonly property int idx_dashboard_light_ui: 8
     readonly property int idx_dashboard_privacy_mode: 9
     readonly property int idx_dashboard_fiat_ramp: 10
+    readonly property int idx_dashboard_games: 11
 
     //readonly property int idx_exchange_trade: 3
     readonly property int idx_exchange_trade: 0
@@ -134,6 +136,12 @@ Item {
         }
 
         Component {
+            id: games
+
+            Games {}
+        }
+
+        Component {
             id: news
 
             Item {
@@ -200,6 +208,7 @@ Item {
                 case idx_dashboard_settings: return settings
                 case idx_dashboard_support: return support
                 case idx_dashboard_fiat_ramp: return fiat_ramp
+                case idx_dashboard_games: return games
                 default: return undefined
                 }
             }

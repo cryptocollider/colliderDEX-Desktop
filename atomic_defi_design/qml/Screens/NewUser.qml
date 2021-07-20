@@ -90,6 +90,7 @@ SetupPage {
         }
     }
 
+    back_image_path: General.image_path + "final-background.png"
     image_scale: 0.7
     // Removed the image for now, no space
     //image_path: General.image_path + (form_is_filled ? "settings-seed.svg" : "setup-welcome-wallet.svg")

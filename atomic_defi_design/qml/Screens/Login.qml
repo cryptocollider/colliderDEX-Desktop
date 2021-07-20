@@ -32,8 +32,10 @@ SetupPage {
 
     property string text_error
 
+    back_image_path: General.image_path + "final-background.png"
     image_scale: 0.7
-    image_path: General.image_path + "setup-logs.svg"
+    image_path: General.image_path + "login-setup-final.png"
+    image_margin: 2
 
     content: ColumnLayout {
         spacing: Style.rowSpacing
