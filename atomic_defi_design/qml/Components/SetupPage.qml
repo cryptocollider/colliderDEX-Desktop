@@ -63,6 +63,7 @@ Item {
 
         Loader {
             id: bottom_content
+            Layout.topMargin: 30
             Layout.alignment: Qt.AlignHCenter
         }
     }
