@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
+import QtQuick.Window 2.2
 import "../Constants"
 
 Item {
@@ -15,10 +16,11 @@ Item {
 
     Image {
         id: back_image
-        width: window.application.width
-        height: window.application.height
+        source: General.image_path + "final-background.jpg"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
+        width: window.width
+        height: window.height
         visible: true
 //        antialiasing: true
     }
