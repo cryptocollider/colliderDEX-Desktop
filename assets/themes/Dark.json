@@ -43,4 +43,7 @@
  "textSelectedColor": "#0e1021",
  "textSelectionColor": "#a03a26",
  "whiteblack": "#ffffff"
- }
+ "rectangleBorderColor": "#23273c",
+ "leftSidebarBorderColor": "transparent",
+ "theme":"dark"
+}
