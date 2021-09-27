@@ -264,6 +264,7 @@
         <file>atomic_defi_design/assets/images/exchange-exchange.svg</file>
         <file>atomic_defi_design/assets/images/exchange-search.svg</file>
         <file>atomic_defi_design/assets/images/exchange-trade-complete.svg</file>
+		<file>atomic_defi_design/assets/images/final-background.jpg</file>
         <file>atomic_defi_design/assets/images/guide_coingecko_id.gif</file>
         <file>atomic_defi_design/assets/images/guide_contract_address_erc.gif</file>
         <file>atomic_defi_design/assets/images/guide_contract_address_qrc.gif</file>
@@ -277,11 +278,13 @@
         <file>atomic_defi_design/assets/images/lang/fr.png</file>
         <file>atomic_defi_design/assets/images/lang/ru.png</file>
         <file>atomic_defi_design/assets/images/lang/tr.png</file>
+		<file>atomic_defi_design/assets/images/login-setup-final.png</file>
         <file>atomic_defi_design/assets/images/logo/dex-logo.png</file>
         <file>atomic_defi_design/assets/images/menu-assets-portfolio.svg</file>
         <file>atomic_defi_design/assets/images/menu-assets-white.svg</file>
         <file>atomic_defi_design/assets/images/menu-dapp-white.svg</file>
         <file>atomic_defi_design/assets/images/menu-exchange-white.svg</file>
+		<file>atomic_defi_design/assets/images/menu-games-white.svg</file>
         <file>atomic_defi_design/assets/images/menu-news-white.svg</file>
         <file>atomic_defi_design/assets/images/menu-settings-white.svg</file>
         <file>atomic_defi_design/assets/images/menu-support-white.png</file>
@@ -502,6 +505,8 @@
         <file>atomic_defi_design/qml/Exchange/Trade/Trading/Items/TotalView.qml</file>
         <file>atomic_defi_design/qml/Exchange/Trade/Trading/TradeViewHeader.qml</file>
         <file>atomic_defi_design/qml/Fiat/FiatRamp.qml</file>
+		<file>atomic_defi_design/qml/Games/Games.qml</file>
+		<file>atomic_defi_design/qml/Games/qwebchannel.js</file>
         <file>atomic_defi_design/qml/NoConnection.qml</file>
         <file>atomic_defi_design/qml/Portfolio/Portfolio.qml</file>
         <file>atomic_defi_design/qml/Screens/Dashboard.qml</file>
