@@ -3,8 +3,10 @@ import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
 import QtQuick.Window 2.2
 import "../Constants"
+import App 1.0
 
 Item {
+    id: _control
     property alias back_image: back_image
     property alias back_image_path: back_image.source
     property alias image: image
@@ -13,6 +15,8 @@ Item {
     property alias content: inner_space.sourceComponent
     property alias bottom_content: bottom_content.sourceComponent
     property double image_margin: 5
+    property string backgroundColor: DexTheme.dexBoxBackgroundColor
+    property string borderColor: DexTheme.rectangleBorderColor
 
     Image {
         id: back_image
@@ -49,21 +53,23 @@ Item {
             rightPadding: leftPadding
             topPadding: leftPadding * 0.5
             bottomPadding: topPadding
-
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-            background: FloatingBackground {
-                color: theme.backgroundColor
+            background: DexRectangle {
+                color: _control.backgroundColor
+                border {
+                    color: DexTheme.portfolioPieGradient ? 'transparent' : _control.borderColor
+                }
+                gradient: DexTheme.portfolioPieGradient ? app.globalGradient : undefined
             }
 
-            Loader {
+            contentChildren: Loader {
                 id: inner_space
             }
         }
 
         Loader {
             id: bottom_content
-            Layout.topMargin: 30
             Layout.alignment: Qt.AlignHCenter
         }
     }
