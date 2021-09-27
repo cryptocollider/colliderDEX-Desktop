@@ -450,6 +450,7 @@ QtObject {
             return false
 
         if(ticker === atomic_app_primary_coin || ticker === atomic_app_secondary_coin) return false
+        if(ticker === "BTC" || ticker === "VRSC" || ticker === "DASH" || ticker === "DGB" || ticker === "DOGE" || ticker === "ETH" || ticker === "LTC" || ticker === "RVN" || ticker === "CHIPS" || ticker === "XPM" || ticker === "TKL" || ticker === "SMTF") return false
         else if(ticker === "ETH") return !General.isParentCoinNeeded("ETH", "ERC-20")
         else if(ticker === "QTUM") return !General.isParentCoinNeeded("QTUM", "QRC-20")
 
