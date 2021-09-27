@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
 import QtGraphicalEffects 1.0
+import QtWebChannel 1.0
 import QtWebEngine 1.10
 
 import "../Components"
@@ -41,6 +42,16 @@ Item {
     readonly property int idx_exchange_trade: 0
     readonly property int idx_exchange_orders: 1
     readonly property int idx_exchange_history: 2
+
+    //list of only pub addresses which gets assigned value from games script
+    property var dataList
+
+    //list of pub addresses and signature to send to html
+    property var dexList:
+    {
+        "data": dataList,
+        "sign": "signature"
+    }
 
     property var current_ticker
 
@@ -115,6 +126,35 @@ Item {
         }
     }
 
+    ModalLoader {
+        id: dex_cannot_send_modal
+
+        sourceComponent: BasicModal {
+            ModalContent {
+                title: qsTr("Cannot send to this address")
+
+                DefaultText {
+                    text: qsTr("Your balance is empty")
+                }
+
+                DefaultButton {
+                    text: qsTr("Ok")
+
+                    onClicked: dex_cannot_send_modal.close()
+                }
+            }
+        }
+    }
+
+    ModalLoader {
+        property string address
+        id: dex_send_modal
+        onLoaded: item.address_field.text = address
+        sourceComponent: SendModal {
+            address_field.readOnly: true
+        }
+    }
+
     // Right side
     AnimatedRectangle {
         color: DexTheme.backgroundColorDeep
@@ -186,6 +226,77 @@ Item {
                 }
             }
         }
+
+        // -------------------------------------------------------------------------------------
+
+        QtObject {
+            id: someObject
+            // ID, under which this object will be known at WebEngineView side
+            WebChannel.id: "qmlBackend"
+            property string someProperty: "QML property string"
+            property string dexUserData: JSON.stringify(dashboard.dexList)
+            signal someSignal(string message);
+
+            function preloadCoin(typeID, address) {
+                // Checks if the coin has balance.
+                if (parseFloat(API.app.get_balance(typeID)) === 0) {
+                    dex_cannot_send_modal.open()
+                }
+                else{ // If the coin has balance, opens the send modal.
+                    api_wallet_page.ticker = typeID
+                    dashboard.current_ticker = api_wallet_page.ticker
+                    dex_send_modal.address = address
+                    dex_send_modal.open()
+                }
+            }
+
+            //called from html, & returns data.
+            function getDexUserData() {
+                return JSON.stringify(dexList);
+            }
+
+            //called from html to change signal
+            function sigChangeTxt(newSig){
+                txtWeb.text = newSig;
+            }
+        }
+
+        Text {
+            id: txtWeb
+            text: "Some text"
+            onTextChanged: {
+                //changed signal will trigger a function at html side
+                someObject.someSignal(text)
+            }
+        }
+
+        WebEngineView {
+            id: webIndex
+            anchors.fill: parent
+            enabled: General.inArena && current_page == 11 ? true : false
+            visible: General.inArena && current_page == 11 ? true : false
+            settings.pluginsEnabled: true
+//            url: "qrc:///atomic_defi_design/qml/Games/testCom.html"
+            url: "https://cryptocollider.com/app/indexDex.html"
+            webChannel: channel
+        }
+
+//		WebEngineView{
+//            id: webGame
+//            anchors.fill: parent
+//            enabled: General.inArena && current_page == 11 ? true : false
+////            visible: General.inArena && current_page == 11 ? true : false
+//			visible: false
+//            settings.pluginsEnabled: true
+//            url: "https://cryptocollider.com/app"
+//        }
+
+        WebChannel {
+            id: channel
+            registeredObjects: [someObject]
+        }
+
+        //---------------------------------------------------------------------------------------
 
         Component {
             id: settings
