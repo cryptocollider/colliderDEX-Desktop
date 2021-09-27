@@ -41,8 +41,11 @@ SetupPage {
     property
     var wallets: ([])
 
-    image_path: (bottomDrawer.y === 0 && bottomDrawer.visible) ? "" : "file:///" + atomic_logo_path + "/" + DexTheme.bigSidebarLogo
-    image_margin: 30
+    back_image_path: General.image_path + "final-background.jpg"
+    image_scale: 0.7
+    image_path: General.image_path + "login-setup-final.png"
+    image_margin: 2
+
     Drawer {
         id: bottomDrawer
         width: parent.width
