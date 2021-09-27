@@ -89,4 +89,15 @@ ColumnLayout {
             }
         }
     }
+
+    //creates a sidebar tab in order (so it sits below fiat tab)
+    SidebarLine {
+        dashboard_index: idx_dashboard_games
+        text_value: sidebar.expanded? qsTr("Games") : ""
+        image: General.image_path + "menu-games-white.svg"
+        Layout.fillWidth: true
+        SidebarTooltip {
+            text_value: qsTr("Games")
+        }
+    }
 }

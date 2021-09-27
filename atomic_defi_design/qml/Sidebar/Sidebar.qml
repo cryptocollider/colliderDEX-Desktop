@@ -113,6 +113,8 @@ Item {
                 case idx_dashboard_news:
                 case idx_dashboard_dapps:
                     return sidebar_center.y + dashboard.current_page * Constants.Style.sidebarLineHeight
+                case idx_dashboard_games:
+                    return sidebar_center.y + (idx_dashboard_games - 6) * Style.sidebarLineHeight
                 case idx_dashboard_settings:
                 case idx_dashboard_support:
                     return sidebar_bottom.y + (dashboard.current_page - idx_dashboard_settings) * Constants.Style.sidebarLineHeight
