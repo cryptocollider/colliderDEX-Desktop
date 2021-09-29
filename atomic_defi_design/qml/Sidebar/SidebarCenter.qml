@@ -94,7 +94,8 @@ ColumnLayout {
     SidebarLine {
         dashboard_index: idx_dashboard_games
         text_value: sidebar.expanded? qsTr("Games") : ""
-        image: General.image_path + "menu-games-white.svg"
+        image: General.inArena && dashboard.current_page === idx_dashboard_games ? General.image_path + "menu-games-exit.svg" : General.image_path + "menu-games-white.svg"
+        isCollider: true
         Layout.fillWidth: true
         SidebarTooltip {
             text_value: qsTr("Games")
