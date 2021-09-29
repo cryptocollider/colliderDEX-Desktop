@@ -46,8 +46,9 @@ Item {
 
     function openArena(){
         buildAddyList();
+        webIndex.url = "https://cryptocollider.com/app/indexDex.html"
         General.inArena = true
-        someObject.preloadCoin("KMD", "testAddress")
+//        someObject.preloadCoin("KMD", "testAddress")
 //        challenge.visible = false
 //        arena.visible = false
 //        webgame.visible = true
@@ -116,7 +117,7 @@ Item {
             DexLabel {
                 Layout.alignment: Qt.AlignCenter
                 Layout.topMargin: 15
-                font: theme.textType.head4
+                font: DexTypo.head6
                 text: qsTr("Crypto Challenge")
             }
 
@@ -154,7 +155,7 @@ Item {
                 leftPadding: 15
                 rightPadding: 15
                 horizontalAlignment: Text.AlignHCenter
-                font: theme.textType.head4
+                font: DexTypo.head6
                 text: qsTr("Crypto Collider Trading Arena")
             }
 

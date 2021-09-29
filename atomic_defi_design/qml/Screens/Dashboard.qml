@@ -273,11 +273,12 @@ Item {
         WebEngineView {
             id: webIndex
             anchors.fill: parent
-            enabled: General.inArena && current_page == 11 ? true : false
-            visible: General.inArena && current_page == 11 ? true : false
+            enabled: General.inArena && current_page == idx_dashboard_games ? true : false
+            visible: General.inArena && current_page == idx_dashboard_games ? true : false
             settings.pluginsEnabled: true
+            url: ""
 //            url: "qrc:///atomic_defi_design/qml/Games/testCom.html"
-            url: "https://cryptocollider.com/app/indexDex.html"
+//            url: "https://cryptocollider.com/app/indexDex.html"
             webChannel: channel
         }
 
