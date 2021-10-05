@@ -48,10 +48,17 @@ Item {
         buildAddyList();
         webIndex.url = "https://cryptocollider.com/app/indexDex.html"
         General.inArena = true
+        General.inColliderApp = true
 //        someObject.preloadCoin("KMD", "testAddress")
 //        challenge.visible = false
 //        arena.visible = false
 //        webgame.visible = true
+    }
+
+    function openChallenge(){
+        webChallenge.url = "https://cryptocollider.com/challenge/app"
+        General.inChallenge = true
+        General.inColliderApp = true
     }
 
     function buildAddyList(){
@@ -104,8 +111,8 @@ Item {
 
     FloatingBackground{
         id: challenge
-        enabled: General.inArena ? false : true
-        visible: General.inArena ? false : true
+        enabled: General.inColliderApp ? false : true
+        visible: General.inColliderApp ? false : true
         width: parent.width * 0.35
         height: parent.height * 0.7
         x: (parent.width * 0.5) - (width + 40) //half window - (width + margin)
@@ -129,15 +136,25 @@ Item {
                 leftPadding: 15
                 rightPadding: 15
                 text_value: qsTr("Lorem ipsum dolor sit amet, sea modus choro constituto eu. Ex nec ignota delenit officiis, ei nam ferri tantas doming. Vel ei solet populo, per ad facilis iracundia definitionem. Mei option dissentiunt cu, mea legimus placerat et. Praesent postulant vis ut, in utinam bonorum fabulas has")
-//                text_value: JSON.stringify(dashboard.dexList)
+            }
+
+            DexButton {
+                Layout.alignment: Qt.AlignCenter
+                Layout.maximumWidth: parent.width - 80
+                Layout.minimumWidth: parent.width - 80
+                Layout.maximumHeight: 60
+                Layout.minimumHeight: 60
+                Layout.topMargin: 70 * (arena.height / 532)
+                text: qsTr("Play Crypto Challenge")
+                onClicked: openChallenge()
             }
         }
     }
 
     FloatingBackground{
         id: arena
-        enabled: General.inArena ? false : true
-        visible: General.inArena ? false : true
+        enabled: General.inColliderApp ? false : true
+        visible: General.inColliderApp ? false : true
         width: parent.width * 0.35
         height: parent.height * 0.7
         x: ((parent.width * 0.5) + 40) //half window + margin
