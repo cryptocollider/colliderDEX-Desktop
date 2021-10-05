@@ -313,8 +313,19 @@ Item {
             devToolsView: devInspect
             url: ""
 //            url: "qrc:///atomic_defi_design/qml/Games/testCom.html"
-//            url: "https://cryptocollider.com/app/indexDex.html"
             webChannel: channel
+        }
+
+        WebEngineView {
+            id: webChallenge
+            width: dashboard.isDevToolLarge ? parent.width - 600 : dashboard.isDevToolSmall ? parent.width - 300 : parent.width
+            height: parent.height
+            enabled: General.inChallenge && current_page == idx_dashboard_games ? true : false
+            visible: General.inChallenge && current_page == idx_dashboard_games ? true : false
+            settings.pluginsEnabled: true
+            devToolsView: devInspect
+            url: ""
+//            webChannel: channel
         }
 
         WebEngineView {
@@ -322,10 +333,10 @@ Item {
             width: dashboard.isDevToolLarge ? 600 : dashboard.isDevToolSmall ? 300 : 0
             height: parent.height
             x: dashboard.isDevToolLarge ? parent.width - 600 : dashboard.isDevToolSmall ? parent.width - 300 : 0
-            enabled: General.inArena && (current_page == idx_dashboard_games) && (dashboard.isDevToolLarge || dashboard.isDevToolSmall) ? true : false
-            visible: General.inArena && (current_page == idx_dashboard_games) && (dashboard.isDevToolLarge || dashboard.isDevToolSmall) ? true : false
+            enabled: General.inColliderApp && (current_page == idx_dashboard_games) && (dashboard.isDevToolLarge || dashboard.isDevToolSmall) ? true : false
+            visible: General.inColliderApp && (current_page == idx_dashboard_games) && (dashboard.isDevToolLarge || dashboard.isDevToolSmall) ? true : false
             settings.pluginsEnabled: true
-            inspectedView: webIndex
+            inspectedView: General.inArena ? webIndex : General.inChallenge ? webChallenge : null
         }
 
 //		WebEngineView{

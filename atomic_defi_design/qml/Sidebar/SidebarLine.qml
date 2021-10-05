@@ -73,7 +73,7 @@ Item {
         visible: img.source != ""
         anchors.fill: img
         source: img
-        color: General.inArena && isCollider && dashboard.current_page === idx_dashboard_games ? "#910000" : txt.font.weight === Font.Medium ? DexTheme.foregroundColor : txt.color
+        color: General.inColliderApp && isCollider && dashboard.current_page === idx_dashboard_games ? "#910000" : txt.font.weight === Font.Medium ? DexTheme.foregroundColor : txt.color
     }
 
     DexLabel {
@@ -128,9 +128,12 @@ Item {
             else if(dashboard_index === idx_dashboard_privacy_mode) {
                 togglePrivacyMode()
             }
-            else if(isCollider && General.inArena && dashboard.current_page === idx_dashboard_games){
+            else if(isCollider && General.inColliderApp && dashboard.current_page === idx_dashboard_games){
                 webIndex.url = ""
+                webChallenge.url = ""
                 General.inArena = false
+                General.inChallenge = false
+                General.inColliderApp = false
             }
             else dashboard.switchPage(dashboard_index)
         }

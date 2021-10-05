@@ -155,6 +155,8 @@ QtObject {
 
 
     property bool inArena: false
+    property bool inChallenge: false
+    property bool inColliderApp: false
     property bool initialized_orderbook_pair: false
     readonly property string default_base: atomic_app_primary_coin
     readonly property string default_rel: atomic_app_secondary_coin
