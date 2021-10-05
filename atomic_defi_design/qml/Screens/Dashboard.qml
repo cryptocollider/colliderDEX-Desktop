@@ -3,7 +3,7 @@ import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
 import QtGraphicalEffects 1.0
 import QtWebChannel 1.0
-import QtWebEngine 1.10
+import QtWebEngine 1.7
 
 import "../Components"
 import "../Constants"
@@ -42,6 +42,9 @@ Item {
     readonly property int idx_exchange_trade: 0
     readonly property int idx_exchange_orders: 1
     readonly property int idx_exchange_history: 2
+
+    property bool isDevToolSmall: false
+    property bool isDevToolLarge: false
 
     //list of only pub addresses which gets assigned value from games script
     property var dataList
@@ -108,6 +111,35 @@ Item {
             dashboard.current_component.openTradeView(api_wallet_page.ticker)
         }
     }
+
+    function devToolsSmall(){
+        if(isDevToolSmall === true){
+            isDevToolSmall = false;
+        }else{
+            isDevToolLarge = false;
+            isDevToolSmall = true;
+        }
+    }
+
+    function devToolsLarge(){
+        if(isDevToolLarge === true){
+            isDevToolLarge = false;
+        }else{
+            isDevToolSmall = false;
+            isDevToolLarge = true;
+        }
+    }
+
+    Shortcut {
+        sequence: "F9"
+        onActivated: dashboard.devToolsSmall()
+    }
+
+    Shortcut {
+        sequence: "F10"
+        onActivated: dashboard.devToolsLarge()
+    }
+
     // Al settings depends this modal
     SettingsPage.SettingModal {
         id: setting_modal
@@ -272,14 +304,28 @@ Item {
 
         WebEngineView {
             id: webIndex
-            anchors.fill: parent
+//            anchors.fill: parent
+            width: dashboard.isDevToolLarge ? parent.width - 600 : dashboard.isDevToolSmall ? parent.width - 300 : parent.width
+            height: parent.height
             enabled: General.inArena && current_page == idx_dashboard_games ? true : false
             visible: General.inArena && current_page == idx_dashboard_games ? true : false
             settings.pluginsEnabled: true
+            devToolsView: devInspect
             url: ""
 //            url: "qrc:///atomic_defi_design/qml/Games/testCom.html"
 //            url: "https://cryptocollider.com/app/indexDex.html"
             webChannel: channel
+        }
+
+        WebEngineView {
+            id: devInspect
+            width: dashboard.isDevToolLarge ? 600 : dashboard.isDevToolSmall ? 300 : 0
+            height: parent.height
+            x: dashboard.isDevToolLarge ? parent.width - 600 : dashboard.isDevToolSmall ? parent.width - 300 : 0
+            enabled: General.inArena && (current_page == idx_dashboard_games) && (dashboard.isDevToolLarge || dashboard.isDevToolSmall) ? true : false
+            visible: General.inArena && (current_page == idx_dashboard_games) && (dashboard.isDevToolLarge || dashboard.isDevToolSmall) ? true : false
+            settings.pluginsEnabled: true
+            inspectedView: webIndex
         }
 
 //		WebEngineView{
