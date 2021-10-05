@@ -24,8 +24,8 @@ Item {
 //        anchors.horizontalCenter: parent.horizontalCenter
 //        anchors.verticalCenter: parent.verticalCenter
         width: window.width
-        height: window.height - 16
-        y: 8
+        height: window.height
+        y: 0
         visible: true
 //        antialiasing: true
     }
