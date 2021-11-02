@@ -2,13 +2,16 @@ import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
 import QtGraphicalEffects 1.0
+import QtWebChannel 1.0
 import QtWebEngine 1.7
 
 import Qaterial 1.0 as Qaterial
+//import "hprequest.js" as hprequest
 
 import "../Components"
 import "../Constants"
 import "../Wallet"
+import "../Exchange/Trade"
 
 Item {
     id: games
@@ -46,19 +49,22 @@ Item {
 
     function openArena(){
         buildAddyList();
-        webIndex.url = "https://cryptocollider.com/app/indexDex.html"
+//        webIndex.url = "https://cryptocollider.com/app/indexDex.html"
+//        webIndex.url = "qrc:///atomic_defi_design/qml/Games/testCom.html"
         General.inArena = true
-        General.inColliderApp = true
 //        someObject.preloadCoin("KMD", "testAddress")
-//        challenge.visible = false
-//        arena.visible = false
-//        webgame.visible = true
     }
 
     function openChallenge(){
         webChallenge.url = "https://cryptocollider.com/challenge/app"
         General.inChallenge = true
-        General.inColliderApp = true
+    }
+
+    function openAutoPlay(){
+        tempTickr = General.apCurrentTicker
+        api_wallet_page.ticker = tempTickr
+        dashboard.current_ticker = api_wallet_page.ticker
+        General.inAuto = true
     }
 
     function buildAddyList(){
@@ -187,6 +193,7 @@ Item {
             }
 
             DexButton {
+//                enabled: General.autoPlaying ? false : true //can't open CryptoCollider while using auto-play
                 Layout.alignment: Qt.AlignCenter
                 Layout.maximumWidth: parent.width - 80
                 Layout.minimumWidth: parent.width - 80
@@ -205,60 +212,9 @@ Item {
                 Layout.minimumHeight: 60
                 Layout.topMargin: 60 * (arena.height / 532)
                 text: qsTr("Auto-Play")
-                onClicked: someObject.preloadCoin("KMD", "testAddress")
+                onClicked: openAutoPlay()
+//                onClicked: someObject.preloadCoin("KMD", "testAddress")
             }
         }
     }
-
-//    WebEngineView{
-//        id: webgame
-//        anchors.fill: parent
-//        visible: false
-//        settings.pluginsEnabled: true
-//        url: "https://cryptocollider.com/app"
-//    }
-
-//    Label{
-//        text: parent.x + "x" + parent.y
-//        color: 'black'
-//    }
-
-
-//    WebEngineView{
-//        id: webgame
-//        anchors.fill: parent
-//        visible: true
-//        settings.pluginsEnabled: true
-//        url: "https://cryptocollider.com/app"
-//    }
-
-//    Layout.fillWidth: true
-//    Layout.fillHeight: true
-//    DefaultText {
-//        anchors.centerIn: parent
-//        text_value: qsTr("Content for this section will be added later. Stay tuned! -GAMES")
-//    }
-
-//    ColumnLayout{
-//        Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-//        layoutDirection: Qt.LeftToRight
-
-//        FloatingBackground{
-//            Layout.fillWidth: true
-//            Layout.fillHeight: true
-//            Layout.bottomMargin: 10
-//            Layout.topMargin: 10
-//            Layout.leftMargin: 10
-//            Layout.rightMargin: 10
-//        }
-
-//        FloatingBackground{
-//            Layout.fillWidth: true
-//            Layout.fillHeight: true
-//            Layout.bottomMargin: 10
-//            Layout.topMargin: 10
-//            Layout.leftMargin: 10
-//            Layout.rightMargin: 10
-//        }
-//    }
 }
