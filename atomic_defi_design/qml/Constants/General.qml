@@ -86,10 +86,15 @@ QtObject {
     readonly property var chart_times: (["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1d", "3d"/*, "1w"*/])
     readonly property var time_seconds: ({ "1m": 60, "3m": 180, "5m": 300, "15m": 900, "30m": 1800, "1h": 3600, "2h": 7200, "4h": 14400, "6h": 21600, "12h": 43200, "1d": 86400, "3d": 259200, "1w": 604800 })
 
-
+    property string apCurrentTicker: "KMD"
+    property int apThrows: 0
+    property bool apCanThrow: true
+    property bool apHasSelected: false
+    property bool autoPlaying: false
+    property bool inAuto: false
     property bool inArena: false
     property bool inChallenge: false
-    property bool inColliderApp: false
+    property bool inColliderApp: inAuto || inArena || inChallenge ? true : false
     property bool initialized_orderbook_pair: false
     readonly property string default_base: atomic_app_primary_coin
     readonly property string default_rel: atomic_app_secondary_coin
