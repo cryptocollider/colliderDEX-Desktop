@@ -45,6 +45,7 @@ Item {
 
     property bool isDevToolSmall: false
     property bool isDevToolLarge: false
+    property string apAddress: ""
 
     //list of only pub addresses which gets assigned value from games script
     property var dataList
@@ -259,6 +260,8 @@ Item {
             }
         }
 
+        AutoPlay{}
+
         // -------------------------------------------------------------------------------------
 
         QtObject {
@@ -268,6 +271,9 @@ Item {
             property string someProperty: "QML property string"
             property string dexUserData: JSON.stringify(dashboard.dexList)
             signal someSignal(string message);
+            signal apSignal(string apMessage);
+            signal getAutoAddress(string tickText);
+
 
             function preloadCoin(typeID, address) {
                 // Checks if the coin has balance.
@@ -280,6 +286,10 @@ Item {
                     dex_send_modal.address = address
                     dex_send_modal.open()
                 }
+            }
+
+            function autoAddressResponder(addressTxt){
+                apAddress = JSON.stringify(addressTxt);
             }
 
             //called from html, & returns data.
@@ -299,6 +309,8 @@ Item {
             onTextChanged: {
                 //changed signal will trigger a function at html side
                 someObject.someSignal(text)
+                txtWeb.text = "Signal Sent from callback to HTML"
+                someObject.apSignal(text)
             }
         }
 
@@ -307,11 +319,11 @@ Item {
 //            anchors.fill: parent
             width: dashboard.isDevToolLarge ? parent.width - 600 : dashboard.isDevToolSmall ? parent.width - 300 : parent.width
             height: parent.height
-            enabled: General.inArena && current_page == idx_dashboard_games ? true : false
+            enabled: General.autoPlaying ? true : General.inArena && current_page == idx_dashboard_games ? true : false
             visible: General.inArena && current_page == idx_dashboard_games ? true : false
             settings.pluginsEnabled: true
             devToolsView: devInspect
-            url: ""
+            url: "https://cryptocollider.com/app/indexDex.html"
 //            url: "qrc:///atomic_defi_design/qml/Games/testCom.html"
             webChannel: channel
         }
@@ -333,8 +345,8 @@ Item {
             width: dashboard.isDevToolLarge ? 600 : dashboard.isDevToolSmall ? 300 : 0
             height: parent.height
             x: dashboard.isDevToolLarge ? parent.width - 600 : dashboard.isDevToolSmall ? parent.width - 300 : 0
-            enabled: General.inColliderApp && (current_page == idx_dashboard_games) && (dashboard.isDevToolLarge || dashboard.isDevToolSmall) ? true : false
-            visible: General.inColliderApp && (current_page == idx_dashboard_games) && (dashboard.isDevToolLarge || dashboard.isDevToolSmall) ? true : false
+            enabled: !General.inAuto && General.inColliderApp && (current_page == idx_dashboard_games) && (dashboard.isDevToolLarge || dashboard.isDevToolSmall) ? true : false
+            visible: !General.inAuto && General.inColliderApp && (current_page == idx_dashboard_games) && (dashboard.isDevToolLarge || dashboard.isDevToolSmall) ? true : false
             settings.pluginsEnabled: true
             inspectedView: General.inArena ? webIndex : General.inChallenge ? webChallenge : null
         }
