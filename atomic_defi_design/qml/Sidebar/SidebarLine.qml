@@ -129,13 +129,23 @@ Item {
                 togglePrivacyMode()
             }
             else if(isCollider && General.inColliderApp && dashboard.current_page === idx_dashboard_games){
-                webIndex.url = ""
-                webChallenge.url = ""
-                General.inArena = false
-                General.inChallenge = false
-                General.inColliderApp = false
+                if(General.inAuto){
+                    General.inAuto = false
+                }else{
+//                    webIndex.url = ""
+                    webChallenge.url = ""
+                    General.inArena = false
+                    General.inChallenge = false
+                }
             }
-            else dashboard.switchPage(dashboard_index)
+            else{
+                if(General.inAuto){
+                    var tmpTick = General.apCurrentTicker
+                    api_wallet_page.ticker = tmpTick
+                    dashboard.current_ticker = api_wallet_page.ticker
+                }
+                dashboard.switchPage(dashboard_index)
+            }
         }
     }
 
