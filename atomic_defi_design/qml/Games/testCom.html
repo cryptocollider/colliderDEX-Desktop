@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <script type="text/javascript" src="qrc:///atomic_defi_design/qml/Games/qwebchannel.js"></script>
+        <script type="text/javascript">
+			var responseInt = 1
+		
+			//here will be our QtObject from QML side
+			var backend;
+			
+			//gets called first..
+			window.onload = function(){
+				new QWebChannel(qt.webChannelTransport, function(channel) {
+					//all published objects are available in channel.objects under their WebChannel.id property in QML
+					backend = channel.objects.qmlBackend;
+					//signal connection(s). Changes inside QML are updated/emitted here.
+					//below a function is added/called here.
+					backend.someSignal.connect(function(someText) {
+						document.getElementById("htReceive").innerHTML = someText;
+						document.getElementById("qResponse").innerHTML = "Qml Response " + responseInt;
+					});
+					backend.apSignal.connect(function(apSomeText) {
+						document.getElementById("htSignal").innerHTML = apSomeText;
+						responseInt++
+						document.getElementById("qResponse").innerHTML = "Qml Response " + responseInt;
+					});
+					backend.getAutoAddress.connect(function(typeID) {
+						document.getElementById("htTyp").innerHTML = typeID;
+					});
+				});
+			}
+			
+			//just to demonstrate the async
+			var result = "ololo";
+			function returnQml(){				
+				//call a qml method, and receive the return value asynchronously
+				backend.changeText(function(callback) {
+					result = callback;
+					//since it's async, this alert will appear second and show the actual result
+					alert(result);
+					document.getElementById("htReturn").innerHTML = result;
+				});
+				//this alert will appear first and show default "ololo"
+				alert(result);
+			}
+
+			//you can also read/write properties of a QtObject from QML side
+			function changePropertyValue(){
+				alert(backend.someProperty);
+				backend.someProperty = "some another value";
+				alert(backend.someProperty);
+			}
+			
+			//updates the value of a signal on the qml side which is updated/emitted above (inside window.onload)
+			function receiveFromQml(){
+				var sigTxt = "signal txt"
+				backend.sigChangeTxt(sigTxt);
+			}
+		</script>
+	</head>
+	<body>
+		<h1>The onclick Event</h1>
+		
+		<p>returnQml:</p>
+		<button onclick="returnQml()">ChangeLabel</button>
+		<p id="htReturn"></p>
+		
+		<p>changePropertyValue:</p>
+		<button onclick="changePropertyValue()">SendSignal</button>
+		
+		<p>receiveFromQml:</p>
+		<p id="htReceive"></p>		
+		<button onclick="receiveFromQml()">ReceiveSignal</button>
+		
+		<p>SignalFromQml:</p>
+		<p id="htSignal"></p>
+
+		<p>TypeIDFromQml:</p>
+		<p id="htTyp"></p>
+		
+		<p>QmlResponse:</p>
+		<p id="qResponse"></p>			
+	</body>
+</html>

@@ -506,8 +506,12 @@
         <file>atomic_defi_design/qml/Exchange/Trade/Trading/Items/TotalView.qml</file>
         <file>atomic_defi_design/qml/Exchange/Trade/Trading/TradeViewHeader.qml</file>
         <file>atomic_defi_design/qml/Fiat/FiatRamp.qml</file>
+		<file>atomic_defi_design/qml/Games/AutoPlay.qml</file>
 		<file>atomic_defi_design/qml/Games/Games.qml</file>
 		<file>atomic_defi_design/qml/Games/qwebchannel.js</file>
+		<file>atomic_defi_design/qml/Games/hprequest.js</file>
+		<file>atomic_defi_design/qml/Games/testCom.html</file>
+		<file>atomic_defi_design/qml/Games/testReq.html</file>
         <file>atomic_defi_design/qml/NoConnection.qml</file>
         <file>atomic_defi_design/qml/Portfolio/Portfolio.qml</file>
         <file>atomic_defi_design/qml/Screens/Dashboard.qml</file>

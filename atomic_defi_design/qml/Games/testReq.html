@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <script type="text/javascript">
+			[HttpGet]
+			public function Get(){
+				document.getElementById("reqReceive").innerHTML = "recieved";
+				var values = ["Saab", "Volvo", "BMW"];
+				return values;
+			}
+		</script>
+	</head>
+	<body>
+		<h1>The onclick Event</h1>
+		<p>Received message below:</p>
+		<p id="reqReceive"></p>
+	</body>
+</html>
