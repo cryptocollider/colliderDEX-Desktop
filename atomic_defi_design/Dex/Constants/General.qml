@@ -163,6 +163,10 @@ QtObject {
     property bool inChallenge: false
     property bool inColliderApp: inAuto || inArena || inChallenge ? true : false
     property bool initialized_orderbook_pair: false
+    property bool hasAutoAddress: false
+    property bool openedArena: false
+    property bool openedChallenge: false
+    property var apAddress
     readonly property string default_base: atomic_app_primary_coin
     readonly property string default_rel: atomic_app_secondary_coin
 

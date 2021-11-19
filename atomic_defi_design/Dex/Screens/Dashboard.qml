@@ -37,15 +37,18 @@ Item {
     readonly property int idx_dashboard_privacy_mode: 9
     readonly property int idx_dashboard_fiat_ramp: 10
     readonly property int idx_dashboard_games: 11
+    readonly property int idx_dashboard_coin_sight: 12
+    readonly property int idx_dashboard_collider_discord: 13
 
     //readonly property int idx_exchange_trade: 3
     readonly property int idx_exchange_trade: 0
     readonly property int idx_exchange_orders: 1
     readonly property int idx_exchange_history: 2
 
+    property bool sentDexUserData: false
+    property bool hasCoinSight: false
     property bool isDevToolSmall: false
     property bool isDevToolLarge: false
-    property string apAddress: ""
 
     //list of only pub addresses which gets assigned value from games script
     property var dataList
@@ -129,6 +132,35 @@ Item {
             isDevToolSmall = false;
             isDevToolLarge = true;
         }
+    }
+
+    function checkClc(){ //checks CLC amount for enabling coinSight
+        if(General.autoPlaying || current_page === idx_dashboard_exchange){
+            clc_check_timer.restart()
+        }else if(current_page === idx_dashboard_games && General.inAuto){
+            clc_check_timer.restart()
+        }else{
+            var clcTick = "CLC"
+            var tempCurrentTick = api_wallet_page.ticker
+            api_wallet_page.ticker = clcTick
+            dashboard.current_ticker = api_wallet_page.ticker
+            if(current_ticker_infos.balance >= 100){
+                hasCoinSight = true
+            }else{
+                clc_check_timer.restart()
+            }
+            api_wallet_page.ticker = tempCurrentTick
+            dashboard.current_ticker = api_wallet_page.ticker
+        }
+    }
+
+    Timer {
+        id: clc_check_timer
+        interval: 10000
+        repeat: false
+        triggeredOnStart: false
+        running: true
+        onTriggered: checkClc()
     }
 
     Shortcut {
@@ -260,7 +292,22 @@ Item {
             }
         }
 
-        AutoPlay{}
+        AutoPlay {}
+
+        Component {
+            id: coinSight
+
+            CoinSight {}
+        }
+
+
+        Component {
+            id: colliderDiscord
+
+            ColliderDiscord {}
+        }
+
+        DiscordWeb {}
 
         // -------------------------------------------------------------------------------------
 
@@ -269,10 +316,12 @@ Item {
             // ID, under which this object will be known at WebEngineView side
             WebChannel.id: "qmlBackend"
             property string someProperty: "QML property string"
+            property string autoplayAddress: "t"
             property string dexUserData: JSON.stringify(dashboard.dexList)
             signal someSignal(string message);
             signal apSignal(string apMessage);
             signal getAutoAddress(string tickText);
+            signal dexAutoLogin(string tempText);
 
 
             function preloadCoin(typeID, address) {
@@ -289,7 +338,8 @@ Item {
             }
 
             function autoAddressResponder(addressTxt){
-                apAddress = JSON.stringify(addressTxt);
+                General.apAddress = JSON.parse(addressTxt);
+                General.hasAutoAddress = true;
             }
 
             //called from html, & returns data.
@@ -298,7 +348,7 @@ Item {
             }
 
             //called from html to change signal
-            function sigChangeTxt(newSig){
+            function sigChangeTxt(newSig) {
                 txtWeb.text = newSig;
             }
         }
@@ -319,11 +369,12 @@ Item {
 //            anchors.fill: parent
             width: dashboard.isDevToolLarge ? parent.width - 600 : dashboard.isDevToolSmall ? parent.width - 300 : parent.width
             height: parent.height
-            enabled: General.autoPlaying ? true : General.inArena && current_page == idx_dashboard_games ? true : false
+            //enabled: General.autoPlaying ? true : General.inArena && current_page == idx_dashboard_games ? true : false
+            enabled: true
             visible: General.inArena && current_page == idx_dashboard_games ? true : false
             settings.pluginsEnabled: true
             devToolsView: devInspect
-            url: "https://cryptocollider.com/app/indexDex.html"
+            url: ""
 //            url: "qrc:///atomic_defi_design/qml/Games/testCom.html"
             webChannel: channel
         }
@@ -427,6 +478,10 @@ Item {
                         return fiat_ramp
                     case idx_dashboard_games:
                         return games
+                    case idx_dashboard_coin_sight:
+                        return coinSight
+                    case idx_dashboard_collider_discord:
+                        return colliderDiscord
                     default:
                         return undefined
                 }

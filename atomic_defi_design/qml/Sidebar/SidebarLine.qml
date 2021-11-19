@@ -132,8 +132,8 @@ Item {
                 if(General.inAuto){
                     General.inAuto = false
                 }else{
-//                    webIndex.url = ""
-                    webChallenge.url = ""
+                    //webIndex.url = ""
+                    //webChallenge.url = ""
                     General.inArena = false
                     General.inChallenge = false
                 }
