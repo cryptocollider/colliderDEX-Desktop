@@ -7,6 +7,7 @@ import Qaterial 1.0 as Qaterial
 import "../Constants"
 import App 1.0
 import "../Components"
+import "../Screens"
 
 ColumnLayout {
     id: window_layout
@@ -99,6 +100,39 @@ ColumnLayout {
         Layout.fillWidth: true
         SidebarTooltip {
             text_value: qsTr("Games")
+        }
+    }
+
+    SidebarLine {
+        section_enabled: dashboard.hasCoinSight ? true : false
+        dashboard_index: idx_dashboard_coin_sight
+        text_value: sidebar.expanded ? qsTr("coinSight") : ""
+        image: General.image_path + "menu-games-white.svg"
+        Layout.fillWidth: true
+
+        SidebarTooltip {
+            text_value: qsTr("coinSight")
+        }
+
+        DexTooltip
+        {
+            enabled: false
+            id: has_coinSight
+            visible: parent.mouse_area.containsMouse
+            contentItem: DexRectangle
+            {
+                DexLabel { text: qsTr("100 CLC Required!"); anchors.centerIn: parent }
+            }
+        }
+    }
+
+    SidebarLine {
+        dashboard_index: idx_dashboard_collider_discord
+        text_value: sidebar.expanded? qsTr("Discord") : ""
+        image: General.image_path + "menu-games-white.svg"
+        Layout.fillWidth: true
+        SidebarTooltip {
+            text_value: qsTr("Discord")
         }
     }
 }
