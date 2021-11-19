@@ -35,7 +35,7 @@ Item {
     property real stValue: set_amount_slider.valueAt((set_amount_slider.position))
     property real localSetAmount: current_ticker_infos.balance
     property real currentFiatValue: General.apHasSelected ? ((1 / set_amount_slider.to) * set_amount_slider.value) * current_ticker_infos.fiat_amount : 50
-    property bool hasEnoughBalance: localSetAmount > 0.1 ? true : false
+    property bool hasEnoughBalance: localSetAmount > staticMinBalanceValue ? true : false
 
     function playAuto(){
         if(General.autoPlaying){
@@ -92,8 +92,8 @@ Item {
                 apStatusLabel.text = "Throw(s): " + General.apThrows
                 var tempIdText = General.apCurrentTicker
             }else{
-                ap_timer.running = false
-                General.apCanThrow = true
+                //ap_timer.running = false
+                //General.apCanThrow = true
                 apStatusLabel.text = "Out of funds! Throw(s) " + General.apThrows
             }
         }else{
