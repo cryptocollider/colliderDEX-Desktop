@@ -29,9 +29,9 @@ Item {
 //    property string kmdAddy: RRBbUHjMaAg2tmWVj8k5fR2Z99uZchdUi4
     property real staticMinBalanceValue: 1
     property real staticThrowSizeValue: 1
-    property real riskValue: 0.55
+    property real riskValue: 0.28
     property real rkValue: risk_slider.valueAt(risk_slider.position)
-    property real setAmountValue: 50
+    property real setAmountValue: 49.5
     property real stValue: set_amount_slider.valueAt((set_amount_slider.position))
     property real localSetAmount: current_ticker_infos.balance
     property real currentFiatValue: General.apHasSelected ? ((1 / set_amount_slider.to) * set_amount_slider.value) * current_ticker_infos.fiat_amount : 50
@@ -238,14 +238,14 @@ Item {
 
     ColumnLayout{
         width: 400
-        height: 590
+        height: 640
         x: (parent.width * 0.5) - (width * 0.5) //half window - width
         y: (parent.height * 0.5) - (height * 0.5) //half window - height
         z: 2
 
         DexLabel{
             Layout.alignment: Qt.AlignCenter
-            font: DexTypo.head6
+            font: DexTypo.head5
             text: qsTr("Game Liquidity Mining")
         }
 
@@ -261,7 +261,7 @@ Item {
         }
         FloatingBackground{
             width: 340
-            height: 510
+            height: 540
             Layout.topMargin: 4
             Layout.alignment: Qt.AlignHCenter
 
@@ -331,6 +331,12 @@ Item {
                     live: true
                     value: autoPlay.riskValue
                 }
+                DefaultText{
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.maximumWidth: parent.width
+                    wrapMode: Text.WordWrap
+                    text: qsTr("LOW                 HIGH")
+                }
                 DexLabel{
                     Layout.alignment: Qt.AlignHCenter
                     height: 60
@@ -348,10 +354,16 @@ Item {
                     id: set_amount_slider
                     enabled: General.autoPlaying || !autoPlay.hasEnoughBalance || !General.apHasSelected ? false : true
                     Layout.alignment: Qt.AlignHCenter
-                    from: 0.1
+                    from: 1
                     to: 100
                     live: true
                     value: autoPlay.setAmountValue
+                }
+                DefaultText{
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.maximumWidth: parent.width
+                    wrapMode: Text.WordWrap
+                    text: qsTr("1%                  100%")
                 }
                 RowLayout{
                     Layout.minimumWidth: parent.width
