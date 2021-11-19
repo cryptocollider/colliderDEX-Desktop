@@ -4,6 +4,7 @@ import QtQuick.Controls 2.15
 
 import "../Components"
 import "../Constants"
+import "../Games"
 import App 1.0
 
 BasicModal {
@@ -20,7 +21,6 @@ BasicModal {
     property bool segwit_success: false
     property var segwit_callback
     property var address_data
-
 
     onClosed: {
         if(segwit) {
@@ -149,12 +149,34 @@ BasicModal {
             gas_limit: gas_limit === "" ? 0 : parseInt(gas_limit)
         }
 
+        //var temp_Gas_limit = gas_limit === "" ? 0 : parseInt(gas_limit)
+
         console.log("Passing fees info: ", JSON.stringify(fees_info))
+        //send_values_label.text = address + ", " + amount + ", " + max + ", " + with_fees + ", " + fees_amount + ", " + gas_price + ", " + temp_Gas_limit
         api_wallet_page.send(address, amount, max, with_fees, fees_info)
+    }
+
+    function respondHidden(){
+        //send_values_label.text = "f6/f7 - respondHidden"
+    }
+
+    function apPrepSendCoin(address, amount, max, with_fees, fees_amount, gas_price, gas_limit){
+        const fees_info_ap = {
+            fees_amount,
+            gas_price,
+            gas_limit
+        }
+        console.log("Passing fees info: ", JSON.stringify(fees_info_ap))
+        api_wallet_page.send(address, amount, max, with_fees, fees_info_ap)
+        //prepareSendCoin(input_address.field.text, input_amount.field.text, custom_fees_switch.checked, input_custom_fees.field.text, isSpecialToken(), input_custom_fees_gas.field.text, input_custom_fees_gas_price.field.text)
     }
 
     function sendCoin() {
         api_wallet_page.broadcast(send_result.withdraw_answer.tx_hex, false, send_result.withdraw_answer.max, input_amount.field.text)
+    }
+
+    function apSendCoin(apSendAmount){
+        api_wallet_page.broadcast(send_result.withdraw_answer.tx_hex, false, send_result.withdraw_answer.max, apSendAmount)
     }
 
     function isSpecialToken() {
@@ -249,6 +271,10 @@ BasicModal {
 
     function setMax() {
         input_amount.field.text = current_ticker_infos.balance
+    }
+
+    function fromHidden(){
+       // send_values_label.text = "f5 - fromHidden"
     }
 
     // Inside modal
@@ -467,6 +493,7 @@ BasicModal {
 
     // Send Page
     ModalContent {
+        visible: General.autoPlaying ? false : true
         title: qsTr("Send")
 
         // Address

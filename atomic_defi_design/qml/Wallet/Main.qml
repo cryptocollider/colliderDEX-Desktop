@@ -252,7 +252,7 @@ Item {
                 Layout.preferredHeight: send_button.height
                 DexAppButton {
                     id: send_button
-                    enabled: API.app.wallet_pg.send_available
+                    enabled: API.app.wallet_pg.send_available && !General.autoPlaying
                     text: qsTr("Send")
                     text_obj.leftPadding:  API.app.wallet_pg.send_availability_state !== ""? 25 : 0
                     onClicked: {
