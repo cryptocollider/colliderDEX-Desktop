@@ -280,6 +280,7 @@
         <file>atomic_defi_design/assets/images/lang/tr.png</file>
 		<file>atomic_defi_design/assets/images/login-setup-final.png</file>
         <file>atomic_defi_design/assets/images/logo/dex-logo.png</file>
+		<file>atomic_defi_design/assets/images/games-page-2.mp4</file>
         <file>atomic_defi_design/assets/images/menu-assets-portfolio.svg</file>
         <file>atomic_defi_design/assets/images/menu-assets-white.svg</file>
         <file>atomic_defi_design/assets/images/menu-dapp-white.svg</file>
@@ -507,6 +508,9 @@
         <file>atomic_defi_design/qml/Exchange/Trade/Trading/TradeViewHeader.qml</file>
         <file>atomic_defi_design/qml/Fiat/FiatRamp.qml</file>
 		<file>atomic_defi_design/qml/Games/AutoPlay.qml</file>
+		<file>atomic_defi_design/qml/Games/CoinSight.qml</file>
+		<file>atomic_defi_design/qml/Games/ColliderDiscord.qml</file>
+		<file>atomic_defi_design/qml/Games/DiscordWeb.qml</file>
 		<file>atomic_defi_design/qml/Games/Games.qml</file>
 		<file>atomic_defi_design/qml/Games/qwebchannel.js</file>
 		<file>atomic_defi_design/qml/Games/hprequest.js</file>
