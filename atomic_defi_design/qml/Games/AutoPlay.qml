@@ -297,7 +297,12 @@ Item {
                     displayText: General.apHasSelected ? currentText : "Select a Coin"
                     model: ListModel {
                         id: ap_model
-                        ListElement { text: "KMD"}
+                        ListElement {
+                            Image {
+                                source: General.coin_icons_path + "kmd.png"
+                            }
+                            text: "KMD"
+                        }
                         //ListElement { text: "CLC"}
                         //ListElement { text: "BTC"}
                         //ListElement { text: "VRSC"}
