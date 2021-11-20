@@ -159,7 +159,8 @@ Item {
             width: parent.width-5
             horizontalAlignment: DefaultText.AlignHCenter
             wrapMode: DefaultText.Wrap
-            text_value: Constants.General.version_string
+            //text_value: Constants.General.version_string
+            text_value: "Desktop Portal v1.8"
             font: DexTypo.caption
             color: Constants.Style.colorThemeDarkLight
         }
