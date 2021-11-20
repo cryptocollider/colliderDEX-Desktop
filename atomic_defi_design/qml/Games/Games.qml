@@ -171,7 +171,7 @@ Item {
 
         DexLabel{
             Layout.alignment: Qt.AlignCenter
-            font: DexTypo.head6
+            font: DexTypo.head4
             text: qsTr("Crypto Challenge")
         }
 
@@ -229,7 +229,7 @@ Item {
             leftPadding: 15
             rightPadding: 15
             horizontalAlignment: Text.AlignHCenter
-            font: DexTypo.head6
+            font: DexTypo.head4
             text: qsTr("Crypto Collider Trading Arena")
         }
 
@@ -301,7 +301,19 @@ Item {
             rightPadding: 15
             horizontalAlignment: Text.AlignHCenter
             font: DexTypo.head6
-            text: qsTr("Provide automated game liquidity to diversify your assets & earn Collider Coin")
+            text: qsTr("Provide automated game liquidity to")
+        }
+        DexLabel{
+            Layout.alignment: Qt.AlignCenter
+            Layout.maximumWidth: parent.width
+            Layout.minimumWidth: parent.width - 30 //minus the paddings
+            Layout.topMargin: 2
+            wrapMode: Text.WordWrap
+            leftPadding: 15
+            rightPadding: 15
+            horizontalAlignment: Text.AlignHCenter
+            font: DexTypo.head6
+            text: qsTr("diversify your assets & mine Collider Coin")
         }
     }
 
