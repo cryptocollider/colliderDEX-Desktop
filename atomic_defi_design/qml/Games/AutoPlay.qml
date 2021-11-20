@@ -245,7 +245,7 @@ Item {
 
         DexLabel{
             Layout.alignment: Qt.AlignCenter
-            font: DexTypo.head5
+            font: DexTypo.head4
             text: qsTr("Game Liquidity Mining")
         }
 
@@ -298,9 +298,9 @@ Item {
                     model: ListModel {
                         id: ap_model
                         ListElement {
-                            Image {
-                                source: General.coin_icons_path + "kmd.png"
-                            }
+//                            Image {
+//                                source: General.coin_icons_path + "kmd.png"
+//                            }
                             text: "KMD"
                         }
                         //ListElement { text: "CLC"}
@@ -340,7 +340,7 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.maximumWidth: parent.width
                     wrapMode: Text.WordWrap
-                    text: qsTr("LOW                 HIGH")
+                    text: qsTr("LOW                                  HIGH")
                 }
                 DexLabel{
                     Layout.alignment: Qt.AlignHCenter
@@ -368,7 +368,7 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.maximumWidth: parent.width
                     wrapMode: Text.WordWrap
-                    text: qsTr("1%                  100%")
+                    text: qsTr("1%                                   100%")
                 }
                 RowLayout{
                     Layout.minimumWidth: parent.width

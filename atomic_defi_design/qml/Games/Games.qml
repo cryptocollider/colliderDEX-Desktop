@@ -171,6 +171,8 @@ Item {
 
         DexLabel{
             Layout.alignment: Qt.AlignCenter
+            Layout.topMargin: 16
+            horizontalAlignment: Text.AlignHCenter
             font: DexTypo.head4
             text: qsTr("Crypto Challenge")
         }
@@ -307,7 +309,6 @@ Item {
             Layout.alignment: Qt.AlignCenter
             Layout.maximumWidth: parent.width
             Layout.minimumWidth: parent.width - 30 //minus the paddings
-            Layout.topMargin: 2
             wrapMode: Text.WordWrap
             leftPadding: 15
             rightPadding: 15
