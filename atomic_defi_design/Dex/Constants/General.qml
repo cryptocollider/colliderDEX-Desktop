@@ -154,6 +154,7 @@ QtObject {
     readonly property var time_seconds: ({ "1m": 60, "3m": 180, "5m": 300, "15m": 900, "30m": 1800, "1h": 3600, "2h": 7200, "4h": 14400, "6h": 21600, "12h": 43200, "1d": 86400, "3d": 259200, "1w": 604800 })
 
     property string apCurrentTicker: "KMD"
+    property string walletCurrentTicker: "KMD"
     property int apThrows: 0
     property bool apCanThrow: true
     property bool apHasSelected: false
@@ -163,12 +164,26 @@ QtObject {
     property bool inChallenge: false
     property bool inColliderApp: inAuto || inArena || inChallenge ? true : false
     property bool initialized_orderbook_pair: false
-    property bool hasAutoAddress: false
     property bool openedArena: false
     property bool openedChallenge: false
     property var apAddress
     readonly property string default_base: atomic_app_primary_coin
     readonly property string default_rel: atomic_app_secondary_coin
+
+    function colliderLogout(){
+        apCurrentTicker = "KMD"
+        walletCurrentTicker = "KMD"
+        apThrows = 0
+        apCanThrow = true
+        apHasSelected = false
+        autoPlaying = false
+        inAuto = false
+        inArena = false
+        inChallenge = false
+        openedArena = false
+        openedChallenge = false
+        apAddress = undefined
+    }
 
     function timestampToDouble(timestamp) {
         return (new Date(timestamp)).getTime()
