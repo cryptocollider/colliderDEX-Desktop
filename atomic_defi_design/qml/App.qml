@@ -78,6 +78,7 @@ DexRectangle
 
     function onDisconnect() {
         app.notifications_list = []
+        General.colliderLogout()
         API.app.wallet_mgr.set_log_status(false);
         app.disconnected = true
         openFirstLaunch()
