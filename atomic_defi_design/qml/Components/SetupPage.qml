@@ -20,11 +20,11 @@ Item {
 
     Image {
         id: back_image
-        source: General.image_path + "final-background.jpg"
+        source: General.image_path + "final-background.gif"
 //        anchors.horizontalCenter: parent.horizontalCenter
 //        anchors.verticalCenter: parent.verticalCenter
         width: window.width
-        height: window.height
+        height: window.height - 30
         y: 0
         visible: true
 //        antialiasing: true

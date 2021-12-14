@@ -33,7 +33,7 @@ SetupPage {
 
     property string text_error
 
-    back_image_path: General.image_path + "final-background.jpg"
+    back_image_path: General.image_path + "final-background.gif"
     image_scale: 0.7
 
     // Removed the image for now, no space
