@@ -4,6 +4,7 @@ import QtQuick.Controls 2.15
 import QtGraphicalEffects 1.0
 import QtWebChannel 1.0
 import QtWebEngine 1.7
+import QtQuick.Window 2.2
 
 import "../Components"
 import "../Constants"
@@ -17,6 +18,7 @@ import "../Support"
 import "../Sidebar"
 import "../Fiat"
 import "../Games"
+import "../ArbBots"
 import "../Settings" as SettingsPage
 
 
@@ -39,6 +41,7 @@ Item {
     readonly property int idx_dashboard_games: 11
     readonly property int idx_dashboard_coin_sight: 12
     readonly property int idx_dashboard_collider_discord: 13
+    readonly property int idx_dashboard_arb_bots: 14
 
     //readonly property int idx_exchange_trade: 3
     readonly property int idx_exchange_trade: 0
@@ -49,6 +52,7 @@ Item {
     property bool hasCoinSight: false
     property bool isDevToolSmall: false
     property bool isDevToolLarge: false
+    property bool openedDisc: false
 
     //list of only pub addresses which gets assigned value from games script
     property var dataList
@@ -134,34 +138,34 @@ Item {
         }
     }
 
-    function checkClc(){ //checks CLC amount for enabling coinSight
-        if(General.autoPlaying || current_page === idx_dashboard_exchange){
-            clc_check_timer.restart()
-        }else if(current_page === idx_dashboard_games && General.inAuto){
-            clc_check_timer.restart()
-        }else{
-            var clcTick = "CLC"
-            var tempCurrentTick = api_wallet_page.ticker
-            api_wallet_page.ticker = clcTick
-            dashboard.current_ticker = api_wallet_page.ticker
-            if(current_ticker_infos.balance >= 100){
-                hasCoinSight = true
-            }else{
-                clc_check_timer.restart()
-            }
-            api_wallet_page.ticker = tempCurrentTick
-            dashboard.current_ticker = api_wallet_page.ticker
-        }
-    }
+//    function checkClc(){ //checks CLC amount for enabling coinSight
+//        if(General.autoPlaying || current_page === idx_dashboard_exchange){
+//            clc_check_timer.restart()
+//        }else if(current_page === idx_dashboard_games && General.inAuto){
+//            clc_check_timer.restart()
+//        }else{
+//            var clcTick = "CLC"
+//            var tempCurrentTick = api_wallet_page.ticker
+//            api_wallet_page.ticker = clcTick
+//            dashboard.current_ticker = api_wallet_page.ticker
+//            if(current_ticker_infos.balance >= 100){
+//                hasCoinSight = true
+//            }else{
+//                clc_check_timer.restart()
+//            }
+//            api_wallet_page.ticker = tempCurrentTick
+//            dashboard.current_ticker = api_wallet_page.ticker
+//        }
+//    }
 
-    Timer {
-        id: clc_check_timer
-        interval: 10000
-        repeat: false
-        triggeredOnStart: false
-        running: true
-        onTriggered: checkClc()
-    }
+//    Timer {
+//        id: clc_check_timer
+//        interval: 10000
+//        repeat: false
+//        triggeredOnStart: false
+//        running: true
+//        onTriggered: checkClc()
+//    }
 
     Shortcut {
         sequence: "F9"
@@ -171,6 +175,14 @@ Item {
     Shortcut {
         sequence: "F10"
         onActivated: dashboard.devToolsLarge()
+    }
+
+    Image {
+        source: General.image_path + "final-background.gif"
+        width: window.width
+        height: window.height
+        y: 0
+        visible: true
     }
 
     // Al settings depends this modal
@@ -222,7 +234,8 @@ Item {
 
     // Right side
     AnimatedRectangle {
-        color: DexTheme.backgroundColorDeep
+        //color: DexTheme.backgroundColorDeep
+        color: 'transparent'
         width: parent.width - sidebar.width
         height: parent.height
         x: sidebar.width
@@ -261,6 +274,12 @@ Item {
         }
 
         Component {
+            id: arb_bots
+
+            ArbBots {}
+        }
+
+        Component {
             id: games
 
             Games {}
@@ -292,7 +311,9 @@ Item {
             }
         }
 
-        AutoPlay {}
+        AutoPlay {
+            id: autoPlay
+        }
 
         Component {
             id: coinSight
@@ -318,10 +339,13 @@ Item {
             property string someProperty: "QML property string"
             property string autoplayAddress: "t"
             property string dexUserData: JSON.stringify(dashboard.dexList)
+            property var coinData
             signal someSignal(string message);
             signal apSignal(string apMessage);
             signal getAutoAddress(string tickText);
             signal dexAutoLogin(string tempText);
+            signal getCoinData();
+            signal loadStats();
 
 
             function preloadCoin(typeID, address) {
@@ -339,7 +363,7 @@ Item {
 
             function autoAddressResponder(addressTxt){
                 General.apAddress = JSON.parse(addressTxt);
-                General.hasAutoAddress = true;
+                autoPlay.recievedAutoAddress();
             }
 
             //called from html, & returns data.
@@ -372,6 +396,7 @@ Item {
             //enabled: General.autoPlaying ? true : General.inArena && current_page == idx_dashboard_games ? true : false
             enabled: true
             visible: General.inArena && current_page == idx_dashboard_games ? true : false
+            audioMuted: General.inArena && current_page == idx_dashboard_games ? false : true
             settings.pluginsEnabled: true
             devToolsView: devInspect
             url: ""
@@ -482,6 +507,8 @@ Item {
                         return coinSight
                     case idx_dashboard_collider_discord:
                         return colliderDiscord
+                    case idx_dashboard_arb_bots:
+                        return arb_bots
                     default:
                         return undefined
                 }
