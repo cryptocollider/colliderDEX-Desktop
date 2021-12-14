@@ -19,6 +19,6 @@ Item {
     WebEngineView {
         anchors.fill: parent
         settings.pluginsEnabled: true
-        url: "https://discord.com/invite/Uq9bpKN"
+        url: dashboard.openedDisc ? "https://discord.com/invite/Uq9bpKN" : ""
     }
 }
