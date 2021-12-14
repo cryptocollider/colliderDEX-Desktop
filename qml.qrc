@@ -17,6 +17,20 @@
         <file>atomic_defi_design/assets/images/circle-failed.png</file>
         <file>atomic_defi_design/assets/images/circle-success.png</file>
         <file>atomic_defi_design/assets/images/coins/1inch.png</file>
+		<file>atomic_defi_design/assets/images/coins/32ARRR.png</file>
+		<file>atomic_defi_design/assets/images/coins/32BTC.png</file>
+		<file>atomic_defi_design/assets/images/coins/32CHIPS.png</file>
+		<file>atomic_defi_design/assets/images/coins/32CLC.png</file>
+		<file>atomic_defi_design/assets/images/coins/32DASH.png</file>
+		<file>atomic_defi_design/assets/images/coins/32DGB.png</file>
+		<file>atomic_defi_design/assets/images/coins/32DOGE.png</file>
+		<file>atomic_defi_design/assets/images/coins/32ETH.png</file>
+		<file>atomic_defi_design/assets/images/coins/32KMD.png</file>
+		<file>atomic_defi_design/assets/images/coins/32LTC.png</file>
+		<file>atomic_defi_design/assets/images/coins/32RVN.png</file>
+		<file>atomic_defi_design/assets/images/coins/32TKL.png</file>
+		<file>atomic_defi_design/assets/images/coins/32VRSC.png</file>
+		<file>atomic_defi_design/assets/images/coins/32XPM.png</file>
         <file>atomic_defi_design/assets/images/coins/aave.png</file>
         <file>atomic_defi_design/assets/images/coins/aby.png</file>
         <file>atomic_defi_design/assets/images/coins/ada.png</file>
@@ -264,6 +278,7 @@
         <file>atomic_defi_design/assets/images/exchange-exchange.svg</file>
         <file>atomic_defi_design/assets/images/exchange-search.svg</file>
         <file>atomic_defi_design/assets/images/exchange-trade-complete.svg</file>
+		<file>atomic_defi_design/assets/images/final-background.gif</file>
 		<file>atomic_defi_design/assets/images/final-background.jpg</file>
         <file>atomic_defi_design/assets/images/guide_coingecko_id.gif</file>
         <file>atomic_defi_design/assets/images/guide_contract_address_erc.gif</file>
@@ -280,10 +295,11 @@
         <file>atomic_defi_design/assets/images/lang/tr.png</file>
 		<file>atomic_defi_design/assets/images/login-setup-final.png</file>
         <file>atomic_defi_design/assets/images/logo/dex-logo.png</file>
-		<file>atomic_defi_design/assets/images/games-page-2.mp4</file>
+		<file>atomic_defi_design/assets/images/games-pg-1.avi</file>
         <file>atomic_defi_design/assets/images/menu-assets-portfolio.svg</file>
         <file>atomic_defi_design/assets/images/menu-assets-white.svg</file>
         <file>atomic_defi_design/assets/images/menu-dapp-white.svg</file>
+		<file>atomic_defi_design/assets/images/menu-discord-white.svg</file>
         <file>atomic_defi_design/assets/images/menu-exchange-white.svg</file>
 		<file>atomic_defi_design/assets/images/menu-games-exit.svg</file>
 		<file>atomic_defi_design/assets/images/menu-games-white.svg</file>
@@ -303,6 +319,7 @@
         <file>atomic_defi_design/assets/languages/atomic_defi_tr.qm</file>
         <file>atomic_defi_design/qml/App.qml</file>
         <file>atomic_defi_design/qml/String.js</file>
+		<file>atomic_defi_design/qml/ArbBots/ArbBots.qml</file>
         <file>atomic_defi_design/qml/Components/AddressField.qml</file>
         <file>atomic_defi_design/qml/Components/AddressFieldWithTitle.qml</file>
         <file>atomic_defi_design/qml/Components/AmountField.qml</file>
@@ -512,6 +529,7 @@
 		<file>atomic_defi_design/qml/Games/ColliderDiscord.qml</file>
 		<file>atomic_defi_design/qml/Games/DiscordWeb.qml</file>
 		<file>atomic_defi_design/qml/Games/Games.qml</file>
+		<file>atomic_defi_design/qml/Games/ListElementAp.qml</file>
 		<file>atomic_defi_design/qml/Games/qwebchannel.js</file>
 		<file>atomic_defi_design/qml/Games/hprequest.js</file>
 		<file>atomic_defi_design/qml/Games/testCom.html</file>
