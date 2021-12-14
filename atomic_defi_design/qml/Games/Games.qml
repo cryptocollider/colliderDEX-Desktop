@@ -4,7 +4,8 @@ import QtQuick.Controls 2.15
 import QtGraphicalEffects 1.0
 import QtWebChannel 1.0
 import QtWebEngine 1.7
-import QtMultimedia 5.12
+import QtMultimedia 5.6
+import QtQuick.Window 2.2
 
 import Qaterial 1.0 as Qaterial
 //import "hprequest.js" as hprequest
@@ -19,6 +20,7 @@ Item {
     anchors.fill: parent
 
     property string tempTickr: "t"
+
     //strings for coins pub address
     property string addyKMD: "t"
     property string addyCLC: "t"
@@ -33,6 +35,21 @@ Item {
     property string addyRVN: "t"
     property string addyXPM: "t"
     property string addyTKL: "t"
+
+    //strings for coins balance
+    property string balKMD: "t"
+    property string balCLC: "t"
+    property string balBTC: "t"
+    property string balVRSC: "t"
+    property string balCHIPS: "t"
+    property string balDASH: "t"
+    property string balDGB: "t"
+    property string balDOGE: "t"
+    property string balETH: "t"
+    property string balLTC: "t"
+    property string balRVN: "t"
+    property string balXPM: "t"
+    property string balTKL: "t"
 
     property var addyList:
     {
@@ -50,7 +67,29 @@ Item {
         "XPM": addyXPM,
         "TKL": addyTKL
     }
-    property var gamesDataList: {"userAddresses": addyList}
+
+    property var balList:
+    {
+        "KMD": balKMD,
+        "CLC": balCLC,
+        "BTC": balBTC,
+        "VRSC": balVRSC,
+        "CHIPS": balCHIPS,
+        "DASH": balDASH,
+        "DGB": balDGB,
+        "DOGE": balDOGE,
+        "ETH": balETH,
+        "LTC": balLTC,
+        "RVN": balRVN,
+        "XPM": balXPM,
+        "TKL": balTKL
+    }
+
+    property var gamesDataList:
+    {
+        "userAddresses": addyList,
+        "balances": balList
+    }
 
     function openArena(){
        // buildAddyList();
@@ -100,55 +139,73 @@ Item {
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         addyKMD = current_ticker_infos.address
+        balKMD = current_ticker_infos.balance
         tempTickr = "CLC"
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         addyCLC = current_ticker_infos.address
+        balCLC = current_ticker_infos.balance
         tempTickr = "BTC"
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         addyBTC = current_ticker_infos.address
+        balBTC = current_ticker_infos.balance
         tempTickr = "VRSC"
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         addyVRSC = current_ticker_infos.address
+        balVRSC = current_ticker_infos.balance
         tempTickr = "CHIPS"
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         addyCHIPS = current_ticker_infos.address
+        balCHIPS = current_ticker_infos.balance
         tempTickr = "DASH"
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         addyDASH = current_ticker_infos.address
+        balDASH = current_ticker_infos.balance
         tempTickr = "DGB"
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         addyDGB = current_ticker_infos.address
+        balDGB = current_ticker_infos.balance
         tempTickr = "DOGE"
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         addyDOGE = current_ticker_infos.address
+        balDOGE = current_ticker_infos.balance
         tempTickr = "ETH"
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         addyETH = current_ticker_infos.address
+        balETH = current_ticker_infos.balance
         tempTickr = "LTC"
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         addyLTC = current_ticker_infos.address
+        balLTC = current_ticker_infos.balance
         tempTickr = "RVN"
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         addyRVN = current_ticker_infos.address
+        balRVN = current_ticker_infos.balance
         tempTickr = "XPM"
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         addyXPM = current_ticker_infos.address
+        balXPM = current_ticker_infos.balance
         tempTickr = "TKL"
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         addyTKL = current_ticker_infos.address
+        balTKL = current_ticker_infos.balance
         dashboard.dataList = gamesDataList;
+    }
+
+    Shortcut {
+        sequence: "F8"
+        onActivated: vid_player.play()
     }
 
     Timer {
@@ -190,20 +247,14 @@ Item {
         }
 
         Video {
+            id: vid_player
             width: 426
             height: 240
             Layout.topMargin: 16
             fillMode: VideoOutput.PreserveAspectFit
             flushMode: VideoOutput.FirstFrame
-            source: General.image_path + "games-page-2.mp4"
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    video.play()
-                }
-            }
-            focus: true
+            source: General.image_path + "games-pg-1.avi"
+            //focus: true
         }
 
         DexLabel{
@@ -248,22 +299,19 @@ Item {
             onClicked: openArena()
         }
 
-        Video{
-            width: 426
-            height: 240
-            Layout.topMargin: 16
-            fillMode: VideoOutput.PreserveAspectFit
-            flushMode: VideoOutput.FirstFrame
-            source: General.image_path + "games-page-2.mp4"
+//        MediaPlayer {
+//            id: player
+//            source: General.image_path + "games-pg-1.avi"
+//            //source: "qrc:///matrix.avi"
+//        }
 
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    video.play()
-                }
-            }
-            focus: true
-        }
+//        VideoOutput {
+//            id: videoOutput
+//            source: player
+//            width: 426
+//            height: 240
+//            Layout.topMargin: 16
+//        }
 
         DexLabel{
             Layout.alignment: Qt.AlignCenter
@@ -278,7 +326,7 @@ Item {
         width: 720
         height: 160
         x: (parent.width / 2) - (width / 2)
-        y: 580
+        y: 580 + (0.625 * (window.height - (General.minimumHeight - 1)))
 
         DexButton{
             Layout.alignment: Qt.AlignCenter
