@@ -113,12 +113,14 @@ Item {
                 case idx_dashboard_news:
                 case idx_dashboard_dapps:
                     return sidebar_center.y + dashboard.current_page * Constants.Style.sidebarLineHeight
+                case idx_dashboard_arb_bots:
+                    return sidebar_center.y + (idx_dashboard_arb_bots - 11) * Style.sidebarLineHeight
                 case idx_dashboard_games:
-                    return sidebar_center.y + (idx_dashboard_games - 6) * Style.sidebarLineHeight
+                    return sidebar_center.y + (idx_dashboard_games - 7) * Style.sidebarLineHeight
                 case idx_dashboard_coin_sight:
-                    return sidebar_center.y + (idx_dashboard_coin_sight - 6) * Style.sidebarLineHeight
+                    return sidebar_center.y + (idx_dashboard_coin_sight - 7) * Style.sidebarLineHeight
                 case idx_dashboard_collider_discord:
-                    return sidebar_center.y + (idx_dashboard_collider_discord - 6) * Style.sidebarLineHeight
+                    return sidebar_center.y + (idx_dashboard_collider_discord - 7) * Style.sidebarLineHeight
                 case idx_dashboard_settings:
                 case idx_dashboard_support:
                     return sidebar_bottom.y + (dashboard.current_page - idx_dashboard_settings) * Constants.Style.sidebarLineHeight

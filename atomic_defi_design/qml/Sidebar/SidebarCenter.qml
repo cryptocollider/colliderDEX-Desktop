@@ -31,6 +31,7 @@ ColumnLayout {
         dashboard_index: idx_dashboard_wallet
         text_value: sidebar.expanded? qsTr("Wallet") : ""
         image: General.image_path + "menu-assets-white.svg"
+        isWallet: true
         Layout.fillWidth: true
         SidebarTooltip {
             text_value: qsTr("Wallet")
@@ -60,29 +61,50 @@ ColumnLayout {
         }
     }
 
-    SidebarLine {
-        dashboard_index: idx_dashboard_addressbook
-        text_value: sidebar.expanded? qsTr("Address Book") : ""
-        image: General.image_path + "menu-news-white.svg"
-        Layout.fillWidth: true
-        SidebarTooltip {
-            text_value: qsTr("Address Book")
-        }
-    }
+//    SidebarLine {
+//        dashboard_index: idx_dashboard_addressbook
+//        text_value: sidebar.expanded? qsTr("Address Book") : ""
+//        image: General.image_path + "menu-news-white.svg"
+//        Layout.fillWidth: true
+//        SidebarTooltip {
+//            text_value: qsTr("Address Book")
+//        }
+//    }
+
+//    SidebarLine {
+//        section_enabled: false
+//        dashboard_index: idx_dashboard_fiat_ramp
+//        text_value: sidebar.expanded ? qsTr("Fiat") : ""
+//        image: General.image_path + "bill.svg"
+//        Layout.fillWidth: true
+
+//        SidebarTooltip { text_value: qsTr("Fiat") }
+
+//        DexTooltip
+//        {
+//            enabled: false
+//            id: fiat_coming_soon
+//            visible: parent.mouse_area.containsMouse
+//            contentItem: DexRectangle
+//            {
+//                DexLabel { text: qsTr("Coming soon !"); anchors.centerIn: parent }
+//            }
+//        }
+//    }
 
     SidebarLine {
         section_enabled: false
-        dashboard_index: idx_dashboard_fiat_ramp
-        text_value: sidebar.expanded ? qsTr("Fiat") : ""
+        dashboard_index: idx_dashboard_arb_bots
+        text_value: sidebar.expanded ? qsTr("Arb Bots") : ""
         image: General.image_path + "bill.svg"
         Layout.fillWidth: true
 
-        SidebarTooltip { text_value: qsTr("Fiat") }
+        SidebarTooltip { text_value: qsTr("Arb Bots") }
 
         DexTooltip
         {
             enabled: false
-            id: fiat_coming_soon
+            id: arb_coming_soon
             visible: parent.mouse_area.containsMouse
             contentItem: DexRectangle
             {
@@ -129,7 +151,7 @@ ColumnLayout {
     SidebarLine {
         dashboard_index: idx_dashboard_collider_discord
         text_value: sidebar.expanded? qsTr("Discord") : ""
-        image: General.image_path + "menu-games-white.svg"
+        image: General.image_path + "menu-discord-white.svg"
         Layout.fillWidth: true
         SidebarTooltip {
             text_value: qsTr("Discord")
