@@ -156,10 +156,6 @@ BasicModal {
         api_wallet_page.send(address, amount, max, with_fees, fees_info)
     }
 
-    function respondHidden(){
-        //send_values_label.text = "f6/f7 - respondHidden"
-    }
-
     function apPrepSendCoin(address, amount, max, with_fees, fees_amount, gas_price, gas_limit){
         const fees_info_ap = {
             fees_amount,
