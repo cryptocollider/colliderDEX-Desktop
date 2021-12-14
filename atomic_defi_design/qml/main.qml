@@ -54,7 +54,7 @@ DexWindow
 
     }
 	
-	DexWindowControl { visible: !isOsx }
+    DexWindowControl { visible: !isOsx }
 
 	DexRectangle {
 		radius: 0
