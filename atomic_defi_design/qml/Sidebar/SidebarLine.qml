@@ -12,6 +12,7 @@ Item {
 
     property bool section_enabled: true
     property bool isCollider: false
+    property bool isWallet: false
     property alias mouse_area: mouse_area
 
     property int dashboard_index
@@ -139,11 +140,29 @@ Item {
                 }
             }
             else{
-                if(General.inAuto){
-                    var tmpTick = General.apCurrentTicker
-                    api_wallet_page.ticker = tmpTick
-                    dashboard.current_ticker = api_wallet_page.ticker
+                if(dashboard.current_page === idx_dashboard_wallet){
+                    General.walletCurrentTicker = api_wallet_page.ticker
+                }else if(dashboard.current_page === idx_dashboard_games){
+                    General.apCurrentTicker = api_wallet_page.ticker
+                }else{
                 }
+
+                if(isWallet){
+                    var tmpWtTick = General.walletCurrentTicker
+                    api_wallet_page.ticker = tmpWtTick
+                    dashboard.current_ticker = api_wallet_page.ticker
+                }else if(isCollider){
+                    var tmpApTick = General.apCurrentTicker
+                    api_wallet_page.ticker = tmpApTick
+                    dashboard.current_ticker = api_wallet_page.ticker
+                }else if(dashboard_index === idx_dashboard_collider_discord){
+                    dashboard.openedDisc = true
+                }
+//                if(General.inAuto){
+//                    var tmpTick = General.apCurrentTicker
+//                    api_wallet_page.ticker = tmpTick
+//                    dashboard.current_ticker = api_wallet_page.ticker
+//                }
                 dashboard.switchPage(dashboard_index)
             }
         }
