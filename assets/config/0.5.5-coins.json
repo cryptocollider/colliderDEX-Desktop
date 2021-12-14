@@ -5614,7 +5614,7 @@
       "https://bscscan.com/"
     ],
     "type": "BEP-20",
-    "active": true,
+    "active": false,
     "currently_enabled": false
   },
   "SMTF-v2": {
