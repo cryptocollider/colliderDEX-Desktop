@@ -391,6 +391,15 @@ Item {
                 
             }
 
+            DexAppButton {
+                text: qsTr("Address Book")
+                onClicked: dashboard.switchPage(idx_dashboard_addressbook)
+                font.pixelSize: send_button.font.pixelSize
+                leftPadding: 40
+                rightPadding: 40
+                radius: 16
+            }
+
             Item {
                 Layout.fillWidth: true
             }

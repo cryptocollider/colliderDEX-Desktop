@@ -109,10 +109,11 @@ Item {
                 case idx_dashboard_portfolio:
                 case idx_dashboard_wallet:
                 case idx_dashboard_exchange:
-                case idx_dashboard_addressbook:
                 case idx_dashboard_news:
                 case idx_dashboard_dapps:
                     return sidebar_center.y + dashboard.current_page * Constants.Style.sidebarLineHeight
+                case idx_dashboard_addressbook:
+                    return sidebar_center.y + (idx_dashboard_addressbook - 2) * Style.sidebarLineHeight
                 case idx_dashboard_arb_bots:
                     return sidebar_center.y + (idx_dashboard_arb_bots - 11) * Style.sidebarLineHeight
                 case idx_dashboard_games:
