@@ -53,6 +53,7 @@ Item {
     property bool isDevToolSmall: false
     property bool isDevToolLarge: false
     property bool openedDisc: false
+    property bool viewingArena: false
 
     //list of only pub addresses which gets assigned value from games script
     property var dataList
@@ -377,6 +378,19 @@ Item {
             }
         }
 
+        QtObject {
+            id: challengeObject
+            WebChannel.id: "challengeBackend"
+            property string clcAddy: General.openedChallenge ? JSON.stringify(games.addyCLC) : ""
+            property string clcAddyTwo: ""
+            property string clcAddyThree: ""
+        }
+
+        QtObject {
+            id: coinSightObject
+            WebChannel.id: "coinSightBackend"
+        }
+
         Text {
             id: txtWeb
             text: "Some text"
@@ -413,7 +427,7 @@ Item {
             settings.pluginsEnabled: true
             devToolsView: devInspect
             url: ""
-//            webChannel: channel
+            webChannel: channel
         }
 
         WebEngineView {
@@ -439,7 +453,7 @@ Item {
 
         WebChannel {
             id: channel
-            registeredObjects: [someObject]
+            registeredObjects: [someObject, challengeObject, coinSightObject]
         }
 
         //---------------------------------------------------------------------------------------
