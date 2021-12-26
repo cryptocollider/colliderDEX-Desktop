@@ -17,8 +17,7 @@ import "../Exchange/Trade"
 
 Item {
     id: games
-    anchors.fill: parent
-
+    anchors.fill: parent    
     property string tempTickr: "t"
 
     //strings for coins pub address
@@ -107,6 +106,7 @@ Item {
     function openChallenge(){
         if(!General.openedChallenge){
             webChallenge.url = "https://cryptocollider.com/challenge/app"
+            buildAddyList();
             General.openedChallenge = true
         }
         General.inChallenge = true
@@ -144,6 +144,8 @@ Item {
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         addyCLC = current_ticker_infos.address
+        challengeObject.clcAddyTwo = addyCLC
+        challengeObject.clcAddyThree = JSON.stringify(addyCLC)
         balCLC = current_ticker_infos.balance
         tempTickr = "BTC"
         api_wallet_page.ticker = tempTickr
@@ -203,9 +205,14 @@ Item {
         dashboard.dataList = gamesDataList;
     }
 
+    function playVids(){
+        vid_player.play()
+        vid_two_player.play()
+    }
+
     Shortcut {
         sequence: "F8"
-        onActivated: vid_player.play()
+        onActivated: playVids()
     }
 
     Timer {
@@ -217,152 +224,155 @@ Item {
         onTriggered: checkDexUserData()
     }
 
-    ColumnLayout{
+    FloatingBackground{
         id: challenge
         enabled: General.inColliderApp ? false : true
         visible: General.inColliderApp ? false : true
-        width: 500
+        width: 490
         height: 500
         x: (parent.width * 0.25) - (width / 2)
         y: 40
-
-        DexLabel{
-            Layout.alignment: Qt.AlignCenter
-            Layout.topMargin: 16
-            horizontalAlignment: Text.AlignHCenter
-            font: DexTypo.head4
-            text: qsTr("Crypto Challenge")
+        ColumnLayout{
+            anchors.fill: parent
+            DexLabel{
+                Layout.alignment: Qt.AlignCenter
+                Layout.topMargin: 6
+                horizontalAlignment: Text.AlignHCenter
+                font: DexTypo.head4
+                text: qsTr("Crypto Challenge")
+            }
+            DexLabel{
+                Layout.alignment: Qt.AlignCenter
+                Layout.topMargin: -4
+                font: DexTypo.head6
+                text: qsTr("Fun way to learn Crypto")
+            }
+            DexButton{
+                Layout.alignment: Qt.AlignCenter
+                Layout.maximumWidth: 200
+                Layout.minimumWidth: 120
+                Layout.maximumHeight: 60
+                Layout.minimumHeight: 80
+                //Layout.topMargin: 70 * (arena.height / 532)
+                Layout.topMargin: 276
+                text: qsTr("Play")
+                onClicked: openChallenge()
+            }
         }
-
-        DexButton{
-            Layout.alignment: Qt.AlignCenter
-            Layout.maximumWidth: 200
-            Layout.minimumWidth: 120
-            Layout.maximumHeight: 60
-            Layout.minimumHeight: 80
-            //Layout.topMargin: 70 * (arena.height / 532)
-            Layout.topMargin: 16
-            text: qsTr("Play")
-            onClicked: openChallenge()
-        }
-
         Video {
             id: vid_player
             width: 426
             height: 240
-            Layout.topMargin: 16
+            anchors.left: parent.left
+            anchors.leftMargin: 32
+            y: y + 116
             fillMode: VideoOutput.PreserveAspectFit
             flushMode: VideoOutput.FirstFrame
-            source: General.image_path + "games-pg-1.avi"
+            source: General.image_path + "games-page-challenge.avi"
             //focus: true
-        }
-
-        DexLabel{
-            Layout.alignment: Qt.AlignCenter
-            font: DexTypo.head6
-            text: qsTr("Fun way to learn Crypto")
         }
     }
 
-    ColumnLayout{
+    FloatingBackground{
         id: arena
         enabled: General.inColliderApp ? false : true
         visible: General.inColliderApp ? false : true
-        width: 500
+        width: 490
         height: 500
         x: (parent.width * 0.75) - (width / 2)
         y: 40
-
-        DexLabel{
-            Layout.alignment: Qt.AlignCenter
-            Layout.maximumWidth: parent.width
-            Layout.minimumWidth: parent.width - 30 //minus the paddings
-            Layout.topMargin: 16
-            wrapMode: Text.WordWrap
-            leftPadding: 15
-            rightPadding: 15
-            horizontalAlignment: Text.AlignHCenter
-            font: DexTypo.head4
-            text: qsTr("Crypto Collider Trading Arena")
+        ColumnLayout{
+            anchors.fill: parent
+            DexLabel{
+                Layout.alignment: Qt.AlignCenter
+//                Layout.maximumWidth: parent.width
+//                Layout.minimumWidth: parent.width - 30 //minus the paddings
+                Layout.topMargin: 6
+//                wrapMode: Text.WordWrap
+//                leftPadding: 15
+//                rightPadding: 15
+                horizontalAlignment: Text.AlignHCenter
+                font: DexTypo.head4
+                text: qsTr("Crypto Collider Trading Arena")
+            }
+            DexLabel{
+                Layout.alignment: Qt.AlignCenter
+                Layout.topMargin: -4
+                font: DexTypo.head6
+                text: qsTr("Use Skill and grow your assets")
+            }
+            DexButton{
+                //enabled: General.autoPlaying ? false : true //can't open CryptoCollider while using auto-play
+                Layout.alignment: Qt.AlignCenter
+                Layout.maximumWidth: 200
+                Layout.minimumWidth: 120
+                Layout.maximumHeight: 60
+                Layout.minimumHeight: 80
+                //Layout.topMargin: 60 * (arena.height / 532)
+                Layout.topMargin: 276
+                text: qsTr("Play")
+                onClicked: openArena()
+            }
         }
-
-        DexButton{
-            //enabled: General.autoPlaying ? false : true //can't open CryptoCollider while using auto-play
-            Layout.alignment: Qt.AlignCenter
-            Layout.maximumWidth: 200
-            Layout.minimumWidth: 120
-            Layout.maximumHeight: 60
-            Layout.minimumHeight: 80
-            //Layout.topMargin: 60 * (arena.height / 532)
-            Layout.topMargin: 16
-            text: qsTr("Play")
-            onClicked: openArena()
-        }
-
-//        MediaPlayer {
-//            id: player
-//            source: General.image_path + "games-pg-1.avi"
-//            //source: "qrc:///matrix.avi"
-//        }
-
-//        VideoOutput {
-//            id: videoOutput
-//            source: player
-//            width: 426
-//            height: 240
-//            Layout.topMargin: 16
-//        }
-
-        DexLabel{
-            Layout.alignment: Qt.AlignCenter
-            font: DexTypo.head6
-            text: qsTr("Use Skill and grow your assets")
+        Video {
+            id: vid_two_player
+            width: 426
+            height: 240
+            anchors.left: parent.left
+            anchors.leftMargin: 32
+            y: y + 116
+            fillMode: VideoOutput.PreserveAspectFit
+            flushMode: VideoOutput.FirstFrame
+            source: General.image_path + "games-page-collider.avi"
         }
     }
 
-    ColumnLayout{
+    FloatingBackground{
         enabled: General.inColliderApp ? false : true
         visible: General.inColliderApp ? false : true
-        width: 720
+        width: 560
         height: 160
         x: (parent.width / 2) - (width / 2)
         y: 580 + (0.625 * (window.height - (General.minimumHeight - 1)))
+        ColumnLayout{
+            anchors.fill: parent
+            DexButton{
+                Layout.alignment: Qt.AlignCenter
+                Layout.maximumWidth: 240
+                Layout.minimumWidth: 160
+                Layout.maximumHeight: 60
+                Layout.minimumHeight: 80
+                //Layout.topMargin: 70 * (arena.height / 532)
+                Layout.topMargin: 16
+                text: qsTr("Auto Hedging")
+                onClicked: openAutoPlay()
+                //onClicked: someObject.preloadCoin("KMD", "testAddress")
+            }
 
-        DexButton{
-            Layout.alignment: Qt.AlignCenter
-            Layout.maximumWidth: 240
-            Layout.minimumWidth: 160
-            Layout.maximumHeight: 60
-            Layout.minimumHeight: 80
-            //Layout.topMargin: 70 * (arena.height / 532)
-            Layout.topMargin: 16
-            text: qsTr("Auto Hedging")
-            onClicked: openAutoPlay()
-            //onClicked: someObject.preloadCoin("KMD", "testAddress")
-        }
-
-        DexLabel{
-            Layout.alignment: Qt.AlignCenter
-            Layout.maximumWidth: parent.width
-            Layout.minimumWidth: parent.width - 30 //minus the paddings
-            Layout.topMargin: 16
-            wrapMode: Text.WordWrap
-            leftPadding: 15
-            rightPadding: 15
-            horizontalAlignment: Text.AlignHCenter
-            font: DexTypo.head6
-            text: qsTr("Provide automated game liquidity to")
-        }
-        DexLabel{
-            Layout.alignment: Qt.AlignCenter
-            Layout.maximumWidth: parent.width
-            Layout.minimumWidth: parent.width - 30 //minus the paddings
-            wrapMode: Text.WordWrap
-            leftPadding: 15
-            rightPadding: 15
-            horizontalAlignment: Text.AlignHCenter
-            font: DexTypo.head6
-            text: qsTr("diversify your assets & mine Collider Coin")
+            DexLabel{
+                Layout.alignment: Qt.AlignCenter
+                Layout.maximumWidth: parent.width
+                Layout.minimumWidth: parent.width - 30 //minus the paddings
+                Layout.topMargin: 10
+                wrapMode: Text.WordWrap
+                leftPadding: 15
+                rightPadding: 15
+                horizontalAlignment: Text.AlignHCenter
+                font: DexTypo.head6
+                text: qsTr("Provide automated game liquidity to")
+            }
+            DexLabel{
+                Layout.alignment: Qt.AlignCenter
+                Layout.maximumWidth: parent.width
+                Layout.minimumWidth: parent.width - 30 //minus the paddings
+                wrapMode: Text.WordWrap
+                bottomPadding: 10
+                leftPadding: 15
+                rightPadding: 15
+                horizontalAlignment: Text.AlignHCenter
+                font: DexTypo.head6
+                text: qsTr("diversify your assets & mine Collider Coin")
+            }
         }
     }
 
