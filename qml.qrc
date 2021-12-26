@@ -295,7 +295,8 @@
         <file>atomic_defi_design/assets/images/lang/tr.png</file>
 		<file>atomic_defi_design/assets/images/login-setup-final.png</file>
         <file>atomic_defi_design/assets/images/logo/dex-logo.png</file>
-		<file>atomic_defi_design/assets/images/games-pg-1.avi</file>
+		<file>atomic_defi_design/assets/images/games-page-challenge.avi</file>
+		<file>atomic_defi_design/assets/images/games-page-collider.avi</file>
         <file>atomic_defi_design/assets/images/menu-assets-portfolio.svg</file>
         <file>atomic_defi_design/assets/images/menu-assets-white.svg</file>
         <file>atomic_defi_design/assets/images/menu-dapp-white.svg</file>
@@ -529,11 +530,7 @@
 		<file>atomic_defi_design/qml/Games/ColliderDiscord.qml</file>
 		<file>atomic_defi_design/qml/Games/DiscordWeb.qml</file>
 		<file>atomic_defi_design/qml/Games/Games.qml</file>
-		<file>atomic_defi_design/qml/Games/ListElementAp.qml</file>
 		<file>atomic_defi_design/qml/Games/qwebchannel.js</file>
-		<file>atomic_defi_design/qml/Games/hprequest.js</file>
-		<file>atomic_defi_design/qml/Games/testCom.html</file>
-		<file>atomic_defi_design/qml/Games/testReq.html</file>
         <file>atomic_defi_design/qml/NoConnection.qml</file>
         <file>atomic_defi_design/qml/Portfolio/Portfolio.qml</file>
         <file>atomic_defi_design/qml/Screens/Dashboard.qml</file>
