@@ -10,7 +10,6 @@ import QtWebEngine 1.7
 import QtQml 2.2
 
 import Qaterial 1.0 as Qaterial
-//import "hprequest.js" as hprequest
 
 import "../Components"
 import "../Constants"
@@ -28,34 +27,29 @@ Item {
     property string broadcast_resul_ap: api_wallet_page.broadcast_rpc_data
     property string tempTkr: "t"
     property string tempGrabTkr: "t"
-    //property string dynaMinBalanceText: parseFloat(localSetAmount - parseFloat(autoPlay.stValue)).toFixed(2) + " ($" + parseFloat(minBalanceFiatValue).toFixed(2) + ")"
-    //property string dynaThrowSizeText: parseFloat(autoPlay.rkValue * parseFloat(autoPlay.stValue)).toFixed(2) + " ($" + parseFloat(autoPlay.rkValue * minBalanceFiatValue).toFixed(2) + ")"
-    //property string throwsPerMinText: parseFloat(1.1 - parseFloat(autoPlay.rkValue)).toFixed(2)
 //    property string kmdAddy: RRBbUHjMaAg2tmWVj8k5fR2Z99uZchdUi4
     property string staticMinBalanceText
     property string staticThrowSizeText
-    //property real staticMinBalanceValue
     property real staticThrowSizeValue
     property real extraThrowSize
-    //property real riskValue: 0.28
-    //property real rkValue: risk_slider.valueAt(risk_slider.position)
     property real setAmountValue: 49.5
-    //property real staticSetAmount
-    //property real stValue: set_amount_slider.valueAt(set_amount_slider.position)
     property real localSetAmount: current_ticker_infos.balance
-    //property real minBalanceFiatValue: ((1 / localSetAmount) * (localSetAmount - parseFloat(autoPlay.stValue))) * current_ticker_infos.fiat_amount
     property bool balanceAboveSetAmount: localSetAmount > (parseFloat(staticMinBalanceText) + parseFloat(staticThrowSizeText)) ? true : false
     property bool hasEnoughBalance: General.apHasSelected && parseFloat(current_ticker_infos.balance) > (parseFloat(currentMinWager) * 4) ? true : false
     //property bool hasAnyBalance: false
     property int throwSeconds
     property var currentMinWager
 
-    property int waitFinishTime: 60
+    property int waitFinishTime: 720
     property real throwAmountValue: 49.5
     property real throwRateValue: 0.55
     property string setAmountPercentage: hasAutoAddress && hasEnoughBalance ? "" + Math.floor(set_amount_slider.position * 100) : ""
+    property string minBalancePercentage: hasAutoAddress && hasEnoughBalance ? "" + ((100 / localSetAmount) * set_amount_slider.value).toFixed(2) : "x"
     //property string throwAmountPercentage: hasAutoAddress && hasEnoughBalance ? "" + Math.floor(throw_amount_slider.position * 100) : ""
-    property bool hasAutoAddress: General.apAddress === undefined ? false : General.apAddress.autoAddress === undefined ? false : true
+    property bool gettingAutoAddress: false
+    //property bool hasAutoAddress: General.apAddress === undefined ? false : General.apAddress.autoAddress === undefined ? false : true
+    property bool hasAutoAddress: gettingAutoAddress || General.apAddress === undefined || !General.apAddress.result ? false : true
+    property var colliderJsonData
     property var returnAddyA
     property var returnAddyB
     property var returnAddyC
@@ -67,7 +61,7 @@ Item {
             General.autoPlaying = false
             if(wait_finish_timer.running){
                 General.apCanThrow = true
-                waitFinishTime = 60
+                waitFinishTime = 720
                 apStatusLabel.text = "Finished! Throw(s): " + General.apThrows
                 setAutoTicker(tempTkr) //resets the sliders & fields
                 wait_finish_timer.stop()
@@ -88,9 +82,7 @@ Item {
                 throwSizeInput.text = staticThrowSizeText
                 //staticThrowSizeText = staticThrowSizeValue + " ($" + parseFloat(autoPlay.rkValue * minBalanceFiatValue).toFixed(2) + ")"
                 ap_timer.interval = (60 / parseFloat(throw_rate_slider.value)) * 1000
-                throwSeconds = Math.floor(parseFloat(ap_timer.interval / 1000))
                 ap_timer.restart()
-                throw_timer.restart()
             }else{
                 apStatusLabel.text = "Waiting on previous throw!"
             }
@@ -118,24 +110,26 @@ Item {
         //here should check for address already saved
         //if not, saves the address
         General.apAddress = undefined
+        gettingAutoAddress = true
         tempGrabTkr = tmpA
         someObject.getAutoAddress(tempGrabTkr)
     }
 
     function recievedAutoAddress(){
+        gettingAutoAddress = false
         if(hasAutoAddress){
             if(hasEnoughBalance){
                 set_amount_slider.value = set_amount_slider.valueAt(0.5)
-                minBalanceInput.text = (localSetAmount - set_amount_slider.value).toFixed(2)
-                throw_amount_slider.value = throw_amount_slider.valueAt(0.5)
+                minBalanceInput.text = (set_amount_slider.value).toFixed(2)
+                throw_amount_slider.value = throw_amount_slider.valueAt(0.0)
                 throwSizeInput.text = (throw_amount_slider.value).toFixed(2)
-                throw_rate_slider.value = throw_rate_slider.valueAt(0.5)
+                throw_rate_slider.value = throw_rate_slider.valueAt(1.0)
                 throwRateInput.text = Math.floor(((600 / 1) * (1.1 - throw_rate_slider.value)))
                 apStatusLabel.text = "Address validated. Ready to throw!"
-                autoAddress_label.text = ("autoAddress " + General.apAddress.autoAddress)
+                autoAddress_label.text = ("hasAddress " + General.apAddress.result + " address " + General.apAddress.autoAddress)
             }else{
                 setDefaultVals()
-                autoAddress_label.text = ("autoAddress " + General.apAddress.autoAddress)
+                autoAddress_label.text = ("hasAddress " + General.apAddress.result + " address " + General.apAddress.autoAddress)
             }
         }else{
             setDefaultVals()
@@ -152,6 +146,8 @@ Item {
                 General.apThrows++
                 General.apCanThrow = false
                 apStatusLabel.text = "Throw(s): " + General.apThrows
+                throwSeconds = Math.floor(parseFloat(ap_timer.interval / 1000))
+                throw_timer.restart()
             }else{
                 ap_timer.running = false
                 wait_finish_timer.restart()
@@ -185,25 +181,25 @@ Item {
 
     function broadcastThrow(){
         if(api_wallet_page.is_send_busy){
-            send_info_label.text = "prep = busy!"
+            //send_info_label.text = "prep = busy!"
             broadcast_timer.restart()
         }else{
             //send_modal.item.apSendCoin(staticThrowSizeValue)
             //api_wallet_page.broadcast(send_result.withdraw_answer.tx_hex, false, false, staticThrowSizeValue)
             ap_send_modal.apSendCoin(extraThrowSize)
             //General.hasAutoAddress = false
-            broadcast_values_label.text = JSON.stringify(ap_send_modal.send_result)
+            //broadcast_values_label.text = JSON.stringify(ap_send_modal.send_result)
             close_send_timer.restart()
         }
     }
 
     function closeSendThrow(){
         if(api_wallet_page.is_broadcast_busy){
-            send_info_label.text = "broadcast = busy!"
+            //send_info_label.text = "broadcast = busy!"
             close_send_timer.restart()
         }else{
-            explorer_button.enabled = true
-            send_info_label.text = "broadcast = done!"
+            //explorer_button.enabled = true
+            //send_info_label.text = "broadcast = done!"
             if(dashboard.current_page !== idx_dashboard_games){
                 var tmpWtTick = General.walletCurrentTicker
                 api_wallet_page.ticker = tmpWtTick
@@ -214,7 +210,7 @@ Item {
 
     function checkUpdatedBalance(){
         if(balanceAboveSetAmount){
-            waitFinishTime = 60
+            waitFinishTime = 720
             wait_finish_timer.stop()
             ap_timer.restart()
         }else{
@@ -223,7 +219,7 @@ Item {
                 apStatusLabel.text = "Waiting " + waitFinishTime + "m for updated balance. Throw(s) " + General.apThrows
             }else{
                 General.apCanThrow = true
-                waitFinishTime = 60
+                waitFinishTime = 720
                 wait_finish_timer.stop()
                 apStatusLabel.text = "Finished! Throw(s): " + General.apThrows
                 General.autoPlaying = false
@@ -234,8 +230,8 @@ Item {
 
     function setDefaultVals(){
         set_amount_slider.value = set_amount_slider.valueAt(0.5)
-        throw_amount_slider.value = throw_amount_slider.valueAt(0.5)
-        throw_rate_slider.value = throw_rate_slider.valueAt(0.5)
+        throw_amount_slider.value = throw_amount_slider.valueAt(0.0)
+        throw_rate_slider.value = throw_rate_slider.valueAt(1.0)
         minBalanceInput.text = "N/A"
         throwSizeInput.text = "N/A"
         throwRateInput.text = "N/A"
@@ -295,7 +291,7 @@ Item {
     }
 
     function slideMinBalance() {
-        minBalanceInput.text = (localSetAmount - set_amount_slider.value).toFixed(2)
+        minBalanceInput.text = (set_amount_slider.value).toFixed(2)
         throwSizeInput.text = (throw_amount_slider.value).toFixed(2)
     }
 
@@ -308,15 +304,15 @@ Item {
     }
 
     function validateMinBalance(minBalanceTxt) {
-        if(Number(minBalanceTxt) > (localSetAmount - set_amount_slider.from)){
-            minBalanceInput.text = (localSetAmount - set_amount_slider.from).toFixed(2)
+        if(Number(minBalanceTxt) > set_amount_slider.to){
+            minBalanceInput.text = (set_amount_slider.to).toFixed(2)
             throwSizeInput.text = (throw_amount_slider.value).toFixed(2)
-        }else if(Number(minBalanceTxt) < 0.1){
-            minBalanceInput.text = 0.1
+        }else if(Number(minBalanceTxt) < set_amount_slider.from){
+            minBalanceInput.text = (set_amount_slider.from).toFixed(2)
             throwSizeInput.text = (throw_amount_slider.value).toFixed(2)
         }else{
         }
-        set_amount_slider.value = (localSetAmount - parseFloat(minBalanceInput.text)).toFixed(2)
+        set_amount_slider.value = (parseFloat(minBalanceInput.text)).toFixed(2)
         throwSizeInput.text = (throw_amount_slider.value).toFixed(2)
     }
 
@@ -378,35 +374,54 @@ Item {
         var visible_contact_result = API.app.addressbook_pg.model.add_contact(tempVis.toString());
     }
 
+    function getColliderData(){
+        colliderJsonData = API.qt_utilities.load_collider_data(app.currentWalletName)
+        var gotData = colliderJsonData !== undefined ? true : false
+        testLabel.text = "defined? " + gotData + " data: " + colliderJsonData.test
+    }
+
+    function setColliderData(){
+        colliderJsonData.test = "testingback"
+        var colliderJsonFilename = app.currentWalletName + ".col.json"
+        var overWright = true
+        if(API.qt_utilities.save_collider_data(colliderJsonFilename, colliderJsonData, overWright)){
+            testLabel.text = "set collider data"
+        }else{
+            testLabel.text = "failed set collider data"
+        }
+    }
+
     function viewArena(){
         General.inAuto = false
         General.inArena = true
+        dashboard.viewingArena = true
     }
 
     function viewStats(){
         General.inAuto = false
         General.inArena = true
+        dashboard.viewingArena = true
         someObject.loadStats()
     }
 
-    Shortcut {
-        sequence: "F4"
-        onActivated: getAddressInfoAp()
-    }
+//    Shortcut {
+//        sequence: "F4"
+//        onActivated: getAddressInfoAp()
+//    }
 
-    Shortcut {
-        sequence: "F5"
-        onActivated: setContactInfoAp()
-    }
+//    Shortcut {
+//        sequence: "F5"
+//        onActivated: setContactInfoAp()
+//    }
 
     Shortcut {
         sequence: "F6"
-        onActivated: createVisibleContact()
+        onActivated: setColliderData()
     }
 
     Shortcut {
         sequence: "F7"
-        onActivated: dashboard.switchPage(idx_dashboard_addressbook)
+        onActivated: getColliderData()
     }
 
     Timer {
@@ -433,7 +448,7 @@ Item {
         interval: 1000
         onTriggered: {
             throwSeconds--;
-            if(throwSeconds == 0){
+            if(throwSeconds < 1){
                 running = false;
             }
         }
@@ -505,7 +520,7 @@ Item {
             text: qsTr("Use these settings to mine Collider Coin (and diversify your assets) via automated Collider Arena Game Hedging")
         }
         FloatingBackground{
-            width: 348
+            width: 384
             height: 580
             Layout.topMargin: 4
             Layout.alignment: Qt.AlignHCenter
@@ -596,8 +611,9 @@ Item {
                     text: hasEnoughBalance ? qsTr("Balance: ") + parseFloat(localSetAmount).toFixed(2) + " ($" + parseFloat(current_ticker_infos.fiat_amount).toFixed(2) + ")" : qsTr("Balance: N/A")
                 }
                 Rectangle{
+                    id: minBalanceRect
                     Layout.alignment: Qt.AlignHCenter
-                    Layout.minimumWidth: 316
+                    Layout.minimumWidth: 364
                     Layout.minimumHeight: 121
                     Layout.topMargin: 2
                     antialiasing: true
@@ -611,132 +627,18 @@ Item {
                             Layout.alignment: Qt.AlignHCenter
                             height: 60
                             font: DexTypo.head6
-                            text: qsTr("Set Amount to Play")
+                            text: qsTr("Set Minimum Balance to Maintain")
                         }
                         DefaultText{
                             Layout.alignment: Qt.AlignHCenter
                             Layout.maximumWidth: parent.width
                             Layout.topMargin: -4
                             wrapMode: Text.WordWrap
-                            text: qsTr("(" + set_amount_slider.value.toFixed(2) + " of balance)")
-                        }
-                        RowLayout{
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.leftMargin: 6
-                            ColumnLayout{
-                                Layout.rightMargin: 4
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    font: Qt.font({
-                                        pixelSize: 13,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'forestgreen'
-                                    wrapMode: Text.WordWrap
-                                    text: "1%"
-                                }
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    Layout.topMargin: -9
-                                    font: Qt.font({
-                                        pixelSize: 11,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'forestgreen'
-                                    wrapMode: Text.WordWrap
-                                    text: "LOW"
-                                }
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    Layout.topMargin: -8
-                                    font: Qt.font({
-                                        pixelSize: 11,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'forestgreen'
-                                    wrapMode: Text.WordWrap
-                                    text: "RISK"
-                                }
-                            }
-                            DexSlider {
-                                id: set_amount_slider
-                                enabled: hasAutoAddress && !General.autoPlaying && hasEnoughBalance ? true : false
-                                Layout.minimumWidth: 220
-                                background: Rectangle {
-                                    x: set_amount_slider.leftPadding
-                                    y: set_amount_slider.topPadding + set_amount_slider.availableHeight / 2 - height / 2
-                                    implicitWidth: 200
-                                    implicitHeight: 4
-                                    width: set_amount_slider.availableWidth
-                                    height: implicitHeight
-                                    radius: 2
-                                    color: Qt.rgba((set_amount_slider.position + 0.001) * 0.99, 1.0 - ((set_amount_slider.position + 0.001) * 0.99), 0, 1)
-                                }
-                                handle: FloatingBackground {
-                                    x: set_amount_slider.leftPadding + set_amount_slider.visualPosition * (set_amount_slider.availableWidth - width)
-                                    y: set_amount_slider.topPadding + set_amount_slider.availableHeight / 2 - height / 2
-                                    implicitWidth: 26
-                                    implicitHeight: 26
-                                    radius: 13
-                                    Rectangle {
-                                        anchors.centerIn: parent
-                                        width: 10
-                                        height: 10
-                                        radius: 10
-                                        color: Qt.rgba((set_amount_slider.position + 0.001) * 0.99, 1.0 - ((set_amount_slider.position + 0.001) * 0.99), 0, 1)
-                                    }
-                                }
-                                from: hasAutoAddress && hasEnoughBalance ? (currentMinWager * 4) : 1
-                                to: hasAutoAddress && hasEnoughBalance ? localSetAmount : 100
-                                live: true
-                                value: setAmountValue
-                                onMoved: slideMinBalance()
-                            }
-                            ColumnLayout{
-                                Layout.leftMargin: -2
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    font: Qt.font({
-                                        pixelSize: 13,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'darkred'
-                                    wrapMode: Text.WordWrap
-                                    text: "100%"
-                                }
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    Layout.topMargin: -9
-                                    font: Qt.font({
-                                        pixelSize: 11,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'darkred'
-                                    wrapMode: Text.WordWrap
-                                    text: "HIGH"
-                                }
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    Layout.topMargin: -8
-                                    font: Qt.font({
-                                        pixelSize: 11,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'darkred'
-                                    wrapMode: Text.WordWrap
-                                    text: "RISK"
-                                }
-                            }
+                            text: qsTr("(" + minBalancePercentage + "% of balance)")
                         }
                         RowLayout{
                             Layout.minimumWidth: parent.width
-                            Layout.topMargin: -6
+                            Layout.topMargin: 37
                             DexLabel{
                                 Layout.alignment: Qt.AlignLeft
                                 Layout.leftMargin: 10
@@ -777,10 +679,73 @@ Item {
                             }
                         }
                     }
+                    FloatingBackground{
+                        width: 16
+                        height: 16
+                        x: x + 4
+                        y: y + 4
+                        border_color_start: "#313c7d"
+                        border_color_end: "#252d5e"
+                        DefaultText{
+                            anchors.centerIn: parent
+                            wrapMode: Text.WordWrap
+                            text: "?"
+                        }
+                        MouseArea{
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onEntered: {minBalanceTip.visible = true}
+                            onExited: {minBalanceTip.visible = false}
+                        }
+                        ToolTip{
+                            id: minBalanceTip
+                            text: "Here set the percentage of your current balance that you will hedge into other coins (by setting your minimum balance to maintain). Your dex wallet balance for this coin will not go below this amount as a result of auto-hedge. You may still withdraw manually but the auto-hedge feature will not make throws if the balance is below this amount. "
+                        }
+                    }
+                    DexSlider {
+                        id: set_amount_slider
+                        enabled: hasAutoAddress && !General.autoPlaying && hasEnoughBalance ? true : false
+                        width: 220
+                        x: (parent.width / 2) - (width / 2)
+                        y: 49
+                        //from: hasAutoAddress && hasEnoughBalance ? (currentMinWager * 4) : 1
+                        //to: hasAutoAddress && hasEnoughBalance ? localSetAmount : 100
+                        from: hasAutoAddress && hasEnoughBalance ? (currentMinWager * 3) : 1
+                        to: hasAutoAddress && hasEnoughBalance ? localSetAmount - (currentMinWager * 4) : 100
+                        live: true
+                        value: setAmountValue
+                        onMoved: slideMinBalance()
+                    }
+                    DefaultText{
+                        anchors.right: set_amount_slider.left
+                        anchors.rightMargin: hasAutoAddress && hasEnoughBalance ? 4 : 6
+                        y: y + 60
+                        font: Qt.font({
+                            pixelSize: 13,
+                            letterSpacing: 0.25,
+                            weight: Font.Normal,
+                        })
+                        color: 'white'
+                        wrapMode: Text.WordWrap
+                        text: hasAutoAddress && hasEnoughBalance ? "" + (currentMinWager * 3).toFixed(2) : "N/A"
+                    }
+                    DefaultText{
+                        anchors.left: set_amount_slider.right
+                        anchors.leftMargin: hasAutoAddress && hasEnoughBalance ? 4 : 6
+                        y: y + 60
+                        font: Qt.font({
+                            pixelSize: 13,
+                            letterSpacing: 0.25,
+                            weight: Font.Normal,
+                        })
+                        color: 'white'
+                        wrapMode: Text.WordWrap
+                        text: hasAutoAddress && hasEnoughBalance ? "" + (localSetAmount - (currentMinWager * 4)).toFixed(2) : "N/A"
+                    }
                 }
                 Rectangle{
                     Layout.alignment: Qt.AlignHCenter
-                    Layout.minimumWidth: 316
+                    Layout.minimumWidth: 364
                     Layout.minimumHeight: 104
                     Layout.topMargin: 2
                     antialiasing: true
@@ -794,125 +759,11 @@ Item {
                             Layout.alignment: Qt.AlignHCenter
                             height: 60
                             font: DexTypo.head6
-                            text: qsTr("Set Throw Amount")
-                        }
-                        RowLayout{
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.leftMargin: 6
-                            ColumnLayout{
-                                Layout.rightMargin: 4
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    font: Qt.font({
-                                        pixelSize: 13,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'forestgreen'
-                                    wrapMode: Text.WordWrap
-                                    text: "1%"
-                                }
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    Layout.topMargin: -9
-                                    font: Qt.font({
-                                        pixelSize: 11,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'forestgreen'
-                                    wrapMode: Text.WordWrap
-                                    text: "LOW"
-                                }
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    Layout.topMargin: -8
-                                    font: Qt.font({
-                                        pixelSize: 11,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'forestgreen'
-                                    wrapMode: Text.WordWrap
-                                    text: "RISK"
-                                }
-                            }
-                            DexSlider {
-                                id: throw_amount_slider
-                                enabled: hasAutoAddress && !General.autoPlaying && hasEnoughBalance ? true : false
-                                Layout.minimumWidth: 220
-                                background: Rectangle {
-                                    x: throw_amount_slider.leftPadding
-                                    y: throw_amount_slider.topPadding + throw_amount_slider.availableHeight / 2 - height / 2
-                                    implicitWidth: 200
-                                    implicitHeight: 4
-                                    width: throw_amount_slider.availableWidth
-                                    height: implicitHeight
-                                    radius: 2
-                                    color: Qt.rgba((throw_amount_slider.position + 0.001) * 0.99, 1.0 - ((throw_amount_slider.position + 0.001) * 0.99), 0, 1)
-                                }
-                                handle: FloatingBackground {
-                                    x: throw_amount_slider.leftPadding + throw_amount_slider.visualPosition * (throw_amount_slider.availableWidth - width)
-                                    y: throw_amount_slider.topPadding + throw_amount_slider.availableHeight / 2 - height / 2
-                                    implicitWidth: 26
-                                    implicitHeight: 26
-                                    radius: 13
-                                    Rectangle {
-                                        anchors.centerIn: parent
-                                        width: 10
-                                        height: 10
-                                        radius: 10
-                                        color: Qt.rgba((throw_amount_slider.position + 0.001) * 0.99, 1.0 - ((throw_amount_slider.position + 0.001) * 0.99), 0, 1)
-                                    }
-                                }
-                                from: hasAutoAddress && hasEnoughBalance ? currentMinWager : 0.5
-                                to: hasAutoAddress && hasEnoughBalance ? set_amount_slider.valueAt(set_amount_slider.position) : 100
-                                live: true
-                                value: throwAmountValue
-                                onMoved: slideThrowSize()
-                            }
-                            ColumnLayout{
-                                Layout.leftMargin: -2
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    font: Qt.font({
-                                        pixelSize: 13,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'darkred'
-                                    wrapMode: Text.WordWrap
-                                    text: "100%"
-                                }
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    Layout.topMargin: -9
-                                    font: Qt.font({
-                                        pixelSize: 11,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'darkred'
-                                    wrapMode: Text.WordWrap
-                                    text: "HIGH"
-                                }
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    Layout.topMargin: -8
-                                    font: Qt.font({
-                                        pixelSize: 11,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'darkred'
-                                    wrapMode: Text.WordWrap
-                                    text: "RISK"
-                                }
-                            }
+                            text: qsTr("Set Throw Size")
                         }
                         RowLayout{
                             Layout.minimumWidth: parent.width
-                            Layout.topMargin: -6
+                            Layout.topMargin: 37
                             DexLabel{
                                 Layout.alignment: Qt.AlignLeft
                                 Layout.leftMargin: 10
@@ -953,10 +804,149 @@ Item {
                             }
                         }
                     }
+                    FloatingBackground{
+                        width: 16
+                        height: 16
+                        x: x + 4
+                        y: y + 4
+                        border_color_start: "#313c7d"
+                        border_color_end: "#252d5e"
+                        DefaultText{
+                            anchors.centerIn: parent
+                            wrapMode: Text.WordWrap
+                            text: "?"
+                        }
+                        MouseArea{
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onEntered: {throwAmountTip.visible = true}
+                            onExited: {throwAmountTip.visible = false}
+                        }
+                        ToolTip{
+                            id: throwAmountTip
+                            text: "Set here the size of each individual throw. A higher number of smaller throws is a lower risk/reward approach than a lower number of larger throws. In order to maintain consistent play the maximum throw size is 40% of your available balance (set using minimum balance above)."
+                        }
+                    }
+                    DexSlider {
+                        id: throw_amount_slider
+                        enabled: hasAutoAddress && !General.autoPlaying && hasEnoughBalance ? true : false
+                        width: 220
+                        x: (parent.width / 2) - (width / 2)
+                        y: 28
+                        background: Rectangle {
+                            x: throw_amount_slider.leftPadding
+                            y: throw_amount_slider.topPadding + throw_amount_slider.availableHeight / 2 - height / 2
+                            implicitWidth: 200
+                            implicitHeight: 4
+                            width: throw_amount_slider.availableWidth
+                            height: implicitHeight
+                            radius: 2
+                            color: Qt.rgba((throw_amount_slider.position + 0.001) * 0.99, 1.0 - ((throw_amount_slider.position + 0.001) * 0.99), 0, 1)
+                        }
+                        handle: FloatingBackground {
+                            x: throw_amount_slider.leftPadding + throw_amount_slider.visualPosition * (throw_amount_slider.availableWidth - width)
+                            y: throw_amount_slider.topPadding + throw_amount_slider.availableHeight / 2 - height / 2
+                            implicitWidth: 26
+                            implicitHeight: 26
+                            radius: 13
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: 10
+                                height: 10
+                                radius: 10
+                                color: Qt.rgba((throw_amount_slider.position + 0.001) * 0.99, 1.0 - ((throw_amount_slider.position + 0.001) * 0.99), 0, 1)
+                            }
+                        }
+                        from: hasAutoAddress && hasEnoughBalance ? currentMinWager : 0.5
+                        to: hasAutoAddress && hasEnoughBalance ? (set_amount_slider.valueAt(set_amount_slider.position) * 0.4) : 100
+                        live: true
+                        value: throwAmountValue
+                        onMoved: slideThrowSize()
+                    }
+                    ColumnLayout{
+                        anchors.right: throw_amount_slider.left
+                        anchors.rightMargin: 4
+                        y: y + 29
+                        DefaultText{
+                            Layout.alignment: Qt.AlignHCenter
+                            font: Qt.font({
+                                pixelSize: 13,
+                                letterSpacing: 0.25,
+                                weight: Font.Normal,
+                            })
+                            color: 'forestgreen'
+                            wrapMode: Text.WordWrap
+                            text: hasAutoAddress && hasEnoughBalance ? "" + parseFloat(currentMinWager).toFixed(2) : "N/A"
+                        }
+                        DefaultText{
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.topMargin: -9
+                            font: Qt.font({
+                                pixelSize: 11,
+                                letterSpacing: 0.25,
+                                weight: Font.Normal,
+                            })
+                            color: 'forestgreen'
+                            wrapMode: Text.WordWrap
+                            text: "LOW"
+                        }
+                        DefaultText{
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.topMargin: -8
+                            font: Qt.font({
+                                pixelSize: 11,
+                                letterSpacing: 0.25,
+                                weight: Font.Normal,
+                            })
+                            color: 'forestgreen'
+                            wrapMode: Text.WordWrap
+                            text: "RISK"
+                        }
+                    }
+                    ColumnLayout{
+                        anchors.left: throw_amount_slider.right
+                        anchors.leftMargin: 4
+                        y: y + 29
+                        DefaultText{
+                            Layout.alignment: Qt.AlignHCenter
+                            font: Qt.font({
+                                pixelSize: 13,
+                                letterSpacing: 0.25,
+                                weight: Font.Normal,
+                            })
+                            color: 'darkred'
+                            wrapMode: Text.WordWrap
+                            text: hasAutoAddress && hasEnoughBalance ? "" + parseFloat(set_amount_slider.valueAt(set_amount_slider.position) * 0.4).toFixed(2) : "N/A"
+                        }
+                        DefaultText{
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.topMargin: -9
+                            font: Qt.font({
+                                pixelSize: 11,
+                                letterSpacing: 0.25,
+                                weight: Font.Normal,
+                            })
+                            color: 'darkred'
+                            wrapMode: Text.WordWrap
+                            text: "HIGH"
+                        }
+                        DefaultText{
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.topMargin: -8
+                            font: Qt.font({
+                                pixelSize: 11,
+                                letterSpacing: 0.25,
+                                weight: Font.Normal,
+                            })
+                            color: 'darkred'
+                            wrapMode: Text.WordWrap
+                            text: "RISK"
+                        }
+                    }
                 }
                 Rectangle{
                     Layout.alignment: Qt.AlignHCenter
-                    Layout.minimumWidth: 316
+                    Layout.minimumWidth: 364
                     Layout.minimumHeight: 104
                     Layout.topMargin: 2
                     antialiasing: true
@@ -973,122 +963,8 @@ Item {
                             text: qsTr("Set Throw Rate")
                         }
                         RowLayout{
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.rightMargin: 2
-                            ColumnLayout{
-                                Layout.rightMargin: -1
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    font: Qt.font({
-                                        pixelSize: 13,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'darkred'
-                                    wrapMode: Text.WordWrap
-                                    text: "SLOW"
-                                }
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    Layout.topMargin: -9
-                                    font: Qt.font({
-                                        pixelSize: 11,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'darkred'
-                                    wrapMode: Text.WordWrap
-                                    text: "HIGH"
-                                }
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    Layout.topMargin: -8
-                                    font: Qt.font({
-                                        pixelSize: 11,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'darkred'
-                                    wrapMode: Text.WordWrap
-                                    text: "RISK"
-                                }
-                            }
-                            DexSlider {
-                                id: throw_rate_slider
-                                enabled: hasAutoAddress && !General.autoPlaying && hasEnoughBalance ? true : false
-                                Layout.minimumWidth: 220
-                                background: Rectangle {
-                                    x: throw_rate_slider.leftPadding
-                                    y: throw_rate_slider.topPadding + throw_rate_slider.availableHeight / 2 - height / 2
-                                    implicitWidth: 200
-                                    implicitHeight: 4
-                                    width: throw_rate_slider.availableWidth
-                                    height: implicitHeight
-                                    radius: 2
-                                    color: Qt.rgba(1.0 - ((throw_rate_slider.position + 0.001) * 0.99), (throw_rate_slider.position + 0.001) * 0.99, 0, 1)
-                                }
-                                handle: FloatingBackground {
-                                    x: throw_rate_slider.leftPadding + throw_rate_slider.visualPosition * (throw_rate_slider.availableWidth - width)
-                                    y: throw_rate_slider.topPadding + throw_rate_slider.availableHeight / 2 - height / 2
-                                    implicitWidth: 26
-                                    implicitHeight: 26
-                                    radius: 13
-                                    Rectangle {
-                                        anchors.centerIn: parent
-                                        width: 10
-                                        height: 10
-                                        radius: 10
-                                        color: Qt.rgba(1.0 - ((throw_rate_slider.position + 0.001) * 0.99), (throw_rate_slider.position + 0.001) * 0.99, 0, 1)
-                                    }
-                                }
-                                from: 0.1
-                                to: 1.0
-                                live: true
-                                value: throwRateValue
-                                onMoved: slideThrowRate()
-                            }
-                            ColumnLayout{
-                                //Layout.leftMargin: -2
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    font: Qt.font({
-                                        pixelSize: 13,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'forestgreen'
-                                    wrapMode: Text.WordWrap
-                                    text: "FAST"
-                                }
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    Layout.topMargin: -9
-                                    font: Qt.font({
-                                        pixelSize: 11,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'forestgreen'
-                                    wrapMode: Text.WordWrap
-                                    text: "LOW"
-                                }
-                                DefaultText{
-                                    Layout.alignment: Qt.AlignHCenter
-                                    Layout.topMargin: -8
-                                    font: Qt.font({
-                                        pixelSize: 11,
-                                        letterSpacing: 0.25,
-                                        weight: Font.Normal,
-                                    })
-                                    color: 'forestgreen'
-                                    wrapMode: Text.WordWrap
-                                    text: "RISK"
-                                }
-                            }
-                        }
-                        RowLayout{
                             Layout.minimumWidth: parent.width
-                            Layout.topMargin: -6
+                            Layout.topMargin: 37
                             DexLabel{
                                 Layout.alignment: Qt.AlignLeft
                                 Layout.leftMargin: 10
@@ -1121,6 +997,149 @@ Item {
                                 //onTextEdited: validateThrowRate(text)
                                 onEditingFinished: validateThrowRate(text)
                             }
+                        }
+                    }
+                    FloatingBackground{
+                        width: 16
+                        height: 16
+                        x: x + 4
+                        y: y + 4
+                        border_color_start: "#313c7d"
+                        border_color_end: "#252d5e"
+                        DefaultText{
+                            anchors.centerIn: parent
+                            wrapMode: Text.WordWrap
+                            text: "?"
+                        }
+                        MouseArea{
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onEntered: {throwRateTip.visible = true}
+                            onExited: {throwRateTip.visible = false}
+                        }
+                        ToolTip{
+                            id: throwRateTip
+                            text: "This is the time interval (in seconds) between each throw attempt. If your wallet's balance at the time of each attempt is lower than the minimum then a throw will not be made and the auto-hedge feature will automatically try again on the next interval. Auto-hedge will be disabled once it has been over 12hrs since the last successful throw."
+                        }
+                    }
+                    DexSlider {
+                        id: throw_rate_slider
+                        enabled: hasAutoAddress && !General.autoPlaying && hasEnoughBalance ? true : false
+                        width: 220
+                        x: (parent.width / 2) - (width / 2)
+                        y: 28
+                        background: Rectangle {
+                            x: throw_rate_slider.leftPadding
+                            y: throw_rate_slider.topPadding + throw_rate_slider.availableHeight / 2 - height / 2
+                            implicitWidth: 200
+                            implicitHeight: 4
+                            width: throw_rate_slider.availableWidth
+                            height: implicitHeight
+                            radius: 2
+                            color: Qt.rgba(1.0 - ((throw_rate_slider.position + 0.001) * 0.99), (throw_rate_slider.position + 0.001) * 0.99, 0, 1)
+                        }
+                        handle: FloatingBackground {
+                            x: throw_rate_slider.leftPadding + throw_rate_slider.visualPosition * (throw_rate_slider.availableWidth - width)
+                            y: throw_rate_slider.topPadding + throw_rate_slider.availableHeight / 2 - height / 2
+                            implicitWidth: 26
+                            implicitHeight: 26
+                            radius: 13
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: 10
+                                height: 10
+                                radius: 10
+                                color: Qt.rgba(1.0 - ((throw_rate_slider.position + 0.001) * 0.99), (throw_rate_slider.position + 0.001) * 0.99, 0, 1)
+                            }
+                        }
+                        from: 0.1
+                        to: 1.0
+                        live: true
+                        value: throwRateValue
+                        onMoved: slideThrowRate()
+                    }
+                    ColumnLayout{
+                        anchors.right: throw_rate_slider.left
+                        anchors.rightMargin: 4
+                        y: y + 29
+                        DefaultText{
+                            Layout.alignment: Qt.AlignHCenter
+                            font: Qt.font({
+                                pixelSize: 13,
+                                letterSpacing: 0.25,
+                                weight: Font.Normal,
+                            })
+                            color: 'darkred'
+                            wrapMode: Text.WordWrap
+                            text: "SLOW"
+                        }
+                        DefaultText{
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.topMargin: -9
+                            Layout.rightMargin: 1
+                            font: Qt.font({
+                                pixelSize: 11,
+                                letterSpacing: 0.25,
+                                weight: Font.Normal,
+                            })
+                            color: 'darkred'
+                            wrapMode: Text.WordWrap
+                            text: "HIGH"
+                        }
+                        DefaultText{
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.topMargin: -8
+                            Layout.rightMargin: 1
+                            font: Qt.font({
+                                pixelSize: 11,
+                                letterSpacing: 0.25,
+                                weight: Font.Normal,
+                            })
+                            color: 'darkred'
+                            wrapMode: Text.WordWrap
+                            text: "RISK"
+                        }
+                    }
+                    ColumnLayout{
+                        anchors.left: throw_rate_slider.right
+                        anchors.leftMargin: 4
+                        y: y + 29
+                        DefaultText{
+                            Layout.alignment: Qt.AlignHCenter
+                            font: Qt.font({
+                                pixelSize: 13,
+                                letterSpacing: 0.25,
+                                weight: Font.Normal,
+                            })
+                            color: 'forestgreen'
+                            wrapMode: Text.WordWrap
+                            text: "FAST"
+                        }
+                        DefaultText{
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.topMargin: -9
+                            Layout.rightMargin: 1
+                            font: Qt.font({
+                                pixelSize: 11,
+                                letterSpacing: 0.25,
+                                weight: Font.Normal,
+                            })
+                            color: 'forestgreen'
+                            wrapMode: Text.WordWrap
+                            text: "LOW"
+                        }
+                        DefaultText{
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.topMargin: -8
+                            Layout.rightMargin: 1
+                            font: Qt.font({
+                                pixelSize: 11,
+                                letterSpacing: 0.25,
+                                weight: Font.Normal,
+                            })
+                            color: 'forestgreen'
+                            wrapMode: Text.WordWrap
+                            text: "RISK"
                         }
                     }
                 }
@@ -1203,76 +1222,81 @@ Item {
             rightPadding: 10
         }
         DefaultText{
+            id: testLabel
             Layout.alignment: Qt.AlignCenter
             Layout.maximumWidth: parent.width
             Layout.topMargin: 4
             wrapMode: Text.WordWrap
             leftPadding: 10
             rightPadding: 10
-            text: ("hasAutoAddress: " + hasAutoAddress)
-        }
-    }
-
-    ColumnLayout{
-        width: 300
-        height: 400
-        x: parent.width - 300 //half window - width
-        y: (parent.height * 0.5) - (height * 0.5) //half window - height
-
-        DexButton{
-            id: explorer_button
-            visible: true
-            enabled: false
-            Layout.alignment: Qt.AlignHCenter
-            Layout.minimumWidth: 180
-            Layout.minimumHeight: 48
-            text: "View on Explorer"
-            onClicked: General.viewTxAtExplorer(api_wallet_page.ticker, broadcast_resul_ap)
-        }
-        DexButton{
-            Layout.alignment: Qt.AlignHCenter
-            Layout.minimumWidth: 180
-            Layout.minimumHeight: 48
-            text: "View Game"
-            onClicked: viewArena()
-        }
-        DexButton{
-            Layout.alignment: Qt.AlignHCenter
-            Layout.minimumWidth: 180
-            Layout.minimumHeight: 48
-            text: "View Stats"
-            onClicked: viewStats()
-        }
-//        DefaultText{
-//            Layout.alignment: Qt.AlignCenter
-//            Layout.maximumWidth: parent.width
-//            Layout.topMargin: 1
-//            wrapMode: Text.WordWrap
-//            leftPadding: 10
-//            rightPadding: 10
-//            text: ("real value: " + (autoPlay.rkValue * parseFloat(autoPlay.stValue)) + " autoplaying: " + General.autoPlaying)
-//        }
-        DefaultText{
-            id: send_info_label
-            Layout.alignment: Qt.AlignCenter
-            Layout.maximumWidth: parent.width
-            Layout.topMargin: 1
-            wrapMode: Text.WordWrap
-            leftPadding: 10
-            rightPadding: 10
             text: ""
-        }
-        DefaultText{
-            id: broadcast_values_label
-            Layout.alignment: Qt.AlignCenter
-            Layout.maximumWidth: parent.width
-            Layout.topMargin: 1
-            wrapMode: Text.WordWrap
-            leftPadding: 10
-            rightPadding: 10
-            text: "sendValuesLabel2"
+            //text: ("hasAutoAddress: " + hasAutoAddress)
         }
     }
+
+    FloatingBackground{
+        width: 220
+        height: 160
+        x: (parent.width * 0.83) - (width * 0.5) //83& window - width
+        y: (parent.height * 0.5) - (height * 0.5) //half window - height
+        ColumnLayout{
+            anchors.fill: parent
+    //        DexButton{
+    //            id: explorer_button
+    //            visible: true
+    //            enabled: false
+    //            Layout.alignment: Qt.AlignHCenter
+    //            Layout.minimumWidth: 180
+    //            Layout.minimumHeight: 48
+    //            text: "View on Explorer"
+    //            onClicked: General.viewTxAtExplorer(api_wallet_page.ticker, broadcast_resul_ap)
+    //        }
+            DexButton{
+                Layout.alignment: Qt.AlignHCenter
+                Layout.minimumWidth: 180
+                Layout.minimumHeight: 48
+                text: "View Game"
+                onClicked: viewArena()
+            }
+            DexButton{
+                Layout.alignment: Qt.AlignHCenter
+                Layout.minimumWidth: 180
+                Layout.minimumHeight: 48
+                text: "View Stats"
+                onClicked: viewStats()
+            }
+        }
+    }
+    //        DefaultText{
+    //            Layout.alignment: Qt.AlignCenter
+    //            Layout.maximumWidth: parent.width
+    //            Layout.topMargin: 1
+    //            wrapMode: Text.WordWrap
+    //            leftPadding: 10
+    //            rightPadding: 10
+    //            text: ("real value: " + (autoPlay.rkValue * parseFloat(autoPlay.stValue)) + " autoplaying: " + General.autoPlaying)
+    //        }
+    //        DefaultText{
+    //            id: send_info_label
+    //            Layout.alignment: Qt.AlignCenter
+    //            Layout.maximumWidth: parent.width
+    //            Layout.topMargin: 1
+    //            wrapMode: Text.WordWrap
+    //            leftPadding: 10
+    //            rightPadding: 10
+    //            text: ""
+    //        }
+    //        DefaultText{
+    //            id: broadcast_values_label
+    //            Layout.alignment: Qt.AlignCenter
+    //            Layout.maximumWidth: parent.width
+    //            Layout.topMargin: 1
+    //            wrapMode: Text.WordWrap
+    //            leftPadding: 10
+    //            rightPadding: 10
+    //            text: "sendValuesLabel2"
+    //        }
+
 //        DefaultText{
 //            id: is_empty_label
 //            Layout.alignment: Qt.AlignCenter
