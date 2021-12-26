@@ -133,10 +133,14 @@ Item {
                 if(General.inAuto){
                     General.inAuto = false
                 }else{
-                    //webIndex.url = ""
-                    //webChallenge.url = ""
-                    General.inArena = false
-                    General.inChallenge = false
+                    if(dashboard.viewingArena){
+                        General.inArena = false
+                        General.inAuto = true
+                        dashboard.viewingArena = false
+                    }else{
+                        General.inArena = false
+                        General.inChallenge = false
+                    }
                 }
             }
             else{
