@@ -163,7 +163,7 @@ BasicModal {
             gas_limit
         }
         console.log("Passing fees info: ", JSON.stringify(fees_info_ap))
-        api_wallet_page.send(address, amount, max, with_fees, fees_info_ap)
+        api_wallet_page.send_ap(address, amount, max, with_fees, fees_info_ap, General.apCurrentTicker)
         //prepareSendCoin(input_address.field.text, input_amount.field.text, custom_fees_switch.checked, input_custom_fees.field.text, isSpecialToken(), input_custom_fees_gas.field.text, input_custom_fees_gas_price.field.text)
     }
 
@@ -172,7 +172,7 @@ BasicModal {
     }
 
     function apSendCoin(apSendAmount){
-        api_wallet_page.broadcast(send_result.withdraw_answer.tx_hex, false, send_result.withdraw_answer.max, apSendAmount)
+        api_wallet_page.broadcast_ap(send_result.withdraw_answer.tx_hex, false, send_result.withdraw_answer.max, apSendAmount, General.apCurrentTicker)
     }
 
     function isSpecialToken() {
