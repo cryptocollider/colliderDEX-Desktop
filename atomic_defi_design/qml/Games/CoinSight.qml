@@ -13,11 +13,4 @@ import "../Constants"
 Item {
     id: coinSight
     anchors.fill: parent
-
-    WebEngineView {
-        id: webCoinS
-        anchors.fill: parent
-        settings.pluginsEnabled: true
-        url: "https://coinsig.ht"
-    }
 }
