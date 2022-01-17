@@ -22,6 +22,8 @@
 
 //! Qt
 #include <QApplication>
+#include <QCoreApplication>
+#include <QCommandLineParser>
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QQmlApplicationEngine>
@@ -384,6 +386,27 @@ run_app(int argc, char** argv)
     atomic_dex::qt_utilities qt_utilities;
 
     //! QT
+    QString env_chrome(qgetenv("QTWEBENGINE_CHROMIUM_FLAGS"));
+    if (env_chrome.isEmpty()){
+        QByteArray x_chrome("--enable-pepper-testing");
+        x_chrome.append(" --allow-outdated-plugins");
+        x_chrome.append(" --no-sandbox");
+#if defined(Q_OS_WIN)
+        x_chrome.append(" --ppapi-flash-path=.\pepflashplayer.dll");
+#endif
+#if defined(Q_OS_LINUX)
+        x_chrome.append(" --ppapi-flash-path=./libpepflashplayer-x86_64.so");
+#endif
+#if defined(Q_OS_MACOS)
+        x_chrome.append(" --ppapi-flash-path=./PepperFlashPlayer.plugin");
+#endif
+        x_chrome.append(" --ppapi-flash-version='32.0.0.465'");
+        qputenv("QTWEBENGINE_CHROMIUM_FLAGS", x_chrome);
+        SPDLOG_INFO("set Qt Chromium flags", env_chrome.toStdString());
+    }else{
+        SPDLOG_INFO("skip Qt Chromium flags", env_chrome.toStdString());
+    }
+
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QtWebEngine::initialize();
     std::shared_ptr<QApplication> app = std::make_shared<QApplication>(argc, argv);
@@ -391,6 +414,7 @@ run_app(int argc, char** argv)
     app->setWindowIcon(QIcon(":/atomic_defi_design/assets/images/logo/dex-logo.png"));
     app->setOrganizationName("KomodoPlatform");
     app->setOrganizationDomain("com");
+
     QQmlApplicationEngine engine;
 
     atomic_app.set_qt_app(app, &engine);
