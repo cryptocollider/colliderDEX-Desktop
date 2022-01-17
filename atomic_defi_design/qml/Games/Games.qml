@@ -100,6 +100,13 @@ Item {
             dex_user_data_timer.restart()
             General.openedArena = true
         }
+        if(!dashboard.loopedVideos){
+            dashboard.loopedVideos = true
+        }
+        if(challenge_video.playbackState === MediaPlayer.PlayingState || arena_video.playbackState === MediaPlayer.PlayingState){
+            challenge_video.stop()
+            arena_video.stop()
+        }
         General.inArena = true
     }
 
@@ -108,6 +115,13 @@ Item {
             webChallenge.url = "https://cryptocollider.com/challenge/app"
             buildAddyList();
             General.openedChallenge = true
+        }
+        if(!dashboard.loopedVideos){
+            dashboard.loopedVideos = true
+        }
+        if(challenge_video.playbackState === MediaPlayer.PlayingState || arena_video.playbackState === MediaPlayer.PlayingState){
+            challenge_video.stop()
+            arena_video.stop()
         }
         General.inChallenge = true
     }
@@ -118,6 +132,13 @@ Item {
             buildAddyList();
             dex_user_data_timer.restart()
             General.openedArena = true
+        }
+        if(!dashboard.loopedVideos){
+            dashboard.loopedVideos = true
+        }
+        if(challenge_video.playbackState === MediaPlayer.PlayingState || arena_video.playbackState === MediaPlayer.PlayingState){
+            challenge_video.stop()
+            arena_video.stop()
         }
         tempTickr = General.apCurrentTicker
         api_wallet_page.ticker = tempTickr
@@ -144,8 +165,7 @@ Item {
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         addyCLC = current_ticker_infos.address
-        challengeObject.clcAddyTwo = addyCLC
-        challengeObject.clcAddyThree = JSON.stringify(addyCLC)
+        challengeObject.clcAddy = addyCLC
         balCLC = current_ticker_infos.balance
         tempTickr = "BTC"
         api_wallet_page.ticker = tempTickr
@@ -205,16 +225,6 @@ Item {
         dashboard.dataList = gamesDataList;
     }
 
-    function playVids(){
-        vid_player.play()
-        vid_two_player.play()
-    }
-
-    Shortcut {
-        sequence: "F8"
-        onActivated: playVids()
-    }
-
     Timer {
         id: dex_user_data_timer
         interval: 2000
@@ -259,17 +269,50 @@ Item {
                 onClicked: openChallenge()
             }
         }
-        Video {
-            id: vid_player
+        Rectangle{
             width: 426
             height: 240
             anchors.left: parent.left
             anchors.leftMargin: 32
             y: y + 116
-            fillMode: VideoOutput.PreserveAspectFit
-            flushMode: VideoOutput.FirstFrame
-            source: General.image_path + "games-page-challenge.avi"
-            //focus: true
+            Video {
+                id: challenge_video
+                visible: dashboard.challengeVideo ? true : dashboard.loopedVideos ? false : true
+                anchors.fill: parent
+                fillMode: VideoOutput.PreserveAspectFit
+                source: General.image_path + "games-page-challenge.avi"
+                autoPlay: true
+                loops: dashboard.loopedVideos ? 1 : MediaPlayer.Infinite
+                onStopped: {
+                    dashboard.challengeVideo = false
+                }
+            }
+            Image{
+                visible: dashboard.challengeVideo ? false : dashboard.loopedVideos ? true : false
+                anchors.fill: parent
+                source: General.image_path + "still-challenge.png"
+            }
+            Image{
+                id: challenge_play
+                visible: dashboard.challengeVideo ? false : dashboard.loopedVideos ? true : false
+                anchors.fill: parent
+                source: General.image_path + "video-play.png"
+            }
+            ColorOverlay{
+                visible: dashboard.challengeVideo ? false : dashboard.loopedVideos ? true : false
+                source: challenge_play
+                color: challenge_mouse.containsMouse ? Qt.rgba(1.0, 1.0, 1.0, 0.6) : Qt.rgba(1.0, 1.0, 1.0, 0.2)
+            }
+            MouseArea{
+                id: challenge_mouse
+                enabled: dashboard.challengeVideo ? false : dashboard.loopedVideos ? true : false
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    challenge_video.play()
+                    dashboard.challengeVideo = true
+                }
+            }
         }
     }
 
@@ -314,16 +357,50 @@ Item {
                 onClicked: openArena()
             }
         }
-        Video {
-            id: vid_two_player
+        Rectangle{
             width: 426
             height: 240
             anchors.left: parent.left
             anchors.leftMargin: 32
             y: y + 116
-            fillMode: VideoOutput.PreserveAspectFit
-            flushMode: VideoOutput.FirstFrame
-            source: General.image_path + "games-page-collider.avi"
+            Video {
+                id: arena_video
+                visible: dashboard.arenaVideo ? true : dashboard.loopedVideos ? false : true
+                anchors.fill: parent
+                fillMode: VideoOutput.PreserveAspectFit
+                source: General.image_path + "games-page-collider.avi"
+                autoPlay: true
+                loops: dashboard.loopedVideos ? 1 : MediaPlayer.Infinite
+                onStopped: {
+                    dashboard.arenaVideo = false
+                }
+            }
+            Image{
+                visible: dashboard.arenaVideo ? false : dashboard.loopedVideos ? true : false
+                anchors.fill: parent
+                source: General.image_path + "still-arena.png"
+            }
+            Image{
+                id: arena_play
+                visible: dashboard.arenaVideo ? false : dashboard.loopedVideos ? true : false
+                anchors.fill: parent
+                source: General.image_path + "video-play.png"
+            }
+            ColorOverlay{
+                visible: dashboard.arenaVideo ? false : dashboard.loopedVideos ? true : false
+                source: arena_play
+                color: arena_mouse.containsMouse ? Qt.rgba(1.0, 1.0, 1.0, 0.6) : Qt.rgba(1.0, 1.0, 1.0, 0.2)
+            }
+            MouseArea{
+                id: arena_mouse
+                enabled: dashboard.arenaVideo ? false : dashboard.loopedVideos ? true : false
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    arena_video.play()
+                    dashboard.arenaVideo = true
+                }
+            }
         }
     }
 
