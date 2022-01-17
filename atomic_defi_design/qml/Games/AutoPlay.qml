@@ -28,6 +28,7 @@ Item {
     property string tempTkr: "t"
     property string tempGrabTkr: "t"
 //    property string kmdAddy: RRBbUHjMaAg2tmWVj8k5fR2Z99uZchdUi4
+    property string autoAddy
     property string staticMinBalanceText
     property string staticThrowSizeText
     property real staticThrowSizeValue
@@ -48,8 +49,11 @@ Item {
     //property string throwAmountPercentage: hasAutoAddress && hasEnoughBalance ? "" + Math.floor(throw_amount_slider.position * 100) : ""
     property bool gettingAutoAddress: false
     //property bool hasAutoAddress: General.apAddress === undefined ? false : General.apAddress.autoAddress === undefined ? false : true
-    property bool hasAutoAddress: gettingAutoAddress || General.apAddress === undefined || !General.apAddress.result ? false : true
+    property bool localAutoAddress: false
+    property bool hasAutoAddress: localAutoAddress ? true : gettingAutoAddress || General.apAddress === undefined || !General.apAddress.result ? false : true
+    property bool hasColliderData: false
     property var colliderJsonData
+    property var cmdVal
     property var returnAddyA
     property var returnAddyB
     property var returnAddyC
@@ -91,11 +95,11 @@ Item {
 
     function setAutoTicker(tmpT){
         tempTkr = tmpT
-        grabAutoAddress(tempTkr)
-        setMinWager()
         api_wallet_page.ticker = tempTkr
         dashboard.current_ticker = api_wallet_page.ticker
         General.apCurrentTicker = dashboard.current_ticker
+        grabAutoAddress(tempTkr)
+        setMinWager()
         if(!General.apHasSelected){
             General.apHasSelected = true
         }
@@ -110,14 +114,48 @@ Item {
         //here should check for address already saved
         //if not, saves the address
         General.apAddress = undefined
-        gettingAutoAddress = true
+        localAutoAddress = false
         tempGrabTkr = tmpA
-        someObject.getAutoAddress(tempGrabTkr)
+        var gotData = colliderJsonData !== undefined ? true : false
+        //testLabel.text = "defined? " + gotData + " data: " + colliderJsonData[tmpA]
+        if(Number(colliderJsonData[tmpA]) === 1){
+            gettingAutoAddress = true
+            someObject.getAutoAddress(tempGrabTkr)
+        }else{
+            setAutoAddress(tempGrabTkr)
+        }
+    }
+
+    function setAutoAddress(tempAd){
+        autoAddy = colliderJsonData[tempAd]
+        localAutoAddress = true
+        if(hasEnoughBalance){
+            set_amount_slider.value = set_amount_slider.valueAt(0.5)
+            minBalanceInput.text = (set_amount_slider.value).toFixed(2)
+            throw_amount_slider.value = throw_amount_slider.valueAt(0.0)
+            throwSizeInput.text = (throw_amount_slider.value).toFixed(2)
+            throw_rate_slider.value = throw_rate_slider.valueAt(1.0)
+            throwRateInput.text = Math.floor(((600 / 1) * (1.1 - throw_rate_slider.value)))
+            apStatusLabel.text = "Address validated. Ready to throw!"
+            //autoAddress_label.text = ("address " + autoAddy)
+        }else{
+            setDefaultVals()
+            //autoAddress_label.text = ("address " + autoAddy)
+        }
     }
 
     function recievedAutoAddress(){
         gettingAutoAddress = false
-        if(hasAutoAddress){
+        if(General.apAddress.result){
+            colliderJsonData[General.apCurrentTicker] = General.apAddress.autoAddress
+            autoAddy = colliderJsonData[General.apCurrentTicker]
+            var colliderJsonFilename = app.currentWalletName + ".col.json"
+            var overWright = true
+            if(API.qt_utilities.save_collider_data(colliderJsonFilename, colliderJsonData, overWright)){
+                //testLabel.text = "set collider data"
+            }else{
+                //testLabel.text = "failed set collider data"
+            }
             if(hasEnoughBalance){
                 set_amount_slider.value = set_amount_slider.valueAt(0.5)
                 minBalanceInput.text = (set_amount_slider.value).toFixed(2)
@@ -126,15 +164,15 @@ Item {
                 throw_rate_slider.value = throw_rate_slider.valueAt(1.0)
                 throwRateInput.text = Math.floor(((600 / 1) * (1.1 - throw_rate_slider.value)))
                 apStatusLabel.text = "Address validated. Ready to throw!"
-                autoAddress_label.text = ("hasAddress " + General.apAddress.result + " address " + General.apAddress.autoAddress)
+                //autoAddress_label.text = ("hasAddress " + General.apAddress.result + " address " + General.apAddress.autoAddress)
             }else{
                 setDefaultVals()
-                autoAddress_label.text = ("hasAddress " + General.apAddress.result + " address " + General.apAddress.autoAddress)
+                //autoAddress_label.text = ("hasAddress " + General.apAddress.result + " address " + General.apAddress.autoAddress)
             }
         }else{
             setDefaultVals()
             apStatusLabel.text = "Couldn't fetch address"
-            autoAddress_label.text = "no address"
+            //autoAddress_label.text = "no address"
         }
     }
 
@@ -169,10 +207,10 @@ Item {
         var randExtra = Math.floor(Math.random() * 99999) + 10000
         extraThrowSize = staticThrowSizeValue + (randExtra * 0.00000001)
         var tmpApTick = General.apCurrentTicker
-        api_wallet_page.ticker = tmpApTick
-        dashboard.current_ticker = api_wallet_page.ticker
+        //api_wallet_page.ticker = tmpApTick
+        //dashboard.current_ticker = api_wallet_page.ticker
         if(hasAutoAddress){
-            ap_send_modal.apPrepSendCoin(General.apAddress.autoAddress, extraThrowSize, false, false, "", "", 0)
+            ap_send_modal.apPrepSendCoin(autoAddy, extraThrowSize, false, false, "", "", 0)
             broadcast_timer.restart()
         }else{
             prep_timer.restart()
@@ -200,11 +238,11 @@ Item {
         }else{
             //explorer_button.enabled = true
             //send_info_label.text = "broadcast = done!"
-            if(dashboard.current_page !== idx_dashboard_games){
-                var tmpWtTick = General.walletCurrentTicker
-                api_wallet_page.ticker = tmpWtTick
-                dashboard.current_ticker = api_wallet_page.ticker
-            }
+//            if(dashboard.current_page !== idx_dashboard_games){
+//                var tmpWtTick = General.walletCurrentTicker
+//                api_wallet_page.ticker = tmpWtTick
+//                dashboard.current_ticker = api_wallet_page.ticker
+//            }
         }
     }
 
@@ -283,7 +321,7 @@ Item {
 
     function setCoinData() {
         if(someObject.coinData === undefined){
-            coinData_timer.interval = 5000
+            coinData_timer.restart()
             someObject.getCoinData()
         }else{
             coinData_timer.stop()
@@ -347,12 +385,12 @@ Item {
         var tempKeyB = "KMD";
         returnAddyA = API.app.addressbook_pg.model.get_wallet_info_address(tempNameB.toString(), tempTypeB.toString(), tempKeyB.toString());
         //returnAddyB = JSON.parse(API.app.addressbook_pg.model.get_wallet_info_address(tempNameB.toString(), tempTypeB.toString(), tempKeyB.toString()));
-        addy_label.text = "A: " + returnAddyA
+        //addy_label.text = "A: " + returnAddyA
         returnAddyC = JSON.stringify(returnAddyA);
-        addy_label.text = "A: " + returnAddyA + " C: " + returnAddyC;
+        //addy_label.text = "A: " + returnAddyA + " C: " + returnAddyC;
         //returnAddyD = JSON.parse(returnAddyC);
         //returnAddyE = JSON.stringify(returnAddyB);
-        addy_label.text = "A: " + returnAddyA + " C: " + returnAddyC;
+        //addy_label.text = "A: " + returnAddyA + " C: " + returnAddyC;
         //addy_label.text = "A: " + returnAddyA + " B: " + returnAddyB + " C: " + returnAddyC + " D: " + returnAddyD + " E: " + returnAddyE;
 
     }
@@ -375,9 +413,12 @@ Item {
     }
 
     function getColliderData(){
-        colliderJsonData = API.qt_utilities.load_collider_data(app.currentWalletName)
-        var gotData = colliderJsonData !== undefined ? true : false
-        testLabel.text = "defined? " + gotData + " data: " + colliderJsonData.test
+        if(!hasColliderData){
+            colliderJsonData = API.qt_utilities.load_collider_data(app.currentWalletName)
+            hasColliderData = true
+        }
+        //var gotData = colliderJsonData !== undefined ? true : false
+        //testLabel.text = "defined? " + gotData + " data: " + colliderJsonData.test
     }
 
     function setColliderData(){
@@ -385,9 +426,9 @@ Item {
         var colliderJsonFilename = app.currentWalletName + ".col.json"
         var overWright = true
         if(API.qt_utilities.save_collider_data(colliderJsonFilename, colliderJsonData, overWright)){
-            testLabel.text = "set collider data"
+            //testLabel.text = "set collider data"
         }else{
-            testLabel.text = "failed set collider data"
+            //testLabel.text = "failed set collider data"
         }
     }
 
@@ -404,32 +445,17 @@ Item {
         someObject.loadStats()
     }
 
-//    Shortcut {
-//        sequence: "F4"
-//        onActivated: getAddressInfoAp()
-//    }
-
-//    Shortcut {
-//        sequence: "F5"
-//        onActivated: setContactInfoAp()
-//    }
-
-    Shortcut {
-        sequence: "F6"
-        onActivated: setColliderData()
-    }
-
-    Shortcut {
-        sequence: "F7"
-        onActivated: getColliderData()
+    function viewCmd(){
+        cmdVal = API.qt_utilities.load_cmd_data();
+        cmdLabel.text = JSON.stringify(cmdVal)
     }
 
     Timer {
         id: coinData_timer
-        repeat: true
+        repeat: false
         triggeredOnStart: false
         running: true
-        interval: 10000
+        interval: 5000
         onTriggered: setCoinData()
     }
 
@@ -653,7 +679,7 @@ Item {
                                 readOnly: hasAutoAddress && !General.autoPlaying && hasEnoughBalance ? false : true
                                 font: DexTypo.body1
                                 validator: RegularExpressionValidator { regularExpression: /(\d{1,7})([.,]\d{1,3})?$/ }
-                                color: 'white'
+                                color: General.autoPlaying ? Qt.rgba(255, 255, 255, 0.5) : 'white'
                                 Behavior on color {
                                     ColorAnimation {
                                         duration: Style.animationDuration
@@ -675,6 +701,7 @@ Item {
                                 Layout.rightMargin: 10
                                 height: 24
                                 font: DexTypo.body1
+                                color: General.autoPlaying ? Qt.rgba(255, 255, 255, 0.5) : 'white'
                                 text: hasAutoAddress && hasEnoughBalance ? "$" + (parseFloat(minBalanceInput.text) * current_ticker_infos.current_currency_ticker_price).toFixed(2) : "N/A"
                             }
                         }
@@ -778,7 +805,7 @@ Item {
                                 readOnly: hasAutoAddress && !General.autoPlaying && hasEnoughBalance ? false : true
                                 font: DexTypo.body1
                                 validator: RegularExpressionValidator { regularExpression: /(\d{1,7})([.,]\d{1,3})?$/ }
-                                color: 'white'
+                                color: General.autoPlaying ? Qt.rgba(255, 255, 255, 0.5) : 'white'
                                 Behavior on color {
                                     ColorAnimation {
                                         duration: Style.animationDuration
@@ -800,6 +827,7 @@ Item {
                                 Layout.rightMargin: 10
                                 height: 24
                                 font: DexTypo.body1
+                                color: General.autoPlaying ? Qt.rgba(255, 255, 255, 0.5) : 'white'
                                 text: hasAutoAddress && hasEnoughBalance ? "$" + (parseFloat(throwSizeInput.text) * current_ticker_infos.current_currency_ticker_price).toFixed(2) : "N/A"
                             }
                         }
@@ -858,7 +886,7 @@ Item {
                             }
                         }
                         from: hasAutoAddress && hasEnoughBalance ? currentMinWager : 0.5
-                        to: hasAutoAddress && hasEnoughBalance ? (set_amount_slider.valueAt(set_amount_slider.position) * 0.4) : 100
+                        to: hasAutoAddress && hasEnoughBalance ? ((localSetAmount - (set_amount_slider.valueAt(set_amount_slider.position))) * 0.4) : 100
                         live: true
                         value: throwAmountValue
                         onMoved: slideThrowSize()
@@ -916,7 +944,8 @@ Item {
                             })
                             color: 'darkred'
                             wrapMode: Text.WordWrap
-                            text: hasAutoAddress && hasEnoughBalance ? "" + parseFloat(set_amount_slider.valueAt(set_amount_slider.position) * 0.4).toFixed(2) : "N/A"
+                            text: hasAutoAddress && hasEnoughBalance ? "" + ((localSetAmount - parseFloat(set_amount_slider.valueAt(set_amount_slider.position))) * 0.4).toFixed(2) : "N/A"
+                            //text: hasAutoAddress && hasEnoughBalance ? "" + parseFloat(throw_amount_slider.valueAt(set_amount_slider.position) * 0.4).toFixed(2) : "N/A"
                         }
                         DefaultText{
                             Layout.alignment: Qt.AlignHCenter
@@ -980,7 +1009,7 @@ Item {
                                 readOnly: hasAutoAddress && !General.autoPlaying && hasEnoughBalance ? false : true
                                 font: DexTypo.body1
                                 validator: RegularExpressionValidator { regularExpression: /(\d{1,3})?$/ }
-                                color: 'white'
+                                color: General.autoPlaying ? Qt.rgba(255, 255, 255, 0.5) : 'white'
                                 Behavior on color {
                                     ColorAnimation {
                                         duration: Style.animationDuration
@@ -1176,19 +1205,19 @@ Item {
                 }
             }
         }
-        DefaultText{
-            id: addy_label
-            Layout.alignment: Qt.AlignCenter
-            Layout.maximumWidth: parent.width
-            Layout.topMargin: 4
-            wrapMode: Text.WordWrap
-            leftPadding: 10
-            rightPadding: 10
-            text: ""
-            //text: "currentText: " + controlAp.currentText + " fiat rate: " + current_ticker_infos.current_currency_ticker_price
-            //text: ("ticker: " + dashboard.current_ticker + " balance: " + General.formatFiat("", current_ticker_infos.fiat_amount, API.app.settings_pg.current_currency))
-//                text: qsTr("*Numbers are auto adjusted based on the risk slider")
-        }
+//        DefaultText{
+//            id: addy_label
+//            Layout.alignment: Qt.AlignCenter
+//            Layout.maximumWidth: parent.width
+//            Layout.topMargin: 4
+//            wrapMode: Text.WordWrap
+//            leftPadding: 10
+//            rightPadding: 10
+//            text: ""
+//            //text: "currentText: " + controlAp.currentText + " fiat rate: " + current_ticker_infos.current_currency_ticker_price
+//            //text: ("ticker: " + dashboard.current_ticker + " balance: " + General.formatFiat("", current_ticker_infos.fiat_amount, API.app.settings_pg.current_currency))
+////                text: qsTr("*Numbers are auto adjusted based on the risk slider")
+//        }
 //        TextInput {
 //            enabled: dashboard.sentDexUserData ? true : false
 //            Layout.alignment: Qt.AlignCenter
@@ -1199,39 +1228,39 @@ Item {
 //            rightPadding: 10
 //            text: JSON.stringify(dashboard.dexList)
 //        }
-        DefaultText{
-            enabled: General.apHasSelected ? true : false
-            visible: General.apHasSelected ? true : false
-            Layout.alignment: Qt.AlignCenter
-            Layout.maximumWidth: parent.width
-            Layout.topMargin: 4
-            wrapMode: Text.WordWrap
-            leftPadding: 10
-            rightPadding: 10
-            //text: ("localSetAmount: " + autoPlay.localSetAmount + " hasEnoughBalance: " + autoPlay.hasEnoughBalance + " hasSelected: " + General.apHasSelected)
-            //text: ("autoAddressResponder " + General.apAddress)
-            text: "coinData.minWager: " + currentMinWager + " localSetAmt: " + localSetAmount + " hasEnoughBalnce: " + hasEnoughBalance
-        }
-        DefaultText{
-            id: autoAddress_label
-            Layout.alignment: Qt.AlignCenter
-            Layout.maximumWidth: parent.width
-            Layout.topMargin: 4
-            wrapMode: Text.WordWrap
-            leftPadding: 10
-            rightPadding: 10
-        }
-        DefaultText{
-            id: testLabel
-            Layout.alignment: Qt.AlignCenter
-            Layout.maximumWidth: parent.width
-            Layout.topMargin: 4
-            wrapMode: Text.WordWrap
-            leftPadding: 10
-            rightPadding: 10
-            text: ""
-            //text: ("hasAutoAddress: " + hasAutoAddress)
-        }
+//        DefaultText{
+//            enabled: General.apHasSelected ? true : false
+//            visible: General.apHasSelected ? true : false
+//            Layout.alignment: Qt.AlignCenter
+//            Layout.maximumWidth: parent.width
+//            Layout.topMargin: 4
+//            wrapMode: Text.WordWrap
+//            leftPadding: 10
+//            rightPadding: 10
+//            //text: ("localSetAmount: " + autoPlay.localSetAmount + " hasEnoughBalance: " + autoPlay.hasEnoughBalance + " hasSelected: " + General.apHasSelected)
+//            //text: ("autoAddressResponder " + General.apAddress)
+//            text: "coinData.minWager: " + currentMinWager + " localSetAmt: " + localSetAmount + " hasEnoughBalnce: " + hasEnoughBalance
+//        }
+//        DefaultText{
+//            id: autoAddress_label
+//            Layout.alignment: Qt.AlignCenter
+//            Layout.maximumWidth: parent.width
+//            Layout.topMargin: 4
+//            wrapMode: Text.WordWrap
+//            leftPadding: 10
+//            rightPadding: 10
+//        }
+//        DefaultText{
+//            id: testLabel
+//            Layout.alignment: Qt.AlignCenter
+//            Layout.maximumWidth: parent.width
+//            Layout.topMargin: 4
+//            wrapMode: Text.WordWrap
+//            leftPadding: 10
+//            rightPadding: 10
+//            text: ""
+//            //text: ("hasAutoAddress: " + hasAutoAddress)
+//        }
     }
 
     FloatingBackground{
@@ -1267,6 +1296,29 @@ Item {
             }
         }
     }
+
+    DefaultText{
+        id: cmdLabel
+        x: parent.width * 0.2
+        y: parent.height * 0.3
+        wrapMode: Text.WordWrap
+        text: ""
+    }
+//    DefaultText{
+//        x: parent.width * 0.2
+//        y: parent.height * 0.35
+//        wrapMode: Text.WordWrap
+//        text: api_wallet_page.is_send_busy ? "sending.." : api_wallet_page.is_broadcast_busy ? "broadcasting.." : "Closed"
+//    }
+//    DexButton{
+//        id: explorer_button
+//        visible: true
+//        enabled: false
+//        width: 180
+//        height: 48
+//        text: "View on Explorer"
+//        onClicked: General.viewTxAtExplorer(General.apCurrentTicker, broadcast_resul_ap)
+//    }
     //        DefaultText{
     //            Layout.alignment: Qt.AlignCenter
     //            Layout.maximumWidth: parent.width
