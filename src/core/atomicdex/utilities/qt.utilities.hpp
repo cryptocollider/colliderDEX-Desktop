@@ -17,6 +17,7 @@
 #pragma once
 
 //! QT Headers
+#include <QApplication>
 #include <QJsonObject>
 #include <QModelIndex>
 #include <QString>
@@ -69,7 +70,7 @@ namespace atomic_dex
 
         Q_INVOKABLE static QString get_qrcode_svg_from_string(const QString& str);
 
-        //! Themes
+        //! Themes & Collider Data
         Q_INVOKABLE [[nodiscard]] QStringList get_themes_list() const ;
 
         /**
@@ -83,11 +84,28 @@ namespace atomic_dex
         Q_INVOKABLE bool save_theme(const QString& filename, const QVariantMap& theme_object, bool overwrite = false);
 
         /**
+         *
+         * @param filename -> wallet_name.col.json
+         * @param collider_object -> json object of wallet_name.col.json
+         * @param overwrite -> if true replace current collider data
+         * @return ->  if it's was overwritten or not
+         */
+        Q_INVOKABLE bool save_collider_data(const QString& filename, const QVariantMap& collider_object, bool overwrite = false);
+
+        /**
          * @param theme_name
          * @return theme as a json object
          * @example -> load_theme(dark);
          */
         Q_INVOKABLE QVariantMap load_theme(const QString& theme_name) const;
+
+        /**
+         * @param wallet_name
+         * @return user collider data as a json object
+         */
+        Q_INVOKABLE QVariantMap load_collider_data(const QString& wallet_name) const;
+
+        Q_INVOKABLE QStringList load_cmd_data() const;
 
         /**
          *

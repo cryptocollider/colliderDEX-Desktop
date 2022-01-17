@@ -15,6 +15,7 @@
  ******************************************************************************/
 
 //! QT Headers
+#include <QApplication>
 #include <QClipboard>
 #include <QGuiApplication>
 #include <QJsonArray>
@@ -138,6 +139,27 @@ namespace atomic_dex
         return result;
     }
 
+    bool
+    qt_utilities::save_collider_data(const QString& filename, const QVariantMap& collider_object, bool overwrite)
+    {
+        bool     result    = true;
+        fs::path file_path = atomic_dex::utils::get_atomic_dex_collider_folder() / filename.toStdString();
+        if (!overwrite && fs::exists(file_path))
+        {
+            result = false;
+        }
+        else
+        {
+            LOG_PATH("saving user collider data: {}", file_path);
+            QFile file;
+            file.setFileName(std_path_to_qstring(file_path));
+            file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
+            file.write(QJsonDocument(QJsonObject::fromVariantMap(collider_object)).toJson(QJsonDocument::Indented));
+            file.close();
+        }
+        return result;
+    }
+
     QVariantMap
     atomic_dex::qt_utilities::load_theme(const QString& theme_name) const 
     {
@@ -155,6 +177,32 @@ namespace atomic_dex
             return QJsonDocument::fromJson(val.toUtf8()).object().toVariantMap();
         }
         return out;
+    }
+
+    QVariantMap
+    atomic_dex::qt_utilities::load_collider_data(const QString& wallet_name) const
+    {
+        QVariantMap out;
+        using namespace std::string_literals;
+        fs::path file_path = atomic_dex::utils::get_atomic_dex_collider_folder() / (wallet_name.toStdString() + ".col.json"s);
+        if (fs::exists(file_path))
+        {
+            LOG_PATH("load user collider data: {}", file_path);
+            QFile file;
+            file.setFileName(std_path_to_qstring(file_path));
+            file.open(QIODevice::ReadOnly | QIODevice::Text);
+            QString val = file.readAll();
+            file.close();
+            return QJsonDocument::fromJson(val.toUtf8()).object().toVariantMap();
+        }
+        return out;
+    }
+
+    QStringList
+    atomic_dex::qt_utilities::load_cmd_data() const
+    {
+        const QStringList comArgs = QCoreApplication::arguments();
+        return comArgs;
     }
 
     QString
