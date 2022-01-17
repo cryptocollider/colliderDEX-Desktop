@@ -69,7 +69,10 @@ namespace atomic_dex
         
         // QML API
         Q_INVOKABLE bool add_contact(const QString& name);
+		Q_INVOKABLE void add_invis_contact(const QString& invisname);
+        Q_INVOKABLE nlohmann::json& get_wallet_info_address(const QString& name, const QString& type, const QString& key);
         Q_INVOKABLE void remove_contact(const QString& name);
+        Q_INVOKABLE void set_contact_wallet_info(const QString& name, const QString& type, const QString& key, const QString& address);
 
         // QML API properties
         Q_PROPERTY(addressbook_proxy_model* proxy READ get_addressbook_proxy_mdl NOTIFY addressbookProxyChanged);
