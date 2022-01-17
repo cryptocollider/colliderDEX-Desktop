@@ -299,6 +299,47 @@ namespace atomic_dex
         return obj;
     }
 
+    //QVariant
+    //wallet_page::get_ap_ticker_infos() const
+    //{
+    //    QJsonObject obj{
+    //        {"balance", "0"},
+    //        {"name", "Komodo"},
+    //        {"type", "SmartChain"},
+    //        {"address", "foo"},
+    //        {"explorer_url", "foo"},
+    //        {"current_currency_ticker_price", "0.00"},
+    //        {"tx_state", "InProgress"},
+    //        {"fiat_amount", "0.00"},
+    //        {"fee_ticker", DEX_PRIMARY_COIN},
+    //        {"qrcode_address", ""};
+    //    std::error_code ec;
+    //    auto&           mm2_system = m_system_manager.get_system<mm2_service>();
+    //    if (mm2_system.is_mm2_running())
+    //    {
+    //        auto&       price_service                 = m_system_manager.get_system<global_price_service>();
+    //        const auto& settings_system               = m_system_manager.get_system<settings_page>();
+    //        const auto& ticker                        = mm2_system.get_current_ticker();
+    //        const auto& coin_info                     = mm2_system.get_coin_info(ticker);
+    //        const auto& config                        = settings_system.get_cfg();
+    //        obj["balance"]                            = QString::fromStdString(mm2_system.my_balance(ticker, ec));
+    //        obj["name"]                               = QString::fromStdString(coin_info.name);
+    //        obj["type"]                               = QString::fromStdString(coin_info.type);
+    //        obj["address"]                            = QString::fromStdString(mm2_system.address(ticker, ec));
+    //        obj["explorer_url"]                       = QString::fromStdString(coin_info.explorer_url[0]);
+    //        obj["current_currency_ticker_price"]      = QString::fromStdString(price_service.get_rate_conversion(config.current_currency, ticker, true));
+    //        const auto& tx_state                      = mm2_system.get_tx_state(ec);
+    //        obj["tx_state"]                           = QString::fromStdString(tx_state.state);
+    //        obj["fiat_amount"]                        = QString::fromStdString(price_service.get_price_in_fiat(config.current_currency, ticker, ec));
+    //        obj["fee_ticker"]              = QString::fromStdString(coin_info.fees_ticker);
+    //        std::error_code   ec;
+    //        qrcodegen::QrCode qr0 = qrcodegen::QrCode::encodeText(mm2_system.address(ticker, ec).c_str(), qrcodegen::QrCode::Ecc::MEDIUM);
+    //        std::string       svg = qr0.toSvgString(2);
+    //        obj["qrcode_address"] = QString::fromStdString("data:image/svg+xml;base64,") + QString::fromStdString(svg).toLocal8Bit().toBase64();
+    //    }
+    //    return obj;
+    //}
+
     QVariant
     wallet_page::get_validate_address_data() const
     {
@@ -662,6 +703,211 @@ namespace atomic_dex
 
         auto error_functor = [this](pplx::task<void> previous_task)
         {
+            try
+            {
+                previous_task.wait();
+            }
+            catch (const std::exception& e)
+            {
+                SPDLOG_ERROR("error caught in broadcast finished: {}", e.what());
+                this->set_rpc_broadcast_data(QString::fromStdString(e.what()));
+                this->set_broadcast_busy(false);
+            }
+        };
+
+        mm2_system.get_mm2_client().async_rpc_batch_standalone(batch).then(answer_functor).then(error_functor);
+    }
+
+    void
+    wallet_page::send_ap(const QString& address, const QString& amount, bool max, bool with_fees, QVariantMap fees_data, const QString& tick)
+    {
+        //! Preparation
+        this->set_send_busy(true);
+        nlohmann::json     batch      = nlohmann::json::array();
+        auto&              mm2_system = m_system_manager.get_system<mm2_service>();
+        std::string        ticker     = tick.toStdString();
+        t_withdraw_request withdraw_req{.coin = ticker, .to = address.toStdString(), .amount = max ? "0" : amount.toStdString(), .max = max};
+        auto               coin_info = mm2_system.get_coin_info(ticker);
+        if (with_fees)
+        {
+            qDebug() << fees_data;
+            auto json_fees    = nlohmann::json::parse(QString(QJsonDocument(QVariant(fees_data).toJsonObject()).toJson()).toStdString());
+            withdraw_req.fees = t_withdraw_fees{
+                .type      = "UtxoFixed",
+                .amount    = json_fees.at("fees_amount").get<std::string>(),
+                .gas_price = json_fees.at("gas_price").get<std::string>(),
+                .gas_limit = json_fees.at("gas_limit").get<int>()};
+            if (coin_info.coin_type == CoinType::ERC20)
+            {
+                withdraw_req.fees->type = "EthGas";
+            }
+            else if (coin_info.coin_type == CoinType::QRC20)
+            {
+                withdraw_req.fees->type = "Qrc20Gas";
+            }
+        }
+        nlohmann::json json_data = ::mm2::api::template_request("withdraw", true);
+        ::mm2::api::to_json(json_data, withdraw_req);
+        // SPDLOG_DEBUG("final json: {}", json_data.dump(4));
+        batch.push_back(json_data);
+        std::string amount_std = amount.toStdString();
+        if (max)
+        {
+            std::error_code ec;
+            amount_std = mm2_system.my_balance(ticker, ec);
+        }
+
+        //! Answer
+        auto answer_functor = [this, coin_info, ticker, amount_std](web::http::http_response resp) {
+            const auto& settings_system     = m_system_manager.get_system<settings_page>();
+            const auto& global_price_system = m_system_manager.get_system<global_price_service>();
+            const auto& current_fiat        = settings_system.get_current_fiat().toStdString();
+            std::string body                = TO_STD_STR(resp.extract_string(true).get());
+            SPDLOG_DEBUG("resp: {}", body);
+            SPDLOG_DEBUG("current fiat", current_fiat);
+            if (resp.status_code() == 200 && body.find("error") == std::string::npos)
+            {
+                auto           answers              = nlohmann::json::parse(body);
+                auto           withdraw_answer      = ::mm2::api::rpc_process_answer_batch<t_withdraw_answer>(answers[0], "withdraw");
+                nlohmann::json j_out                = nlohmann::json::object();
+                j_out["withdraw_answer"]            = answers[0]["result"];
+                j_out.at("withdraw_answer")["date"] = withdraw_answer.result.value().timestamp_as_date;
+
+                // Add total amount in fiat currency.
+                if (coin_info.coinpaprika_id == "test-coin")
+                {
+                    j_out["withdraw_answer"]["total_amount_fiat"] = "0";
+                }
+                else
+                {
+                    j_out["withdraw_answer"]["total_amount_fiat"] = global_price_system.get_price_as_currency_from_amount(current_fiat, ticker, amount_std);
+                }
+
+                // Add fees amount.
+                if (j_out.at("withdraw_answer").at("fee_details").contains("total_fee") && !j_out.at("withdraw_answer").at("fee_details").contains("amount"))
+                {
+                    j_out["withdraw_answer"]["fee_details"]["amount"] = j_out["withdraw_answer"]["fee_details"]["total_fee"];
+                }
+                if (j_out.at("withdraw_answer").at("fee_details").contains("miner_fee") && !j_out.at("withdraw_answer").at("fee_details").contains("amount"))
+                {
+                    j_out["withdraw_answer"]["fee_details"]["amount"] = j_out["withdraw_answer"]["fee_details"]["miner_fee"];
+                }
+
+                // Add fees amount in fiat currency.
+                auto fee = j_out["withdraw_answer"]["fee_details"]["amount"].get<std::string>();
+                if (coin_info.coinpaprika_id == "test-coin")
+                {
+                    j_out["withdraw_answer"]["fee_details"]["amount_fiat"] = "0";
+                }
+                else
+                {
+                    j_out["withdraw_answer"]["fee_details"]["amount_fiat"] =
+                        global_price_system.get_price_as_currency_from_amount(current_fiat, coin_info.fees_ticker, fee);
+                }
+
+                this->set_rpc_send_data(nlohmann_json_object_to_qt_json_object(j_out));
+            }
+            else
+            {
+                auto error_json = QJsonObject({{"error_code", resp.status_code()}, {"error_message", QString::fromStdString(body)}});
+                this->set_rpc_send_data(error_json);
+            }
+            this->set_send_busy(false);
+        };
+
+        auto error_functor = [this](pplx::task<void> previous_task) {
+            try
+            {
+                previous_task.wait();
+            }
+            catch (const std::exception& e)
+            {
+                SPDLOG_ERROR("error caught in send: {}", e.what());
+                auto error_json = QJsonObject({{"error_code", 500}, {"error_message", QString::fromStdString(e.what())}});
+                this->set_rpc_send_data(error_json);
+                this->set_send_busy(false);
+            }
+        };
+
+        //! Process
+        mm2_system.get_mm2_client().async_rpc_batch_standalone(batch).then(answer_functor).then(error_functor);
+    }
+
+    void
+    wallet_page::broadcast_ap(const QString& tx_hex, bool is_claiming, bool is_max, const QString& amount, const QString& tickr)
+    {
+#if defined(__APPLE__) || defined(WIN32) || defined(_WIN32)
+        QSettings& settings = this->entity_registry_.ctx<QSettings>();
+        if (settings.value("2FA").toBool())
+        {
+            antara::gaming::core::evaluate_authentication(
+                "Password to send funds is required", [=](bool is_auth) { broadcast_on_auth_finished_ap(is_auth, tx_hex, is_claiming, is_max, amount, tickr); });
+        }
+        else
+        {
+            broadcast_on_auth_finished_ap(true, tx_hex, is_claiming, is_max, amount, tickr);
+        }
+#else
+        broadcast_on_auth_finished(true, tx_hex, is_claiming, is_max, amount);
+#endif
+    }
+
+    void
+    wallet_page::broadcast_on_auth_finished_ap(bool is_auth, const QString& tx_hex, bool is_claiming, bool is_max, const QString& amount, const QString& tick)
+    {
+        if (!is_auth)
+        {
+            m_auth_succeeded = false;
+            emit auth_succeededChanged();
+            return;
+        }
+        m_auth_succeeded = true;
+        emit auth_succeededChanged();
+        this->set_rpc_broadcast_data("");
+        this->set_broadcast_busy(true);
+        auto&               mm2_system = m_system_manager.get_system<mm2_service>();
+        std::string         ticker     = tick.toStdString();
+        nlohmann::json      batch      = nlohmann::json::array();
+        t_broadcast_request broadcast_request{.tx_hex = tx_hex.toStdString(), .coin = ticker};
+        nlohmann::json      json_data = ::mm2::api::template_request("send_raw_transaction");
+        ::mm2::api::to_json(json_data, broadcast_request);
+        batch.push_back(json_data);
+
+        //! Answer
+        auto answer_functor = [this, is_claiming, is_max, amount, tick](web::http::http_response resp) {
+            std::string body = TO_STD_STR(resp.extract_string(true).get());
+            if (resp.status_code() == 200)
+            {
+                auto&       mm2_system = m_system_manager.get_system<mm2_service>();
+                std::string ticker     = tick.toStdString();
+                auto        answers    = nlohmann::json::parse(body);
+                // SPDLOG_INFO("broadcast answer: {}", answers.dump(4));
+                if (answers[0].contains("tx_hash"))
+                {
+                    this->set_rpc_broadcast_data(QString::fromStdString(answers[0].at("tx_hash").get<std::string>()));
+                    if (mm2_system.is_pin_cfg_enabled() && (not is_claiming && is_max))
+                    {
+                        mm2_system.reset_fake_balance_to_zero(ticker);
+                    }
+                    else if (mm2_system.is_pin_cfg_enabled() && (not is_claiming && not is_max))
+                    {
+                        mm2_system.decrease_fake_balance(ticker, amount.toStdString());
+                    }
+                    mm2_system.fetch_infos_thread();
+                }
+                else
+                {
+                    this->set_rpc_broadcast_data(QString::fromStdString(body));
+                }
+            }
+            else
+            {
+                this->set_rpc_broadcast_data(QString::fromStdString(body));
+            }
+            this->set_broadcast_busy(false);
+        };
+
+        auto error_functor = [this](pplx::task<void> previous_task) {
             try
             {
                 previous_task.wait();

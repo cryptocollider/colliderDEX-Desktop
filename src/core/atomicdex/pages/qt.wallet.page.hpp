@@ -32,6 +32,7 @@ namespace atomic_dex
         [[nodiscard]] QString             get_current_ticker() const;
         void                              set_current_ticker(const QString& ticker);
         [[nodiscard]] QVariant            get_ticker_infos() const;
+        //[[nodiscard]] QVariant            get_ap_ticker_infos() const;
         [[nodiscard]] bool                is_broadcast_busy() const;
         void                              set_broadcast_busy(bool status);
         [[nodiscard]] bool                is_send_busy() const;
@@ -78,11 +79,17 @@ namespace atomic_dex
         Q_INVOKABLE void claim_rewards();
         Q_INVOKABLE void claim_faucet();
         Q_INVOKABLE void broadcast(const QString& tx_hex, bool is_claiming, bool is_max, const QString& amount);
-        void             broadcast_on_auth_finished(
+        Q_INVOKABLE void broadcast_ap(const QString& tx_hex, bool is_claiming, bool is_max, const QString& amount, const QString& tick);
+        void            broadcast_on_auth_finished(
                         bool is_auth, const QString& tx_hex, bool is_claiming, bool is_max,
                         const QString& amount); // Broadcast requires OS local user credentials verification. This is called by the Q_INVOKABLE broadcast() method after
                                                 // entering credentials.
+        void            broadcast_on_auth_finished_ap(
+                        bool is_auth, const QString& tx_hex, bool is_claiming, bool is_max, 
+                        const QString& amount, const QString& tickr); // Broadcast requires OS local user credentials verification. This is called by the Q_INVOKABLE broadcast() method after
+                                                // entering credentials.
         Q_INVOKABLE void send(const QString& address, const QString& amount, bool max, bool with_fees, QVariantMap fees_data);
+        Q_INVOKABLE void send_ap(const QString& address, const QString& amount, bool max, bool with_fees, QVariantMap fees_data, const QString& tick);
         Q_INVOKABLE QString switch_address_mode(bool checked);
         Q_INVOKABLE void    post_switch_address_mode(bool is_segwit);
 
@@ -90,6 +97,7 @@ namespace atomic_dex
         Q_PROPERTY(transactions_model* transactions_mdl READ get_transactions_mdl NOTIFY transactionsMdlChanged)
         Q_PROPERTY(QString ticker READ get_current_ticker WRITE set_current_ticker NOTIFY currentTickerChanged)
         Q_PROPERTY(QVariant ticker_infos READ get_ticker_infos NOTIFY tickerInfosChanged)
+        //Q_PROPERTY(QVariant ap_ticker_infos READ get_ticker_infos NOTIFY tickerInfosChanged)
         Q_PROPERTY(bool is_claiming_busy READ is_rpc_claiming_busy WRITE set_claiming_is_busy NOTIFY rpcClaimingStatusChanged)
         Q_PROPERTY(QVariant claiming_rpc_data READ get_rpc_claiming_data WRITE set_rpc_claiming_data NOTIFY claimingRpcDataChanged)
         Q_PROPERTY(bool is_claiming_faucet_busy READ is_claiming_faucet_busy WRITE set_claiming_faucet_is_busy NOTIFY claimingFaucetStatusChanged)
