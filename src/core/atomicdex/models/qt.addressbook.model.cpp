@@ -14,6 +14,10 @@
  *                                                                            *
  ******************************************************************************/
 
+//! STD
+#include <utility>
+#include <stdexcept> //> std::invalid_argument.
+
 //! Qt
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -119,6 +123,31 @@ namespace atomic_dex
         m_model_data.push_back(new addressbook_contact_model(m_system_manager, name, this));
         endInsertRows();
         return true;
+    }
+	
+	void addressbook_model::add_invis_contact(const QString& invisname)
+    {
+        auto& addrbook_manager = m_system_manager.get_system<addressbook_manager>();
+        addrbook_manager.add_contact(invisname.toStdString());
+        addrbook_manager.save_configuration();
+    }
+
+    
+    void addressbook_model::set_contact_wallet_info(const QString& name, const QString& type, const QString& key, const QString& address)
+    {
+        auto& addrbook_manager = m_system_manager.get_system<addressbook_manager>();
+        addrbook_manager.set_contact_wallet_info(name.toStdString(), type.toStdString(), key.toStdString(), address.toStdString());
+        addrbook_manager.save_configuration();
+    }
+
+    nlohmann::json&
+    addressbook_model::get_wallet_info_address(const QString& name, const QString& type, const QString& key)
+    {
+        auto& addrbook_manager = m_system_manager.get_system<addressbook_manager>();
+        SPDLOG_INFO("get wallet info address: ", addrbook_manager.get_wallet_info_address(name.toStdString(), type.toStdString(), key.toStdString()));
+		return addrbook_manager.get_wallet_info_address(name.toStdString(), type.toStdString(), key.toStdString());
+        //nlohmann::json addy = addrbook_manager.get_wallet_info_address(name.toStdString(), type.toStdString(), key.toStdString());
+        //return addy;
     }
 } // namespace atomic_dex
 
