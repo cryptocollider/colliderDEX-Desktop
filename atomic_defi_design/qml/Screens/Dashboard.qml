@@ -50,10 +50,15 @@ Item {
 
     property bool sentDexUserData: false
     property bool hasCoinSight: false
+    property bool inCoinSight: current_page === idx_dashboard_coin_sight ? true : false
+    //property bool idleCoinSight: false
     property bool isDevToolSmall: false
     property bool isDevToolLarge: false
     property bool openedDisc: false
     property bool viewingArena: false
+    property bool loopedVideos: false
+    property bool challengeVideo: false
+    property bool arenaVideo: false
 
     //list of only pub addresses which gets assigned value from games script
     property var dataList
@@ -140,10 +145,10 @@ Item {
     }
 
 //    function checkClc(){ //checks CLC amount for enabling coinSight
-//        if(General.autoPlaying || current_page === idx_dashboard_exchange){
-//            clc_check_timer.restart()
-//        }else if(current_page === idx_dashboard_games && General.inAuto){
-//            clc_check_timer.restart()
+//        if(General.autoPlaying && (autoPlay.throwSeconds < 5)){
+//            return
+//        }else if(api_wallet_page.is_send_busy || api_wallet_page.is_broadcast_busy){
+//            return
 //        }else{
 //            var clcTick = "CLC"
 //            var tempCurrentTick = api_wallet_page.ticker
@@ -151,8 +156,6 @@ Item {
 //            dashboard.current_ticker = api_wallet_page.ticker
 //            if(current_ticker_infos.balance >= 100){
 //                hasCoinSight = true
-//            }else{
-//                clc_check_timer.restart()
 //            }
 //            api_wallet_page.ticker = tempCurrentTick
 //            dashboard.current_ticker = api_wallet_page.ticker
@@ -160,23 +163,36 @@ Item {
 //    }
 
 //    Timer {
-//        id: clc_check_timer
-//        interval: 10000
+//        id: coin_sight_timer
+//        interval: 600000
 //        repeat: false
 //        triggeredOnStart: false
-//        running: true
-//        onTriggered: checkClc()
+//        running: false
+//        onTriggered: {idleCoinSight = true}
 //    }
 
-    Shortcut {
-        sequence: "F9"
-        onActivated: dashboard.devToolsSmall()
+    Timer {
+        interval: 250
+        repeat: false
+        triggeredOnStart: false
+        running: true
+        onTriggered: autoPlay.getColliderData()
     }
 
-    Shortcut {
-        sequence: "F10"
-        onActivated: dashboard.devToolsLarge()
-    }
+//    Shortcut {
+//        sequence: "F8"
+//        onActivated: checkClc()
+//    }
+
+//    Shortcut {
+//        sequence: "F9"
+//        onActivated: dashboard.devToolsSmall()
+//    }
+
+//    Shortcut {
+//        sequence: "F10"
+//        onActivated: dashboard.devToolsLarge()
+//    }
 
     Image {
         source: General.image_path + "final-background.gif"
@@ -373,34 +389,36 @@ Item {
             }
 
             //called from html to change signal
-            function sigChangeTxt(newSig) {
-                txtWeb.text = newSig;
-            }
+//            function sigChangeTxt(newSig) {
+//                txtWeb.text = newSig;
+//            }
         }
 
         QtObject {
             id: challengeObject
             WebChannel.id: "challengeBackend"
-            property string clcAddy: General.openedChallenge ? JSON.stringify(games.addyCLC) : ""
-            property string clcAddyTwo: ""
-            property string clcAddyThree: ""
+            property string clcAddy: ""
         }
 
         QtObject {
             id: coinSightObject
             WebChannel.id: "coinSightBackend"
+
+//            function checkClcAmount(){
+//                checkClc()
+//            }
         }
 
-        Text {
-            id: txtWeb
-            text: "Some text"
-            onTextChanged: {
-                //changed signal will trigger a function at html side
-                someObject.someSignal(text)
-                txtWeb.text = "Signal Sent from callback to HTML"
-                someObject.apSignal(text)
-            }
-        }
+//        Text {
+//            id: txtWeb
+//            text: "Some text"
+//            onTextChanged: {
+//                //changed signal will trigger a function at html side
+//                someObject.someSignal(text)
+//                txtWeb.text = "Signal Sent from callback to HTML"
+//                someObject.apSignal(text)
+//            }
+//        }
 
         WebEngineView {
             id: webIndex
@@ -424,6 +442,20 @@ Item {
             height: parent.height
             enabled: General.inChallenge && current_page == idx_dashboard_games ? true : false
             visible: General.inChallenge && current_page == idx_dashboard_games ? true : false
+            settings.pluginsEnabled: true
+            devToolsView: devInspect
+            url: ""
+            webChannel: channel
+        }
+
+        WebEngineView {
+            id: webCoinS
+            //enabled: hasCoinSight && General.openedCoinSight && !idleCoinSight ? true : false
+            //visible: enabled && inCoinSight ? true : false
+            enabled: General.openedCoinSight && inCoinSight ? true : false
+            visible: enabled
+            width: dashboard.isDevToolLarge ? parent.width - 600 : dashboard.isDevToolSmall ? parent.width - 300 : parent.width
+            height: parent.height
             settings.pluginsEnabled: true
             devToolsView: devInspect
             url: ""

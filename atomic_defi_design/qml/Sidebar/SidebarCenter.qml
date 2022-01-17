@@ -126,10 +126,11 @@ ColumnLayout {
     }
 
     SidebarLine {
-        section_enabled: dashboard.hasCoinSight ? true : false
+        //section_enabled: dashboard.hasCoinSight ? true : false
         dashboard_index: idx_dashboard_coin_sight
         text_value: sidebar.expanded ? qsTr("coinSight") : ""
         image: General.image_path + "menu-games-white.svg"
+        isCoinSight: true
         Layout.fillWidth: true
 
         SidebarTooltip {

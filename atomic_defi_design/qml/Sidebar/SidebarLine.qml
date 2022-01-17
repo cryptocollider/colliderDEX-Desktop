@@ -5,6 +5,7 @@ import QtQuick.Controls 2.15
 import QtGraphicalEffects 1.0
 import "../Components"
 import "../Constants" as Constants
+import "../Games"
 import App 1.0
 
 Item {
@@ -12,6 +13,7 @@ Item {
 
     property bool section_enabled: true
     property bool isCollider: false
+    property bool isCoinSight: false
     property bool isWallet: false
     property alias mouse_area: mouse_area
 
@@ -143,6 +145,19 @@ Item {
                     }
                 }
             }
+//            else if(dashboard.hasCoinSight){
+//                if(dashboard.inCoinSight && General.openedCoinSight){
+//                    coin_sight_timer.restart()
+//                }
+//                if(isCoinSight){
+//                    coin_sight_timer.stop()
+//                    dashboard.idleCoinSight = false
+//                    if(!General.openedCoinSight){
+//                        webCoinS.url = "https://coinsig.ht"
+//                        General.openedCoinSight = true
+//                    }
+//                }
+//            }
             else{
                 if(dashboard.current_page === idx_dashboard_wallet){
                     General.walletCurrentTicker = api_wallet_page.ticker
@@ -161,6 +176,9 @@ Item {
                     dashboard.current_ticker = api_wallet_page.ticker
                 }else if(dashboard_index === idx_dashboard_collider_discord){
                     dashboard.openedDisc = true
+                }else if(isCoinSight && !General.openedCoinSight){
+                    webCoinS.url = "https://coinsig.ht"
+                    General.openedCoinSight = true
                 }
 //                if(General.inAuto){
 //                    var tmpTick = General.apCurrentTicker
