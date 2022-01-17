@@ -11,6 +11,7 @@ import "Screens"
 import "Constants"
 import "Components"
 import "Dashboard"
+import "Games"
 
 import App 1.0 as App
 
@@ -172,6 +173,7 @@ DexRectangle
         InitialLoading {
             onLoaded: () => {
                 current_page = idx_dashboard
+
             }
         }
     }
