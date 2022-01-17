@@ -189,6 +189,14 @@ namespace atomic_dex::utils
     }
 
     fs::path
+    get_atomic_dex_collider_folder()
+    {
+        const auto fs_collider_folder = get_atomic_dex_data_folder() / "collider";
+        create_if_doesnt_exist(fs_collider_folder);
+        return fs_collider_folder;
+    }
+
+    fs::path
     get_atomic_dex_current_export_recent_swaps_file()
     {
         return get_atomic_dex_export_folder() / ("swap-export.json");
