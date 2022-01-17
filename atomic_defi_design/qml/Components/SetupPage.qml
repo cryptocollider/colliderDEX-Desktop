@@ -17,6 +17,7 @@ Item {
     property double image_margin: 5
     property string backgroundColor: DexTheme.dexBoxBackgroundColor
     property string borderColor: DexTheme.rectangleBorderColor
+    property bool isFirstLaunch: false
 
     Image {
         id: back_image
@@ -34,8 +35,11 @@ Item {
         id: window_layout
 
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
+        //anchors.verticalCenter: parent.verticalCenter
+        //anchors.verticalCenterOffset: isFirstLaunch ? 80 : 0
         transformOrigin: Item.Center
+        y: isFirstLaunch ? -80 : (window.height * 0.5) - (height * 0.5)
+        //anchors.topMargin: isFirstLaunch ? -20 : 0
         spacing: image_margin
 
         DefaultImage {
@@ -43,7 +47,7 @@ Item {
 //            Layout.maximumWidth: 300
 //            Layout.maximumHeight: Layout.maximumWidth * paintedHeight/paintedWidth
 
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.alignment: Qt.AlignHCenter
             antialiasing: true
         }
 
@@ -52,9 +56,10 @@ Item {
 
             leftPadding: 30
             rightPadding: leftPadding
-            topPadding: leftPadding * 0.5
+            //topPadding: leftPadding * 0.5
             bottomPadding: topPadding
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: isFirstLaunch ? -90 : 0
 
             background: DexRectangle {
                 color: _control.backgroundColor
@@ -68,10 +73,13 @@ Item {
                 id: inner_space
             }
         }
+    }
 
-        Loader {
-            id: bottom_content
-            Layout.alignment: Qt.AlignHCenter
-        }
+    Loader {
+        id: bottom_content
+        //Layout.alignment: Qt.AlignHCenter
+        anchors.horizontalCenter: parent.horizontalCenter
+        //Layout.topMargin: isFirstLaunch ? -80 : 0
+        y: window.height - 95
     }
 }
