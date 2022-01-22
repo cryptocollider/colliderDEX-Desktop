@@ -848,7 +848,7 @@ namespace atomic_dex
             broadcast_on_auth_finished_ap(true, tx_hex, is_claiming, is_max, amount, tickr);
         }
 #else
-        broadcast_on_auth_finished(true, tx_hex, is_claiming, is_max, amount);
+        broadcast_on_auth_finished_ap(true, tx_hex, is_claiming, is_max, amount, tickr);
 #endif
     }
 
