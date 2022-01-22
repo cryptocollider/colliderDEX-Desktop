@@ -9,7 +9,7 @@ set(DEX_DISCORD "https://discord.com/invite/Uq9bpKN")
 set(DEX_TWITTER "https://twitter.com/crypto_collider")
 set(DEX_PRIMARY_COIN "CLC")                                                         ## Main coin of the DEX, will be enabled by default and will be the default left ticker for trading
 set(DEX_SECOND_PRIMARY_COIN "KMD")                                                  ## Second main coin of the DEX, will be enabled by default and will be the default right ticker for trading
-option(DISABLE_GEOBLOCKING "Enable to disable geoblocking (for dev purpose)" OFF)
+option(DISABLE_GEOBLOCKING "Enable to disable geoblocking (for dev purpose)" ON)
 set(DEX_REPOSITORY_OWNER ${DEX_COMPANY})
 set(DEX_REPOSITORY_NAME "atomicDEX-Desktop")
 set(DEX_CHECKSUM_API_URL "https://komodo.live/static/checksum.json")
