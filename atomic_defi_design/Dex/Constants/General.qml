@@ -165,6 +165,7 @@ QtObject {
     property bool inColliderApp: inAuto || inArena || inChallenge ? true : false
     property bool initialized_orderbook_pair: false
     property bool openedArena: false
+	property bool openedAutoP: false
     property bool openedChallenge: false
     property bool openedCoinSight: false
     property var apAddress
