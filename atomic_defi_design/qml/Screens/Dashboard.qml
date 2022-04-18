@@ -86,7 +86,7 @@ Item {
 
     readonly property alias loader: loader
     readonly property alias current_component: loader.item
-    property int current_page: idx_dashboard_portfolio
+    property int current_page: idx_dashboard_games
 
     onCurrent_pageChanged: {
         app.deepPage = current_page * 10
