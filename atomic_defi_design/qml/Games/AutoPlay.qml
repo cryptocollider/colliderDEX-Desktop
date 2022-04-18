@@ -99,7 +99,8 @@ Item {
                 staticThrowSizeValue = parseFloat(staticThrowSizeText)
                 throwSizeInput.text = staticThrowSizeText
                 //staticThrowSizeText = staticThrowSizeValue + " ($" + parseFloat(autoPlay.rkValue * minBalanceFiatValue).toFixed(2) + ")"
-                ap_timer.interval = (60 / parseFloat(throw_rate_slider.value)) * 1000
+                //ap_timer.interval = (60 / parseFloat(throw_rate_slider.value)) * 1000
+                ap_timer.interval = parseInt(throwRateInput.text) * 1000
                 ap_timer.restart()
             }else{
                 apStatusLabel.text = "Waiting on previous throw!"
