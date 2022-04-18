@@ -133,6 +133,10 @@ Item {
             dex_user_data_timer.restart()
             General.openedArena = true
         }
+        if(!General.openedAutoP){
+            autoPlay.runCoinData();
+            General.openedAutoP = true;
+        }
         if(!dashboard.loopedVideos){
             dashboard.loopedVideos = true
         }

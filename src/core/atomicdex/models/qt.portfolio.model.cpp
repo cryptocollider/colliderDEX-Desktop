@@ -217,6 +217,13 @@ namespace atomic_dex
     }
 
     QVariant
+    atomic_dex::portfolio_model::collider_key(int rowc) const
+    {
+        const portfolio_data& itemc = m_model_data.at(rowc);
+        return itemc.ticker;
+    }
+
+    QVariant
     atomic_dex::portfolio_model::data(const QModelIndex& index, int role) const
     {
         if (!hasIndex(index.row(), index.column(), index.parent()))

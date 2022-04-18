@@ -674,6 +674,77 @@ namespace atomic_dex
         return {QString::fromStdString(seed), QString::fromStdString(::mm2::api::get_rpc_password())};
     }
 
+    bool
+    settings_page::retrieve_kp()
+    {
+        using namespace std::string_literals;
+        this->set_fetching_priv_key_busy(true);
+        //! Also fetch private keys
+        nlohmann::json batch   = nlohmann::json::array();
+        const auto*    cfg_mdl = m_system_manager.get_system<portfolio_page>().get_global_cfg();
+        const auto     coins   = cfg_mdl->get_enabled_coins();
+        for (auto&& [coin, coin_cfg]: coins)
+        {
+            ::mm2::api::show_priv_key_request req{.coin = coin};
+            nlohmann::json                    req_json = ::mm2::api::template_request("show_priv_key");
+            to_json(req_json, req);
+            batch.push_back(req_json);
+        }
+        auto&      mm2_system     = m_system_manager.get_system<mm2_service>();
+        const auto answer_functor = [this](web::http::http_response resp) {
+            std::string body = TO_STD_STR(resp.extract_string(true).get());
+            if (resp.status_code() == 200)
+            {
+                //!
+                auto answers = nlohmann::json::parse(body);
+                SPDLOG_WARN("Priv keys fetched, those are sensitive data.");
+                for (auto&& answer: answers)
+                {
+                    auto       show_priv_key_answer = ::mm2::api::rpc_process_answer_batch<::mm2::api::show_priv_key_answer>(answer, "show_priv_key");
+                    auto*      portfolio_mdl        = this->m_system_manager.get_system<portfolio_page>().get_portfolio();
+                    const auto idx                  = portfolio_mdl->match(
+                        portfolio_mdl->index(0, 0), portfolio_model::TickerRole, QString::fromStdString(show_priv_key_answer.coin), 1,
+                        Qt::MatchFlag::MatchExactly);
+                    if (not idx.empty())
+                    {
+                        update_value(portfolio_model::PrivKey, QString::fromStdString(show_priv_key_answer.priv_key), idx.at(0), *portfolio_mdl);
+                    }
+                }
+            }
+            this->set_fetching_priv_key_busy(false);
+        };
+        mm2_system.get_mm2_client().async_rpc_batch_standalone(batch).then(answer_functor);
+        return true;
+    }
+
+    //QString
+    //settings_page::retrieve_at_kp(const QString& tck)
+    //{
+    //    using namespace std::string_literals;
+    //    this->set_fetching_priv_key_busy(true);
+    //    //! Also fetch private key
+    //    nlohmann::json batch   = nlohmann::json::array();
+    //    ::mm2::api::show_priv_key_request req{.coin = tck.toStdString()};
+    //    nlohmann::json                    req_json = ::mm2::api::template_request("show_priv_key");
+    //    to_json(req_json, req);
+    //    batch.push_back(req_json);
+    //    auto&      mm2_system     = m_system_manager.get_system<mm2_service>();
+    //    QString&   retKey;
+    //    const auto answer_functor = [this](web::http::http_response resp) {
+    //        std::string body = TO_STD_STR(resp.extract_string(true).get());
+    //        if (resp.status_code() == 200)
+    //        {
+    //            auto answers = nlohmann::json::parse(body);
+    //            SPDLOG_WARN("Priv key fetched, those are sensitive data.");
+    //            auto       show_priv_key_answer = ::mm2::api::rpc_process_answer_batch<::mm2::api::show_priv_key_answer>(answers, "show_priv_key");
+    //            retKey                    = QString::fromStdString(show_priv_key_answer.priv_key);
+    //        }
+    //        this->set_fetching_priv_key_busy(false);
+    //    };
+    //    mm2_system.get_mm2_client().async_rpc_batch_standalone(batch).then(answer_functor);
+    //    return retKey;
+    //}
+
     QString
     settings_page::get_version()
     {

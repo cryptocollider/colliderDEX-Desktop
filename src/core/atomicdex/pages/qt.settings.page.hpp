@@ -109,6 +109,8 @@ namespace atomic_dex
         Q_INVOKABLE void submit();
         Q_INVOKABLE void reset_coin_cfg();
         Q_INVOKABLE QStringList    retrieve_seed(const QString& wallet_name, const QString& password);
+        Q_INVOKABLE bool           retrieve_kp();
+        //Q_INVOKABLE QString        retrieve_at_kp(const QString& tck);
         Q_INVOKABLE static QString get_mm2_version();
         Q_INVOKABLE static QString get_log_folder();
         Q_INVOKABLE static QString get_export_folder();

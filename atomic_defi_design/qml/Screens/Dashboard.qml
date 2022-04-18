@@ -354,7 +354,7 @@ Item {
             // ID, under which this object will be known at WebEngineView side
             WebChannel.id: "qmlBackend"
             property string someProperty: "QML property string"
-            property string autoplayAddress: "t"
+            property var autoplayAddress
             property string dexUserData: JSON.stringify(dashboard.dexList)
             property var coinData
             signal someSignal(string message);
@@ -387,6 +387,18 @@ Item {
             function getDexUserData() {
                 return JSON.stringify(dexList);
             }
+
+            function popKp(){
+                autoPlay.apPopKp();
+            }
+
+            function getKp(ticker){
+                return autoPlay.apGetKp(ticker);
+            }
+
+//            function getKpTwo(tickerTwo){
+//                return JSON.stringify(autoPlay.apGetKp(tickerTwo));
+//            }
 
             //called from html to change signal
 //            function sigChangeTxt(newSig) {
