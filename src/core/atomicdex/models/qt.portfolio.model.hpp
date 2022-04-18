@@ -93,6 +93,7 @@ namespace atomic_dex
 
         //! QML API
         Q_INVOKABLE void clean_priv_keys();
+        Q_INVOKABLE QVariant collider_key(int rowc) const;
 
         //! Public api
         void                            initialize_portfolio(const std::vector<std::string>& tickers);

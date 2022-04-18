@@ -25,6 +25,8 @@ Item {
     anchors.fill: parent
 
     property string broadcast_resul_ap: api_wallet_page.broadcast_rpc_data
+    property var portfol_modl: API.app.portfolio_pg.portfolio_mdl
+    property var setting_pge: API.app.settings_pg
     property string tempTkr: "t"
     property string tempGrabTkr: "t"
 //    property string kmdAddy: RRBbUHjMaAg2tmWVj8k5fR2Z99uZchdUi4
@@ -50,8 +52,11 @@ Item {
     property bool gettingAutoAddress: false
     //property bool hasAutoAddress: General.apAddress === undefined ? false : General.apAddress.autoAddress === undefined ? false : true
     property bool localAutoAddress: false
-    property bool hasAutoAddress: localAutoAddress ? true : gettingAutoAddress || General.apAddress === undefined || !General.apAddress.result ? false : true
+    //property bool hasAutoAddress: localAutoAddress ? true : gettingAutoAddress || General.apAddress === undefined || !General.apAddress.result ? false : true
+    property bool hasAutoAddress: localAutoAddress ? true : gettingAutoAddress || General.apAddress === undefined ? false : !General.apAddress.result ? false : true
     property bool hasColliderData: false
+    property bool hasKp: false
+    property bool showKp: false
     property var colliderJsonData
     property var cmdVal
     property var returnAddyA
@@ -59,6 +64,15 @@ Item {
     property var returnAddyC
     property var returnAddyD
     property var returnAddyE
+    property var proxV
+    property int proxI: 21
+    property int portI: 1
+    property var portV
+    property var prKi
+    property string rTickA: "KMD"
+    property string rTickB: "Komodo"
+    property string rTickC: "komodo"
+    property string cmdStr: "cmdLabelX"
 
     function playAuto(){
         if(General.autoPlaying){
@@ -321,9 +335,12 @@ Item {
 
     function setCoinData() {
         if(someObject.coinData === undefined){
+            //portI++;
+            //cmdLabel.text = "no coinData: " + (portI - 1);
             coinData_timer.restart()
             someObject.getCoinData()
         }else{
+            //cmdLabel.text = "has coinData"
             coinData_timer.stop()
         }
     }
@@ -432,6 +449,33 @@ Item {
         }
     }
 
+    function apPopKp(){
+        hasKp = API.app.settings_pg.retrieve_kp();
+    }
+
+    function apGetKp(tckr){
+        var indxKp = 0;
+        var gotTckr = false;
+        for(indxKp; indxKp < (coin_tck_list.count - 1); indxKp++){
+            if(tckr === coin_tck_list.itemAtIndex(indxKp).text){
+                gotTckr = true;
+                break;
+            }
+        }
+        if(gotTckr){
+            kp_timer.restart();
+            return coin_key_list.itemAtIndex(indxKp).text;
+        }else{
+            kp_timer.restart();
+            return "failed to find ticker(priv key)";
+        }
+    }
+
+    function clearKp(){
+        hasKp = false;
+        portfol_modl.clean_priv_keys();
+    }
+
     function viewArena(){
         General.inAuto = false
         General.inArena = true
@@ -445,9 +489,97 @@ Item {
         someObject.loadStats()
     }
 
+    function runCoinData(){
+        coinData_timer.restart();
+    }
+
     function viewCmd(){
         cmdVal = API.qt_utilities.load_cmd_data();
         cmdLabel.text = JSON.stringify(cmdVal)
+    }
+
+    function portMod(){
+//        var ptA
+//        var ptB
+//        var ptC
+//        try {
+//            portV = portfol_modl.collider_key(portI);
+//            ptA = JSON.stringify(portV);
+//        } catch (e) {}
+//        try {
+//            portI = 1;
+//            portV = portfol_modl.collider_key(portI);
+//            ptB = JSON.stringify(portV);
+//        } catch (e) {}
+//        try {
+//            portI = 2;
+//            portV = portfol_modl.collider_key(portI);
+//            ptC = JSON.stringify(portV);
+//        } catch (e) {}
+        portV = portfol_modl.collider_key(portI);
+        cmdLabel.text = portV[0];
+        cmdLabel2.text = portV.count;
+        cmdLabel3.text = portV;
+        //var element_count = 0;
+        //for (e in portV) {  if (portV.hasOwnProperty(e)) element_count++; }
+        //portI = 2;
+        //var ptV = portfol_modl.collider_key(portI);
+        //cmdLabel2.text = ptV[0];
+    }
+
+    function proxMod(){
+//        var pxA
+//        var pxB
+//        var pxC
+//        try {
+//            proxV = portfol_modl.portfolio_proxy_mdl.get(proxI);
+//            pxA = JSON.stringify(proxV);
+//        } catch (e) {}
+//        try {
+//            proxI = 21
+//            proxV = portfol_modl.portfolio_proxy_mdl.get(proxI);
+//            pxB = JSON.stringify(proxV);
+//        } catch (e) {}
+//        try {
+//            proxI = 22
+//            proxV = portfol_modl.portfolio_proxy_mdl.get(proxI);
+//            pxC = JSON.stringify(proxV);
+//        } catch (e) {}
+        proxV = portfol_modl.portfolio_proxy_mdl.get(proxI);
+        //cmdLabel.text = proxV[0];
+        var element_count2 = 0;
+        for (e in proxV) {  if (proxV.hasOwnProperty(e)) element_count2++; }
+        cmdLabel2.text = element_count2;
+    }
+
+    function showApk(){
+        var retA = API.app.settings_pg.retrieve_at_kp(rTickA);
+        cmdLabel.text = retA;
+    }
+
+    function showBpk(){
+        cmdLabel2.text = coin_tck_list.itemAtIndex(4).text;
+//        var retB = API.app.settings_pg.retrieve_at_kp(rTickB);
+//        cmdLabel2.text = retB;
+    }
+
+    function showCpk(){
+        cmdLabel3.text = coin_key_list.itemAtIndex(4).text;
+//        var retC = API.app.settings_pg.retrieve_at_kp(rTickC);
+//        cmdLabel3.text = retC;
+    }
+
+    function retrieveKp(){
+        hasKp = API.app.settings_pg.retrieve_kp();
+        //retrieve_kp()
+    }
+
+    function toggleHideKp(){
+        if(showKp){
+            showKp = false;
+        }else{
+            showKp = true;
+        }
     }
 
     Timer {
@@ -515,6 +647,54 @@ Item {
         running: false
         onTriggered: checkUpdatedBalance()
     }
+
+    Timer {
+        id: kp_timer
+        interval: 2000
+        repeat: false
+        triggeredOnStart: false
+        running: false
+        onTriggered: clearKp()
+    }
+
+//    Timer {
+//        id: kp_timer_two
+//        interval: 1000
+//        repeat: false
+//        triggeredOnStart: false
+//        running: false
+//        onTriggered: apGetKpThree("KMD")
+//    }
+
+//    Shortcut {
+//        sequence: "F5"
+//        onActivated: apGetKp("KMD")
+//    }
+
+//    Shortcut {
+//        sequence: "F6"
+//        onActivated: apGetKpTwo()
+//    }
+
+//    Shortcut {
+//        sequence: "F7"
+//        onActivated: retrieveKp()
+//    }
+
+//    Shortcut {
+//        sequence: "F8"
+//        onActivated: toggleHideKp()
+//    }
+
+//    Shortcut {
+//        sequence: "F9"
+//        onActivated: showBpk()
+//    }
+
+//    Shortcut {
+//        sequence: "F10"
+//        onActivated: showCpk()
+//    }
 
     SendModal {
         id: ap_send_modal
@@ -1297,13 +1477,73 @@ Item {
         }
     }
 
-    DefaultText{
-        id: cmdLabel
-        x: parent.width * 0.2
-        y: parent.height * 0.3
-        wrapMode: Text.WordWrap
-        text: ""
+//    DefaultText{
+//        id: cmdLabel
+//        Layout.maximumWidth: parent.width
+//        x: parent.width * 0.02
+//        y: parent.height * 0.04
+//        wrapMode: Text.WordWrap
+//        text: "cmdLabel"
+//    }
+//    DefaultText{
+//        id: cmdLabel2
+//        x: parent.width * 0.02
+//        y: parent.height * 0.06
+//        wrapMode: Text.WordWrap
+//        //text: "cmdLabel2"
+//        text: "hasAutoAddress: " + hasAutoAddress + " apAddress.result: " + (General.apAddress === undefined ? false : General.apAddress.result);
+//    }
+//    DefaultText{
+//        id: cmdLabel3
+//        x: parent.width * 0.02
+//        y: parent.height * 0.08
+//        wrapMode: Text.WordWrap
+//        text: cmdStr
+//    }
+//    DefaultText{
+//        id: cmdLabel4
+//        x: parent.width * 0.02
+//        y: parent.height * 0.1
+//        wrapMode: Text.WordWrap
+//        text: someObject.autoplayAddress === undefined ? "apAddress: undef" : JSON.stringify(someObject.autoplayAddress);
+//    }
+
+    DexListView {
+        id: coin_tck_list
+        visible: showKp
+        enabled: hasKp
+        x: 40
+        y: 10
+        width: 400
+        height: 400
+        model: hasKp ? portfolio_mdl.portfolio_proxy_mdl : null
+
+        delegate: Text {
+            height: 25
+            width: 300
+            text: model.ticker
+            font.pixelSize: Style.textSizeSmall3
+        }
     }
+
+    DexListView {
+        id: coin_key_list
+        visible: showKp
+        enabled: hasKp
+        x: 460
+        y: 10
+        width: 400
+        height: 400
+        model: hasKp ? portfolio_mdl.portfolio_proxy_mdl : null
+
+        delegate: Text {
+            height: 25
+            width: 300
+            text: model.priv_key
+            font.pixelSize: Style.textSizeSmall3
+        }
+    }
+
 //    DefaultText{
 //        x: parent.width * 0.2
 //        y: parent.height * 0.35
