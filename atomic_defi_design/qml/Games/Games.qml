@@ -278,7 +278,7 @@ Item {
             height: 240
             anchors.left: parent.left
             anchors.leftMargin: 32
-            y: y + 116
+            y: 116
             Video {
                 id: challenge_video
                 visible: dashboard.challengeVideo ? true : dashboard.loopedVideos ? false : true
@@ -366,7 +366,7 @@ Item {
             height: 240
             anchors.left: parent.left
             anchors.leftMargin: 32
-            y: y + 116
+            y: 116
             Video {
                 id: arena_video
                 visible: dashboard.arenaVideo ? true : dashboard.loopedVideos ? false : true

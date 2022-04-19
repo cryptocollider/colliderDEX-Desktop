@@ -890,8 +890,8 @@ Item {
                     FloatingBackground{
                         width: 16
                         height: 16
-                        x: x + 4
-                        y: y + 4
+                        x: 4
+                        y: 4
                         border_color_start: "#313c7d"
                         border_color_end: "#252d5e"
                         DefaultText{
@@ -927,7 +927,7 @@ Item {
                     DefaultText{
                         anchors.right: set_amount_slider.left
                         anchors.rightMargin: hasAutoAddress && hasEnoughBalance ? 4 : 6
-                        y: y + 60
+                        y: 60
                         font: Qt.font({
                             pixelSize: 13,
                             letterSpacing: 0.25,
@@ -940,7 +940,7 @@ Item {
                     DefaultText{
                         anchors.left: set_amount_slider.right
                         anchors.leftMargin: hasAutoAddress && hasEnoughBalance ? 4 : 6
-                        y: y + 60
+                        y: 60
                         font: Qt.font({
                             pixelSize: 13,
                             letterSpacing: 0.25,
@@ -1016,8 +1016,8 @@ Item {
                     FloatingBackground{
                         width: 16
                         height: 16
-                        x: x + 4
-                        y: y + 4
+                        x: 4
+                        y: 4
                         border_color_start: "#313c7d"
                         border_color_end: "#252d5e"
                         DefaultText{
@@ -1075,7 +1075,7 @@ Item {
                     ColumnLayout{
                         anchors.right: throw_amount_slider.left
                         anchors.rightMargin: 4
-                        y: y + 29
+                        y: 29
                         DefaultText{
                             Layout.alignment: Qt.AlignHCenter
                             font: Qt.font({
@@ -1115,7 +1115,7 @@ Item {
                     ColumnLayout{
                         anchors.left: throw_amount_slider.right
                         anchors.leftMargin: 4
-                        y: y + 29
+                        y: 29
                         DefaultText{
                             Layout.alignment: Qt.AlignHCenter
                             font: Qt.font({
@@ -1212,8 +1212,8 @@ Item {
                     FloatingBackground{
                         width: 16
                         height: 16
-                        x: x + 4
-                        y: y + 4
+                        x: 4
+                        y: 4
                         border_color_start: "#313c7d"
                         border_color_end: "#252d5e"
                         DefaultText{
@@ -1271,7 +1271,7 @@ Item {
                     ColumnLayout{
                         anchors.right: throw_rate_slider.left
                         anchors.rightMargin: 4
-                        y: y + 29
+                        y: 29
                         DefaultText{
                             Layout.alignment: Qt.AlignHCenter
                             font: Qt.font({
@@ -1313,7 +1313,7 @@ Item {
                     ColumnLayout{
                         anchors.left: throw_rate_slider.right
                         anchors.leftMargin: 4
-                        y: y + 29
+                        y: 29
                         DefaultText{
                             Layout.alignment: Qt.AlignHCenter
                             font: Qt.font({
