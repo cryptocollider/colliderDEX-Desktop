@@ -67,7 +67,9 @@ namespace atomic_dex
             CoinType,                    ///< Type of the coin
             Address,                     ///< Public address
             PrivKey,                     ///< Priv key
-            PercentMainCurrency
+            PercentMainCurrency,
+            LastPriceTimestamp,
+            PriceProvider
         };
         Q_ENUM(PortfolioRoles)
 
@@ -91,6 +93,7 @@ namespace atomic_dex
 
         //! QML API
         Q_INVOKABLE void clean_priv_keys();
+        Q_INVOKABLE QVariant collider_key(int rowc) const;
 
         //! Public api
         void                            initialize_portfolio(const std::vector<std::string>& tickers);

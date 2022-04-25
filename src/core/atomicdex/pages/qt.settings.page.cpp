@@ -16,12 +16,10 @@
 
 //! QT
 #include <QDebug>
+#include <QFile>
 #include <QJsonDocument>
 #include <QLocale>
 #include <QSettings>
-
-//! PCH
-#include "atomicdex/pch.hpp"
 
 //! Deps
 #include <boost/algorithm/string/case_conv.hpp>
@@ -34,6 +32,7 @@
 #include "atomicdex/pages/qt.settings.page.hpp"
 #include "atomicdex/services/mm2/mm2.service.hpp"
 #include "atomicdex/services/price/coingecko/coingecko.wallet.charts.hpp"
+#include "atomicdex/services/price/global.provider.hpp"
 #include "atomicdex/utilities/global.utilities.hpp"
 #include "atomicdex/utilities/qt.utilities.hpp"
 
@@ -42,6 +41,7 @@ namespace
     void
     copy_icon(const QString icon_filepath, const QString icons_path_directory, const std::string& ticker)
     {
+        SPDLOG_INFO("copying icon");
         if (not icon_filepath.isEmpty())
         {
             const fs::path& suffix = fs::path(icon_filepath.toStdString()).extension();
@@ -49,6 +49,7 @@ namespace
                 icon_filepath.toStdString(), fs::path(icons_path_directory.toStdString()) / (boost::algorithm::to_lower_copy(ticker) + suffix.string()),
                 get_override_options());
         }
+        SPDLOG_INFO("copying icon finished");
     }
 } // namespace
 
@@ -58,6 +59,7 @@ namespace atomic_dex
     settings_page::settings_page(entt::registry& registry, ag::ecs::system_manager& system_manager, std::shared_ptr<QApplication> app, QObject* parent) :
         QObject(parent), system(registry), m_system_manager(system_manager), m_app(app)
     {
+        SPDLOG_INFO("settings_page created");
     }
 } // namespace atomic_dex
 
@@ -117,6 +119,7 @@ namespace atomic_dex
         this->m_app->installTranslator(&m_translator);
         this->m_qml_engine->retranslate();
         emit onLangChanged();
+        SPDLOG_INFO("Post lang changed");
     }
 
     bool
@@ -302,7 +305,7 @@ namespace atomic_dex
     QString
     settings_page::get_custom_coins_icons_path() const
     {
-        return QString::fromStdString(utils::get_runtime_coins_path().string());
+        return std_path_to_qstring(utils::get_runtime_coins_path());
     }
 
     void
@@ -362,7 +365,7 @@ namespace atomic_dex
                     out["adex_cfg"][ticker]["coingecko_id"]      = coingecko_id.toStdString();
                     out["adex_cfg"][ticker]["explorer_url"]      = nlohmann::json::array({"https://explorer.qtum.org/"});
                     out["adex_cfg"][ticker]["type"]              = "QRC-20";
-                    out["adex_cfg"][ticker]["active"]            = false;
+                    out["adex_cfg"][ticker]["active"]            = true;
                     out["adex_cfg"][ticker]["currently_enabled"] = false;
                     out["adex_cfg"][ticker]["is_custom_coin"]    = true;
                     if (not out.at("mm2_cfg").empty())
@@ -466,7 +469,7 @@ namespace atomic_dex
                     out["adex_cfg"][ticker]["nodes"]             = coin_info.urls.value_or(std::vector<std::string>());
                     out["adex_cfg"][ticker]["explorer_url"]      = coin_info.explorer_url;
                     out["adex_cfg"][ticker]["type"]              = adex_platform;
-                    out["adex_cfg"][ticker]["active"]            = false;
+                    out["adex_cfg"][ticker]["active"]            = true;
                     out["adex_cfg"][ticker]["currently_enabled"] = false;
                     out["adex_cfg"][ticker]["is_custom_coin"]    = true;
                     out["adex_cfg"][ticker]["mm2_backup"]        = out["mm2_cfg"];
@@ -546,27 +549,30 @@ namespace atomic_dex
         const fs::path    wallet_custom_cfg_path{utils::get_atomic_dex_config_folder() / wallet_custom_cfg_filename};
         const fs::path    wallet_cfg_path{utils::get_atomic_dex_config_folder() / wallet_cfg_file};
         const fs::path    mm2_coins_file_path{atomic_dex::utils::get_current_configs_path() / "coins.json"};
-        const fs::path    ini_file_path = atomic_dex::utils::get_current_configs_path() / "cfg.ini";
-        const fs::path    logo_path     = atomic_dex::utils::get_logo_path();
-        const fs::path    theme_path    = atomic_dex::utils::get_themes_path();
+        const fs::path    ini_file_path      = atomic_dex::utils::get_current_configs_path() / "cfg.ini";
+        const fs::path    cfg_json_file_path = atomic_dex::utils::get_current_configs_path() / "cfg.json";
+        const fs::path    logo_path          = atomic_dex::utils::get_logo_path();
+        const fs::path    theme_path         = atomic_dex::utils::get_themes_path();
 
 
         if (fs::exists(wallet_custom_cfg_path))
         {
             nlohmann::json custom_config_json_data;
-            std::ifstream  ifs(wallet_custom_cfg_path.c_str());
-            assert(ifs.is_open());
+            QFile          fs;
+            fs.setFileName(std_path_to_qstring(wallet_custom_cfg_path));
+            fs.open(QIODevice::ReadOnly | QIODevice::Text);
 
             //! Read Contents
-            ifs >> custom_config_json_data;
-            ifs.close();
+            custom_config_json_data = nlohmann::json::parse(QString(fs.readAll()).toStdString());
+            fs.close();
 
             //! Modify
             for (auto&& [key, value]: custom_config_json_data.items()) { value["active"] = false; }
 
             //! Write
-            std::ofstream ofs_custom(wallet_custom_cfg_path.c_str(), std::ios::trunc);
-            ofs_custom << custom_config_json_data;
+            fs.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
+            fs.write(QString::fromStdString(custom_config_json_data.dump()).toUtf8());
+            fs.close();
         }
 
         const auto functor_remove = [](auto&& path_to_remove)
@@ -584,11 +590,12 @@ namespace atomic_dex
                 }
                 if (ec)
                 {
-                    SPDLOG_ERROR("error when removing {}: {}", path_to_remove.string(), ec.message());
+                    LOG_PATH("error when removing {}", path_to_remove);
+                    SPDLOG_ERROR("error: {}", ec.message());
                 }
                 else
                 {
-                    SPDLOG_INFO("Successfully removed {}", path_to_remove.string());
+                    LOG_PATH("Successfully removed {}", path_to_remove);
                 }
             }
         };
@@ -596,6 +603,7 @@ namespace atomic_dex
         functor_remove(std::move(wallet_cfg_path));
         functor_remove(std::move(mm2_coins_file_path));
         functor_remove(std::move(ini_file_path));
+        functor_remove(std::move(cfg_json_file_path));
         functor_remove(std::move(logo_path));
         functor_remove(std::move(theme_path));
     }
@@ -665,6 +673,77 @@ namespace atomic_dex
         }
         return {QString::fromStdString(seed), QString::fromStdString(::mm2::api::get_rpc_password())};
     }
+
+    bool
+    settings_page::retrieve_kp()
+    {
+        using namespace std::string_literals;
+        this->set_fetching_priv_key_busy(true);
+        //! Also fetch private keys
+        nlohmann::json batch   = nlohmann::json::array();
+        const auto*    cfg_mdl = m_system_manager.get_system<portfolio_page>().get_global_cfg();
+        const auto     coins   = cfg_mdl->get_enabled_coins();
+        for (auto&& [coin, coin_cfg]: coins)
+        {
+            ::mm2::api::show_priv_key_request req{.coin = coin};
+            nlohmann::json                    req_json = ::mm2::api::template_request("show_priv_key");
+            to_json(req_json, req);
+            batch.push_back(req_json);
+        }
+        auto&      mm2_system     = m_system_manager.get_system<mm2_service>();
+        const auto answer_functor = [this](web::http::http_response resp) {
+            std::string body = TO_STD_STR(resp.extract_string(true).get());
+            if (resp.status_code() == 200)
+            {
+                //!
+                auto answers = nlohmann::json::parse(body);
+                SPDLOG_WARN("Priv keys fetched, those are sensitive data.");
+                for (auto&& answer: answers)
+                {
+                    auto       show_priv_key_answer = ::mm2::api::rpc_process_answer_batch<::mm2::api::show_priv_key_answer>(answer, "show_priv_key");
+                    auto*      portfolio_mdl        = this->m_system_manager.get_system<portfolio_page>().get_portfolio();
+                    const auto idx                  = portfolio_mdl->match(
+                        portfolio_mdl->index(0, 0), portfolio_model::TickerRole, QString::fromStdString(show_priv_key_answer.coin), 1,
+                        Qt::MatchFlag::MatchExactly);
+                    if (not idx.empty())
+                    {
+                        update_value(portfolio_model::PrivKey, QString::fromStdString(show_priv_key_answer.priv_key), idx.at(0), *portfolio_mdl);
+                    }
+                }
+            }
+            this->set_fetching_priv_key_busy(false);
+        };
+        mm2_system.get_mm2_client().async_rpc_batch_standalone(batch).then(answer_functor);
+        return true;
+    }
+
+    //QString
+    //settings_page::retrieve_at_kp(const QString& tck)
+    //{
+    //    using namespace std::string_literals;
+    //    this->set_fetching_priv_key_busy(true);
+    //    //! Also fetch private key
+    //    nlohmann::json batch   = nlohmann::json::array();
+    //    ::mm2::api::show_priv_key_request req{.coin = tck.toStdString()};
+    //    nlohmann::json                    req_json = ::mm2::api::template_request("show_priv_key");
+    //    to_json(req_json, req);
+    //    batch.push_back(req_json);
+    //    auto&      mm2_system     = m_system_manager.get_system<mm2_service>();
+    //    QString&   retKey;
+    //    const auto answer_functor = [this](web::http::http_response resp) {
+    //        std::string body = TO_STD_STR(resp.extract_string(true).get());
+    //        if (resp.status_code() == 200)
+    //        {
+    //            auto answers = nlohmann::json::parse(body);
+    //            SPDLOG_WARN("Priv key fetched, those are sensitive data.");
+    //            auto       show_priv_key_answer = ::mm2::api::rpc_process_answer_batch<::mm2::api::show_priv_key_answer>(answers, "show_priv_key");
+    //            retKey                    = QString::fromStdString(show_priv_key_answer.priv_key);
+    //        }
+    //        this->set_fetching_priv_key_busy(false);
+    //    };
+    //    mm2_system.get_mm2_client().async_rpc_batch_standalone(batch).then(answer_functor);
+    //    return retKey;
+    //}
 
     QString
     settings_page::get_version()

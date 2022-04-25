@@ -4,12 +4,17 @@ import QtQuick.Controls 2.15
 
 import QtGraphicalEffects 1.0
 import "../Components"
-import "../Constants"
+import "../Constants" as Constants
+import "../Games"
+import App 1.0
 
 Item {
     id: root
 
     property bool section_enabled: true
+    property bool isCollider: false
+    property bool isCoinSight: false
+    property bool isWallet: false
     property alias mouse_area: mouse_area
 
     property int dashboard_index
@@ -20,16 +25,17 @@ Item {
     readonly property bool selected: dashboard.current_page === dashboard_index
 
     function toggleDarkUI() {
-        Style.dark_theme = !Style.dark_theme
+        Constants.Style.dark_theme = !Constants.Style.dark_theme
     }
 
     function togglePrivacyMode() {
-        General.privacy_mode = !General.privacy_mode
+        Constants.General.privacy_mode = !Constants.General.privacy_mode
+        switch_input.checked = Constants.General.privacy_mode
     }
 
-    height: Style.sidebarLineHeight
+    height: Constants.Style.sidebarLineHeight
 
-    DefaultSwitch {
+    DexSwitch {
         id: switch_input
         visible: dashboard_index === idx_dashboard_light_ui ||
                  dashboard_index === idx_dashboard_privacy_mode
@@ -44,12 +50,13 @@ Item {
         height: txt.font.pixelSize * 1.4
         anchors.left: parent.left
         anchors.leftMargin: 30
-        scale: 1.2
+        scale: 1
         anchors.verticalCenter: parent.verticalCenter
         visible: false
     }
+    
     DropShadow {
-        visible: selected
+        visible: false//selected
         anchors.fill: img
         source: img
         cached: false
@@ -63,12 +70,13 @@ Item {
         color: "#40000000"
         smooth: true
     }
+
     DefaultColorOverlay {
         id: img_color
         visible: img.source != ""
         anchors.fill: img
         source: img
-        color: txt.font.weight === Font.Medium ? Style.colorSidebarIconHighlighted : txt.color
+        color: General.inColliderApp && isCollider && dashboard.current_page === idx_dashboard_games ? "#910000" : txt.font.weight === Font.Medium ? DexTheme.foregroundColor : txt.color
     }
 
     DexLabel {
@@ -76,29 +84,30 @@ Item {
         anchors.left: parent.left
         anchors.leftMargin: 70
         anchors.verticalCenter: parent.verticalCenter
-        scale: Qt.platform.os==="windows"? 1.2 : API.app.settings_pg.lang=="fr"? 0.85 : 1
+        //scale: Qt.platform.os==="windows"? 1.2 : API.app.settings_pg.lang=="fr"? 0.85 : 1
         font: Qt.font({
-            pixelSize: 16*_font.fontDensity*_font.languageDensity,
-            letterSpacing: 0.5,
-            family: _font.fontFamily,
+            pixelSize: 13 * DexTypo.fontDensity,
+            letterSpacing: 0.25,
+            family: DexTypo.fontFamily,
             weight: Font.Normal
         })
-        color: !section_enabled ? Style.colorTextDisabled :
-                selected ? Style.colorSidebarSelectedText :
-                mouse_area.containsMouse ? Style.colorThemePassiveLight :
-                                           Style.colorThemePassive
+        style: Text.Normal
+        color: !section_enabled ? Constants.Style.colorTextDisabled :
+                selected ? Constants.Style.colorSidebarSelectedText :
+                mouse_area.containsMouse ? Constants.Style.colorThemePassiveLight :
+                                           Constants.Style.colorThemePassive
     }
     DropShadow {
-        visible: selected
+        visible: false//selected
         anchors.fill: txt
         source: txt
         cached: false
         horizontalOffset: 0
-        verticalOffset: 3
-        radius: 3
+        verticalOffset: 1
+        radius: 0
         samples: 4
         spread: 0
-        scale: Qt.platform.os==="windows"? 1.2 : API.app.settings_pg.lang=="fr"? 0.85 : 1
+        scale: txt.scale
         color: "#40000000"
         smooth: true
     }
@@ -122,7 +131,62 @@ Item {
             else if(dashboard_index === idx_dashboard_privacy_mode) {
                 togglePrivacyMode()
             }
-            else dashboard.current_page = dashboard_index
+            else if(isCollider && General.inColliderApp && dashboard.current_page === idx_dashboard_games){
+                if(General.inAuto){
+                    General.inAuto = false
+                }else{
+                    if(dashboard.viewingArena){
+                        General.inArena = false
+                        General.inAuto = true
+                        dashboard.viewingArena = false
+                    }else{
+                        General.inArena = false
+                        General.inChallenge = false
+                    }
+                }
+            }
+//            else if(dashboard.hasCoinSight){
+//                if(dashboard.inCoinSight && General.openedCoinSight){
+//                    coin_sight_timer.restart()
+//                }
+//                if(isCoinSight){
+//                    coin_sight_timer.stop()
+//                    dashboard.idleCoinSight = false
+//                    if(!General.openedCoinSight){
+//                        webCoinS.url = "https://coinsig.ht"
+//                        General.openedCoinSight = true
+//                    }
+//                }
+//            }
+            else{
+                if(dashboard.current_page === idx_dashboard_wallet){
+                    General.walletCurrentTicker = api_wallet_page.ticker
+                }else if(dashboard.current_page === idx_dashboard_games){
+                    General.apCurrentTicker = api_wallet_page.ticker
+                }else{
+                }
+
+                if(isWallet){
+                    var tmpWtTick = General.walletCurrentTicker
+                    api_wallet_page.ticker = tmpWtTick
+                    dashboard.current_ticker = api_wallet_page.ticker
+                }else if(isCollider){
+                    var tmpApTick = General.apCurrentTicker
+                    api_wallet_page.ticker = tmpApTick
+                    dashboard.current_ticker = api_wallet_page.ticker
+                }else if(dashboard_index === idx_dashboard_collider_discord){
+                    dashboard.openedDisc = true
+                }else if(isCoinSight && !General.openedCoinSight){
+                    webCoinS.url = "https://coinsig.ht"
+                    General.openedCoinSight = true
+                }
+//                if(General.inAuto){
+//                    var tmpTick = General.apCurrentTicker
+//                    api_wallet_page.ticker = tmpTick
+//                    dashboard.current_ticker = api_wallet_page.ticker
+//                }
+                dashboard.switchPage(dashboard_index)
+            }
         }
     }
 

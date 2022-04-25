@@ -43,7 +43,7 @@ RowLayout {
             if(combo.index_changed) {
                 combo.index_changed = false
                 // Set the ticker
-                if(currentValue !== undefined) 
+                if(currentValue !== undefined)
                     setPair(left_side, currentValue)
             }
             // List change

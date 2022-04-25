@@ -3,8 +3,10 @@ import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
 import QtQuick.Window 2.2
 import "../Constants"
+import App 1.0
 
 Item {
+    id: _control
     property alias back_image: back_image
     property alias back_image_path: back_image.source
     property alias image: image
@@ -13,14 +15,18 @@ Item {
     property alias content: inner_space.sourceComponent
     property alias bottom_content: bottom_content.sourceComponent
     property double image_margin: 5
+    property string backgroundColor: DexTheme.dexBoxBackgroundColor
+    property string borderColor: DexTheme.rectangleBorderColor
+    property bool isFirstLaunch: false
 
     Image {
         id: back_image
-        source: General.image_path + "final-background.jpg"
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
+        source: General.image_path + "final-background.gif"
+//        anchors.horizontalCenter: parent.horizontalCenter
+//        anchors.verticalCenter: parent.verticalCenter
         width: window.width
-        height: window.height
+        height: window.height - 30
+        y: 0
         visible: true
 //        antialiasing: true
     }
@@ -29,8 +35,11 @@ Item {
         id: window_layout
 
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
+        //anchors.verticalCenter: parent.verticalCenter
+        //anchors.verticalCenterOffset: isFirstLaunch ? 80 : 0
         transformOrigin: Item.Center
+        y: isFirstLaunch ? -80 : (window.height * 0.5) - (height * 0.5)
+        //anchors.topMargin: isFirstLaunch ? -20 : 0
         spacing: image_margin
 
         DefaultImage {
@@ -38,7 +47,7 @@ Item {
 //            Layout.maximumWidth: 300
 //            Layout.maximumHeight: Layout.maximumWidth * paintedHeight/paintedWidth
 
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.alignment: Qt.AlignHCenter
             antialiasing: true
         }
 
@@ -47,24 +56,30 @@ Item {
 
             leftPadding: 30
             rightPadding: leftPadding
-            topPadding: leftPadding * 0.5
+            //topPadding: leftPadding * 0.5
             bottomPadding: topPadding
+            Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: isFirstLaunch ? -90 : 0
 
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-
-            background: FloatingBackground {
-                color: theme.backgroundColor
+            background: DexRectangle {
+                color: _control.backgroundColor
+                border {
+                    color: DexTheme.portfolioPieGradient ? 'transparent' : _control.borderColor
+                }
+                gradient: DexTheme.portfolioPieGradient ? app.globalGradient : undefined
             }
 
-            Loader {
+            contentChildren: Loader {
                 id: inner_space
             }
         }
+    }
 
-        Loader {
-            id: bottom_content
-            Layout.topMargin: 30
-            Layout.alignment: Qt.AlignHCenter
-        }
+    Loader {
+        id: bottom_content
+        //Layout.alignment: Qt.AlignHCenter
+        anchors.horizontalCenter: parent.horizontalCenter
+        //Layout.topMargin: isFirstLaunch ? -80 : 0
+        y: window.height - 95
     }
 }
