@@ -2,9 +2,7 @@ import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
 import QtGraphicalEffects 1.0
-import QtWebChannel 1.0
-import QtWebEngine 1.7
-import QtQuick.Window 2.2
+import QtWebEngine 1.10
 
 import "../Components"
 import "../Constants"
@@ -15,197 +13,81 @@ import "../Wallet"
 import "../Exchange"
 import "../Settings"
 import "../Support"
-import "../Sidebar"
+import "../Sidebar" as Sidebar
 import "../Fiat"
-import "../Games"
-import "../ArbBots"
 import "../Settings" as SettingsPage
+import "../Screens"
+import Dex.Themes 1.0 as Dex
+//import Dex.Sidebar 1.0 as Dex
 
 
 Item {
     id: dashboard
 
+    enum PageType
+    {
+        Portfolio,
+        Wallet,
+        DEX,            // DEX == Trading page
+        Addressbook,
+        Support
+    }
+
+    property var currentPage: Dashboard.PageType.Portfolio
+    property var availablePages: [portfolio, wallet, exchange, addressbook, support]
+
     property alias webEngineView: webEngineView
 
-    readonly property int idx_dashboard_portfolio: 0
-    readonly property int idx_dashboard_wallet: 1
-    readonly property int idx_dashboard_exchange: 2
-    readonly property int idx_dashboard_addressbook: 3
-    readonly property int idx_dashboard_news: 4
-    readonly property int idx_dashboard_dapps: 5
-    readonly property int idx_dashboard_settings: 6
-    readonly property int idx_dashboard_support: 7
-    readonly property int idx_dashboard_light_ui: 8
-    readonly property int idx_dashboard_privacy_mode: 9
-    readonly property int idx_dashboard_fiat_ramp: 10
-    readonly property int idx_dashboard_games: 11
-    readonly property int idx_dashboard_coin_sight: 12
-    readonly property int idx_dashboard_collider_discord: 13
-    readonly property int idx_dashboard_arb_bots: 14
-
-    //readonly property int idx_exchange_trade: 3
     readonly property int idx_exchange_trade: 0
     readonly property int idx_exchange_orders: 1
     readonly property int idx_exchange_history: 2
 
-    property bool sentDexUserData: false
-    property bool hasCoinSight: false
-    property bool inCoinSight: current_page === idx_dashboard_coin_sight ? true : false
-    //property bool idleCoinSight: false
-    property bool isDevToolSmall: false
-    property bool isDevToolLarge: false
-    property bool openedDisc: false
-    property bool viewingArena: false
-    property bool loopedVideos: false
-    property bool challengeVideo: false
-    property bool arenaVideo: false
-
-    //list of only pub addresses which gets assigned value from games script
-    property var dataList
-
-    //list of pub addresses and signature to send to html
-    property var dexList:
-    {
-        "data": dataList,
-        "sign": "signature"
-    }
-
     property var current_ticker
 
-    Layout.fillWidth: true
+    property var notifications_list: ([])
 
-    function openLogsFolder() {
-        Qt.openUrlExternally(General.os_file_prefix + API.app.settings_pg.get_log_folder())
-    }
+    readonly property var portfolio_mdl: API.app.portfolio_pg.portfolio_mdl
+    property var portfolio_coins: portfolio_mdl.portfolio_proxy_mdl
 
-    readonly property
-    var api_wallet_page: API.app.wallet_pg
-    readonly property
-    var current_ticker_infos: api_wallet_page.ticker_infos
-    readonly property bool can_change_ticker: !api_wallet_page.tx_fetching_busy
+    readonly property var   api_wallet_page: API.app.wallet_pg
+    readonly property var   current_ticker_infos: api_wallet_page.ticker_infos
+    readonly property bool  can_change_ticker: !api_wallet_page.tx_fetching_busy
+    readonly property bool  is_dex_banned: !API.app.ip_checker.ip_authorized
 
     readonly property alias loader: loader
     readonly property alias current_component: loader.item
-    property int current_page: idx_dashboard_portfolio
 
-    onCurrent_pageChanged: {
-        app.deepPage = current_page * 10
+
+    function openLogsFolder()
+    {
+        Qt.openUrlExternally(General.os_file_prefix + API.app.settings_pg.get_log_folder())
     }
 
-
-    readonly property bool is_dex_banned: !API.app.ip_checker.ip_authorized
-
-    function inCurrentPage() {
-        return app.current_page === idx_dashboard
-    }
+    function inCurrentPage() { return app.current_page === idx_dashboard }
 
     function switchPage(page)
     {
         if (loader.status === Loader.Ready)
-            current_page = page
+            currentPage = page
         else
             console.warn("Tried to switch to page %1 when loader is not ready yet.".arg(page))
     }
 
-    property
-    var notifications_list: ([])
+    function resetCoinFilter() { portfolio_coins.setFilterFixedString("") }
 
-    readonly property
-    var portfolio_mdl: API.app.portfolio_pg.portfolio_mdl
-    property
-    var portfolio_coins: portfolio_mdl.portfolio_proxy_mdl
-
-    function resetCoinFilter() {
-        portfolio_coins.setFilterFixedString("")
-    }
-
-
-    function openTradeViewWithTicker() {
+    function openTradeViewWithTicker()
+    {
         dashboard.loader.onLoadComplete = () => {
             dashboard.current_component.openTradeView(api_wallet_page.ticker)
         }
     }
 
-    function devToolsSmall(){
-        if(isDevToolSmall === true){
-            isDevToolSmall = false;
-        }else{
-            isDevToolLarge = false;
-            isDevToolSmall = true;
-        }
-    }
+    Layout.fillWidth: true
 
-    function devToolsLarge(){
-        if(isDevToolLarge === true){
-            isDevToolLarge = false;
-        }else{
-            isDevToolSmall = false;
-            isDevToolLarge = true;
-        }
-    }
-
-//    function checkClc(){ //checks CLC amount for enabling coinSight
-//        if(General.autoPlaying && (autoPlay.throwSeconds < 5)){
-//            return
-//        }else if(api_wallet_page.is_send_busy || api_wallet_page.is_broadcast_busy){
-//            return
-//        }else{
-//            var clcTick = "CLC"
-//            var tempCurrentTick = api_wallet_page.ticker
-//            api_wallet_page.ticker = clcTick
-//            dashboard.current_ticker = api_wallet_page.ticker
-//            if(current_ticker_infos.balance >= 100){
-//                hasCoinSight = true
-//            }
-//            api_wallet_page.ticker = tempCurrentTick
-//            dashboard.current_ticker = api_wallet_page.ticker
-//        }
-//    }
-
-//    Timer {
-//        id: coin_sight_timer
-//        interval: 600000
-//        repeat: false
-//        triggeredOnStart: false
-//        running: false
-//        onTriggered: {idleCoinSight = true}
-//    }
-
-    Timer {
-        interval: 250
-        repeat: false
-        triggeredOnStart: false
-        running: true
-        onTriggered: autoPlay.getColliderData()
-    }
-
-//    Shortcut {
-//        sequence: "F8"
-//        onActivated: checkClc()
-//    }
-
-//    Shortcut {
-//        sequence: "F9"
-//        onActivated: dashboard.devToolsSmall()
-//    }
-
-//    Shortcut {
-//        sequence: "F10"
-//        onActivated: dashboard.devToolsLarge()
-//    }
-
-    Image {
-        source: General.image_path + "final-background.gif"
-        width: window.width
-        height: window.height
-        y: 0
-        visible: true
-    }
+    onCurrentPageChanged: sidebar.currentLineType = currentPage
 
     // Al settings depends this modal
-    SettingsPage.SettingModal {
-        id: setting_modal
-    }
+    SettingsPage.SettingModal { id: setting_modal }
 
     // Force restart modal: opened when the user has more coins enabled than specified in its configuration
     ForceRestartModal {
@@ -220,309 +102,69 @@ Item {
         }
     }
 
-    ModalLoader {
-        id: dex_cannot_send_modal
-
-        sourceComponent: BasicModal {
-            ModalContent {
-                title: qsTr("Cannot send to this address")
-
-                DefaultText {
-                    text: qsTr("Your balance is empty")
-                }
-
-                DefaultButton {
-                    text: qsTr("Ok")
-
-                    onClicked: dex_cannot_send_modal.close()
-                }
-            }
-        }
-    }
-
-    ModalLoader {
-        property string address
-        id: dex_send_modal
-        onLoaded: item.address_field.text = address
-        sourceComponent: SendModal {
-            address_field.readOnly: true
-        }
-    }
-
     // Right side
-    AnimatedRectangle {
-        //color: DexTheme.backgroundColorDeep
-        color: 'transparent'
+    AnimatedRectangle
+    {
         width: parent.width - sidebar.width
         height: parent.height
         x: sidebar.width
         border.color: 'transparent'
 
         // Modals
-        ModalLoader {
+        ModalLoader
+        {
             id: enable_coin_modal
-            sourceComponent: EnableCoinModal {
+            sourceComponent: EnableCoinModal
+            {
                 anchors.centerIn: Overlay.overlay
             }
         }
 
-        Component {
+        Component
+        {
             id: portfolio
 
             Portfolio {}
         }
 
-        Component {
+        Component
+        {
             id: wallet
 
             Wallet {}
         }
 
-        Component {
+        Component
+        {
             id: exchange
 
             Exchange {}
         }
 
-        Component {
+        Component
+        {
             id: addressbook
 
             AddressBook {}
         }
 
-        Component {
-            id: arb_bots
-
-            ArbBots {}
-        }
-
-        Component {
-            id: games
-
-            Games {}
-        }
-
-        Component {
-            id: news
-
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                DefaultText {
-                    anchors.centerIn: parent
-                    text_value: qsTr("Content for this section will be added later. Stay tuned!")
-                }
-            }
-        }
-
-        Component {
-            id: dapps
-
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                DefaultText {
-                    anchors.centerIn: parent
-                    text_value: qsTr("Content for this section will be added later. Stay tuned!")
-                }
-            }
-        }
-
-        AutoPlay {
-            id: autoPlay
-        }
-
-        Component {
-            id: coinSight
-
-            CoinSight {}
-        }
-
-
-        Component {
-            id: colliderDiscord
-
-            ColliderDiscord {}
-        }
-
-        DiscordWeb {}
-
-        // -------------------------------------------------------------------------------------
-
-        QtObject {
-            id: someObject
-            // ID, under which this object will be known at WebEngineView side
-            WebChannel.id: "qmlBackend"
-            property string someProperty: "QML property string"
-            property var autoplayAddress
-            property string dexUserData: JSON.stringify(dashboard.dexList)
-            property var coinData
-            signal someSignal(string message);
-            signal apSignal(string apMessage);
-            signal getAutoAddress(string tickText);
-            signal dexAutoLogin(string tempText);
-            signal getCoinData();
-            signal loadStats();
-
-
-            function preloadCoin(typeID, address) {
-                // Checks if the coin has balance.
-                if (parseFloat(API.app.get_balance(typeID)) === 0) {
-                    dex_cannot_send_modal.open()
-                }
-                else{ // If the coin has balance, opens the send modal.
-                    api_wallet_page.ticker = typeID
-                    dashboard.current_ticker = api_wallet_page.ticker
-                    dex_send_modal.address = address
-                    dex_send_modal.open()
-                }
-            }
-
-            function autoAddressResponder(addressTxt){
-                General.apAddress = JSON.parse(addressTxt);
-                autoPlay.recievedAutoAddress();
-            }
-
-            //called from html, & returns data.
-            function getDexUserData() {
-                return JSON.stringify(dexList);
-            }
-
-            function popKp(){
-                autoPlay.apPopKp();
-            }
-
-            function getKp(ticker){
-                return autoPlay.apGetKp(ticker);
-            }
-
-//            function getKpTwo(tickerTwo){
-//                return JSON.stringify(autoPlay.apGetKp(tickerTwo));
-//            }
-
-            //called from html to change signal
-//            function sigChangeTxt(newSig) {
-//                txtWeb.text = newSig;
-//            }
-        }
-
-        QtObject {
-            id: challengeObject
-            WebChannel.id: "challengeBackend"
-            property string clcAddy: ""
-        }
-
-        QtObject {
-            id: coinSightObject
-            WebChannel.id: "coinSightBackend"
-
-//            function checkClcAmount(){
-//                checkClc()
-//            }
-        }
-
-//        Text {
-//            id: txtWeb
-//            text: "Some text"
-//            onTextChanged: {
-//                //changed signal will trigger a function at html side
-//                someObject.someSignal(text)
-//                txtWeb.text = "Signal Sent from callback to HTML"
-//                someObject.apSignal(text)
-//            }
-//        }
-
-        WebEngineView {
-            id: webIndex
-//            anchors.fill: parent
-            width: dashboard.isDevToolLarge ? parent.width - 600 : dashboard.isDevToolSmall ? parent.width - 300 : parent.width
-            height: parent.height
-            //enabled: General.autoPlaying ? true : General.inArena && current_page == idx_dashboard_games ? true : false
-            enabled: true
-            visible: General.inArena && current_page == idx_dashboard_games ? true : false
-            audioMuted: General.inArena && current_page == idx_dashboard_games ? false : true
-            settings.pluginsEnabled: true
-            devToolsView: devInspect
-            url: ""
-//            url: "qrc:///atomic_defi_design/qml/Games/testCom.html"
-            webChannel: channel
-        }
-
-        WebEngineView {
-            id: webChallenge
-            width: dashboard.isDevToolLarge ? parent.width - 600 : dashboard.isDevToolSmall ? parent.width - 300 : parent.width
-            height: parent.height
-            enabled: General.inChallenge && current_page == idx_dashboard_games ? true : false
-            visible: General.inChallenge && current_page == idx_dashboard_games ? true : false
-            settings.pluginsEnabled: true
-            devToolsView: devInspect
-            url: ""
-            webChannel: channel
-        }
-
-        WebEngineView {
-            id: webCoinS
-            //enabled: hasCoinSight && General.openedCoinSight && !idleCoinSight ? true : false
-            //visible: enabled && inCoinSight ? true : false
-            enabled: General.openedCoinSight && inCoinSight ? true : false
-            visible: enabled
-            width: dashboard.isDevToolLarge ? parent.width - 600 : dashboard.isDevToolSmall ? parent.width - 300 : parent.width
-            height: parent.height
-            settings.pluginsEnabled: true
-            devToolsView: devInspect
-            url: ""
-            webChannel: channel
-        }
-
-        WebEngineView {
-            id: devInspect
-            width: dashboard.isDevToolLarge ? 600 : dashboard.isDevToolSmall ? 300 : 0
-            height: parent.height
-            x: dashboard.isDevToolLarge ? parent.width - 600 : dashboard.isDevToolSmall ? parent.width - 300 : 0
-            enabled: !General.inAuto && General.inColliderApp && (current_page == idx_dashboard_games) && (dashboard.isDevToolLarge || dashboard.isDevToolSmall) ? true : false
-            visible: !General.inAuto && General.inColliderApp && (current_page == idx_dashboard_games) && (dashboard.isDevToolLarge || dashboard.isDevToolSmall) ? true : false
-            settings.pluginsEnabled: true
-            inspectedView: General.inArena ? webIndex : General.inChallenge ? webChallenge : null
-        }
-
-//		WebEngineView{
-//            id: webGame
-//            anchors.fill: parent
-//            enabled: General.inArena && current_page == 11 ? true : false
-////            visible: General.inArena && current_page == 11 ? true : false
-//			visible: false
-//            settings.pluginsEnabled: true
-//            url: "https://cryptocollider.com/app"
-//        }
-
-        WebChannel {
-            id: channel
-            registeredObjects: [someObject, challengeObject, coinSightObject]
-        }
-
-        //---------------------------------------------------------------------------------------
-
-        Component {
+        Component
+        {
             id: settings
 
-            Settings {
+            Settings
+            {
                 Layout.alignment: Qt.AlignCenter
             }
         }
 
-        Component {
+        Component
+        {
             id: support
 
-            Support {
+            Support
+            {
                 Layout.alignment: Qt.AlignCenter
-            }
-        }
-
-        Component {
-            id: fiat_ramp
-
-            FiatRamp {
-
             }
         }
 
@@ -532,53 +174,25 @@ Item {
             backgroundColor: "transparent"
         }
 
-        DefaultLoader {
+        DefaultLoader
+        {
             id: loader
 
             anchors.fill: parent
             transformOrigin: Item.Center
             asynchronous: true
 
-            sourceComponent: {
-                switch (current_page) {
-                    case idx_dashboard_portfolio:
-                        return portfolio
-                    case idx_dashboard_wallet:
-                        return wallet
-                    case idx_dashboard_exchange:
-                        return exchange
-                    case idx_dashboard_addressbook:
-                        return addressbook
-                    case idx_dashboard_news:
-                        return news
-                    case idx_dashboard_dapps:
-                        return dapps
-                    case idx_dashboard_settings:
-                        return settings
-                    case idx_dashboard_support:
-                        return support
-                    case idx_dashboard_fiat_ramp:
-                        return fiat_ramp
-                    case idx_dashboard_games:
-                        return games
-                    case idx_dashboard_coin_sight:
-                        return coinSight
-                    case idx_dashboard_collider_discord:
-                        return colliderDiscord
-                    case idx_dashboard_arb_bots:
-                        return arb_bots
-                    default:
-                        return undefined
-                }
-            }
+            sourceComponent: availablePages[currentPage]
         }
 
-        Item {
+        Item
+        {
             visible: !loader.visible
 
             anchors.fill: parent
 
-            DexBusyIndicator {
+            DefaultBusyIndicator
+            {
                 anchors.centerIn: parent
                 running: !loader.visible
             }
@@ -586,45 +200,42 @@ Item {
     }
 
     // Sidebar, left side
-    Sidebar {
+    Sidebar.Main
+    {
         id: sidebar
-        y: -30
+
+        enabled: loader.status === Loader.Ready
+
+        onLineSelected: currentPage = lineType;
+        onSettingsClicked: setting_modal.open()
     }
 
-    DropShadow {
-        anchors.fill: sidebar
-        source: sidebar
-        cached: false
-        horizontalOffset: 0
-        verticalOffset: 0
-        radius: DexTheme.sidebarShadowRadius
-        samples: 32
-        spread: 0
-        color: DexTheme.colorSidebarDropShadow
-        smooth: true
-    }
-
-    ModalLoader {
+    ModalLoader
+    {
         id: add_custom_coin_modal
         sourceComponent: AddCustomCoinModal {}
     }
 
     // CEX Rates info
-    ModalLoader {
+    ModalLoader
+    {
         id: cex_rates_modal
         sourceComponent: CexInfoModal {}
     }
-    ModalLoader {
+    ModalLoader
+    {
         id: min_trade_modal
         sourceComponent: MinTradeModal {}
     }
 
-    ModalLoader {
+    ModalLoader
+    {
         id: restart_modal
         sourceComponent: RestartModal {}
     }
 
-    function getStatusColor(status) {
+    function getStatusColor(status)
+    {
         switch (status) {
             case "matching":
                 return Style.colorYellow
@@ -633,14 +244,15 @@ Item {
             case "refunding":
                 return Style.colorOrange
             case "successful":
-                return DexTheme.greenColor
+                return Dex.CurrentTheme.sidebarLineTextHovered
             case "failed":
             default:
                 return DexTheme.redColor
         }
     }
 
-    function isSwapDone(status) {
+    function isSwapDone(status)
+    {
         switch (status) {
             case "matching":
             case "matched":
@@ -654,7 +266,8 @@ Item {
         }
     }
 
-    function getStatusStep(status) {
+    function getStatusStep(status)
+    {
         switch (status) {
             case "matching":
                 return "0/3"
@@ -673,7 +286,28 @@ Item {
         }
     }
 
-    function getStatusText(status, short_text=false) {
+    function getStatusFontSize(status)
+    {
+        switch (status) {
+            case "matching":
+                return 9
+            case "matched":
+                return 9
+            case "ongoing":
+                return 9
+            case "successful":
+                return 16
+            case "refunding":
+                return 16
+            case "failed":
+                return 12
+            default:
+                return 9
+        }
+    }
+
+    function getStatusText(status, short_text=false)
+    {
         switch(status) {
             case "matching":
                 return short_text ? qsTr("Matching") : qsTr("Order Matching")
@@ -692,12 +326,15 @@ Item {
         }
     }
 
-    function getStatusTextWithPrefix(status, short_text = false) {
+    function getStatusTextWithPrefix(status, short_text = false)
+    {
         return getStatusStep(status) + " " + getStatusText(status, short_text)
     }
 
-    function getEventText(event_name) {
-        switch (event_name) {
+    function getEventText(event_name)
+    {
+        switch (event_name)
+        {
             case "Started":
                 return qsTr("Started")
             case "Negotiated":
