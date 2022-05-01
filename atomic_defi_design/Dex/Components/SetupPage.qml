@@ -1,85 +1,78 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
-import QtQuick.Window 2.2
+
 import "../Constants"
 import App 1.0
+import Dex.Themes 1.0 as Dex
 
-Item {
+Item
+{
     id: _control
-    property alias back_image: back_image
-    property alias back_image_path: back_image.source
+
     property alias image: image
     property alias image_path: image.source
     property alias image_scale: image.scale
     property alias content: inner_space.sourceComponent
     property alias bottom_content: bottom_content.sourceComponent
     property double image_margin: 5
-    property string backgroundColor: DexTheme.dexBoxBackgroundColor
-    property string borderColor: DexTheme.rectangleBorderColor
-    property bool isFirstLaunch: false
-
-    Image {
-        id: back_image
-        source: General.image_path + "final-background.gif"
-//        anchors.horizontalCenter: parent.horizontalCenter
-//        anchors.verticalCenter: parent.verticalCenter
-        width: window.width
-        height: window.height - 30
-        y: 0
-        visible: true
-//        antialiasing: true
-    }
-
-    ColumnLayout {
+    property color backgroundColor: 'transparent' //Dex.CurrentTheme.floatingBackgroundColor
+    property int verticalCenterOffset: 0
+    ColumnLayout
+    {
         id: window_layout
 
         anchors.horizontalCenter: parent.horizontalCenter
-        //anchors.verticalCenter: parent.verticalCenter
-        //anchors.verticalCenterOffset: isFirstLaunch ? 80 : 0
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: _control.verticalCenterOffset
         transformOrigin: Item.Center
-        y: isFirstLaunch ? -80 : (window.height * 0.5) - (height * 0.5)
-        //anchors.topMargin: isFirstLaunch ? -20 : 0
         spacing: image_margin
 
-        DefaultImage {
+        DefaultImage
+        {
             id: image
-//            Layout.maximumWidth: 300
-//            Layout.maximumHeight: Layout.maximumWidth * paintedHeight/paintedWidth
+            Layout.maximumWidth: 300
+            Layout.maximumHeight: Layout.maximumWidth * paintedHeight / paintedWidth
 
-            Layout.alignment: Qt.AlignHCenter
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
             antialiasing: true
         }
 
-        Pane {
+        Pane
+        {
             id: pane
 
             leftPadding: 30
             rightPadding: leftPadding
-            //topPadding: leftPadding * 0.5
+            topPadding: leftPadding * 0.5
             bottomPadding: topPadding
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: isFirstLaunch ? -90 : 0
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-            background: DexRectangle {
+            background: DefaultRectangle
+            {
+                radius: 20
                 color: _control.backgroundColor
-                border {
-                    color: DexTheme.portfolioPieGradient ? 'transparent' : _control.borderColor
-                }
-                gradient: DexTheme.portfolioPieGradient ? app.globalGradient : undefined
             }
 
-            contentChildren: Loader {
+            contentChildren: Loader
+            {
                 id: inner_space
             }
         }
+
+        Loader
+        {
+            id: bottom_content
+            Layout.alignment: Qt.AlignHCenter
+        }
     }
 
-    Loader {
-        id: bottom_content
-        //Layout.alignment: Qt.AlignHCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-        //Layout.topMargin: isFirstLaunch ? -80 : 0
-        y: window.height - 95
+    DexLanguage
+    {
+        y: 52
+        anchors.right: parent.right
+        anchors.rightMargin: 52
+        width: 72
     }
+
 }
