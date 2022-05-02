@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
+import QtQuick.Window 2.2
 
 import "../Constants"
 import App 1.0
@@ -10,6 +11,8 @@ Item
 {
     id: _control
 
+    property alias back_image: back_image
+    property alias back_image_path: back_image.source
     property alias image: image
     property alias image_path: image.source
     property alias image_scale: image.scale
@@ -18,23 +21,38 @@ Item
     property double image_margin: 5
     property color backgroundColor: 'transparent' //Dex.CurrentTheme.floatingBackgroundColor
     property int verticalCenterOffset: 0
+    property bool isFirstLaunch: false
+
+    Image {
+        id: back_image
+        source: General.image_path + "final-background.gif"
+//        anchors.horizontalCenter: parent.horizontalCenter
+//        anchors.verticalCenter: parent.verticalCenter
+        width: window.width
+        height: window.height - 30
+        y: 0
+        visible: true
+//        antialiasing: true
+    }
+
     ColumnLayout
     {
         id: window_layout
 
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.verticalCenterOffset: _control.verticalCenterOffset
+        //anchors.verticalCenter: parent.verticalCenter
+        //anchors.verticalCenterOffset: _control.verticalCenterOffset
+        //anchors.verticalCenterOffset: isFirstLaunch ? 80 : 0    //my modified version
         transformOrigin: Item.Center
+        y: isFirstLaunch ? -80 : (window.height * 0.5) - (height * 0.5)
         spacing: image_margin
 
-        DefaultImage
-        {
+        DefaultImage {
             id: image
-            Layout.maximumWidth: 300
-            Layout.maximumHeight: Layout.maximumWidth * paintedHeight / paintedWidth
+//            Layout.maximumWidth: 300
+//            Layout.maximumHeight: Layout.maximumWidth * paintedHeight/paintedWidth
 
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.alignment: Qt.AlignHCenter
             antialiasing: true
         }
 
@@ -44,9 +62,10 @@ Item
 
             leftPadding: 30
             rightPadding: leftPadding
-            topPadding: leftPadding * 0.5
+            //topPadding: leftPadding * 0.5
             bottomPadding: topPadding
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: isFirstLaunch ? -90 : 0
 
             background: DefaultRectangle
             {
@@ -59,12 +78,14 @@ Item
                 id: inner_space
             }
         }
+    }
 
-        Loader
-        {
-            id: bottom_content
-            Layout.alignment: Qt.AlignHCenter
-        }
+    Loader {
+        id: bottom_content
+        //Layout.alignment: Qt.AlignHCenter
+        anchors.horizontalCenter: parent.horizontalCenter
+        //Layout.topMargin: isFirstLaunch ? -80 : 0
+        y: window.height - 95
     }
 
     DexLanguage

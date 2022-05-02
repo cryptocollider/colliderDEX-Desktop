@@ -390,7 +390,7 @@ Item
                 // Send Button
                 DexAppButton
                 {
-                    enabled: API.app.wallet_pg.send_available
+                    enabled: API.app.wallet_pg.send_available  && !General.autoPlaying && General.apCanThrow
 
                     anchors.fill: parent
                     radius: 18

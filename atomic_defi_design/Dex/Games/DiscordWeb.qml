@@ -14,7 +14,7 @@ import "../Screens"
 Item {
     id: discordWeb
     anchors.fill: parent
-    visible: dashboard.current_page === idx_dashboard_collider_discord ? true : false
+    visible: dashboard.currentPage === Dashboard.PageType.Discord ? true : false
 
     WebEngineView {
         anchors.fill: parent

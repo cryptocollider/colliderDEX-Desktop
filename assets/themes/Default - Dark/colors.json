@@ -1,15 +1,15 @@
 {
-    "accentColor": "#2C3D66",
+    "accentColor": "#4ea7cf",
     "foregroundColor": "#ffffff",
     "foregroundColor2": "#7A8EA1FF",
     "foregroundColor3": "#ABC0D3FF",
-    "backgroundColor": "#202337",
+    "backgroundColor": "#00061b",
     "secondBackgroundColor": "#24273D",
-    "backgroundColorDeep": "#171a2c",
+    "backgroundColorDeep": "#000c1b",
 
     "buttonColorDisabled": "#28375A",
-    "buttonColorEnabled": "#293254",
-    "buttonColorHovered": "#4068B929",
+    "buttonColorEnabled": "#15182a",
+    "buttonColorHovered": "#0a1239",
     "buttonColorPressed": "#2932546C",
     "buttonTextDisabledColor": "#444444",
     "buttonTextEnabledColor": "#ffffff",
@@ -37,7 +37,7 @@
     "switchGradientStartColor2": "#FFF",
     "switchGradientEndColor2": "#FFF",
 
-    "comboBoxBackgroundColor": "#303757FF",
+    "comboBoxBackgroundColor": "#00152f",
     "comboBoxArrowsColor": "#FFFFFFFF",
     "comboBoxDropdownItemHighlightedColor": "#4663E8",
 
@@ -57,8 +57,8 @@
     "tabSelectedColor": "#2C3D66",
 
     "textDisabledColor": "#444444",
-    "textSelectionColor": "#14bca6",
-    "textPlaceholderColor": "#91A8E8",
+    "textSelectionColor": "#a03a26",
+    "textPlaceholderColor": "#3f7187",
     "textSelectedColor": "#0e1021",
 
     "textFieldBackgroundColor": "#313555FF",
@@ -66,7 +66,7 @@
     "textFieldPrefixColor": "#8790B2FF",
     "textFieldSuffixColor": "#456078FF#",
 
-    "chartTradingLineBackgroundColor": "#24283d",
+    "chartTradingLineBackgroundColor": "#175979",
     "chartTradingLineColor": "#74fbee",
 
     "innerBackgroundColor": "#1F263F",

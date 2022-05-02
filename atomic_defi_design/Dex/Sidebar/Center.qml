@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.2
 import App 1.0
 import "../Components"
 import "../Constants"
+import "../Screens"
 import Dex.Themes 1.0 as Dex
 
 MouseArea
@@ -27,8 +28,12 @@ MouseArea
                 _portfolioLine.label.opacity = 0;
                 _walletLine.label.opacity = 0;
                 _dexLine.label.opacity = 0;
-                _addressBookLine.label.opacity = 0;
-                _fiatLine.label.opacity = 0;
+                //_addressBookLine.label.opacity = 0;
+                //_fiatLine.label.opacity = 0;
+                _arbibotLine.label.opacity = 0;
+                _gamesLine.label.opacity = 0;
+                _coinSightLine.label.opacity = 0;
+                _discordLine.label.opacity = 0;
             }
         }
     }
@@ -36,7 +41,8 @@ MouseArea
     NumberAnimation
     {
         id: waitForSidebarExpansionAnimation
-        targets: [_portfolioLine.label, _walletLine.label, _dexLine.label, _addressBookLine.label, _fiatLine.label]
+        //targets: [_portfolioLine.label, _walletLine.label, _dexLine.label, _addressBookLine.label, _fiatLine.label]
+        targets: [_portfolioLine.label, _walletLine.label, _dexLine.label, _arbibotLine.label, _gamesLine.label, _coinSightLine.label, _discordLine.label]
         properties: "opacity"
         duration: 200
         from: 0
@@ -47,7 +53,8 @@ MouseArea
     NumberAnimation
     {
         id: labelsOpacityAnimation
-        targets: [_portfolioLine.label, _walletLine.label, _dexLine.label, _addressBookLine.label, _fiatLine.label]
+        //targets: [_portfolioLine.label, _walletLine.label, _dexLine.label, _addressBookLine.label, _fiatLine.label]
+        targets: [_portfolioLine.label, _walletLine.label, _dexLine.label, _arbibotLine.label, _gamesLine.label, _coinSightLine.label, _discordLine.label]
         properties: "opacity"
         duration: 350
         from: 0.0
@@ -78,6 +85,7 @@ MouseArea
             type: Main.LineType.Wallet
             label.text: isExpanded ? qsTr("Wallet") : ""
             icon.source: General.image_path + "menu-assets-white.svg"
+            isWallet: true
             onClicked: lineSelected(type)
         }
 
@@ -92,26 +100,75 @@ MouseArea
             onClicked: lineSelected(type)
         }
 
+//        FigurativeLine
+//        {
+//            id: _addressBookLine
+
+//            Layout.fillWidth: true
+//            type: Main.LineType.Addressbook
+//            label.text: isExpanded ? qsTr("Address Book") : ""
+//            icon.source: General.image_path + "menu-news-white.svg"
+//            onClicked: lineSelected(type)
+//        }
+
+//        FigurativeLine
+//        {
+//            id: _fiatLine
+
+//            label.enabled: false
+//            icon.enabled: false
+//            Layout.fillWidth: true
+//            label.text: isExpanded ? qsTr("Fiat") : ""
+//            icon.source: General.image_path + "bill.svg"
+//        }
+
         FigurativeLine
         {
-            id: _addressBookLine
+            id: _arbibotLine
+
+            label.enabled: false
+            icon.enabled: false
+            Layout.fillWidth: true
+            //type: Main.LineType.Arbibot
+            label.text: isExpanded ? qsTr("Arbitration Bot") : ""
+            icon.source: General.image_path + "bill.svg"
+            //onClicked: lineSelected(type)
+        }
+
+        FigurativeLine
+        {
+            id: _gamesLine
 
             Layout.fillWidth: true
-            type: Main.LineType.Addressbook
-            label.text: isExpanded ? qsTr("Address Book") : ""
-            icon.source: General.image_path + "menu-news-white.svg"
+            type: Main.LineType.Games
+            label.text: isExpanded ? qsTr("Games") : ""
+            icon.source: General.inColliderApp && dashboard.currentPage === Dashboard.PageType.Games ? General.image_path + "menu-games-exit.svg" : General.image_path + "menu-games-white.svg"
+            isCollider: true
             onClicked: lineSelected(type)
         }
 
         FigurativeLine
         {
-            id: _fiatLine
+            id: _coinSightLine
 
-            label.enabled: false
-            icon.enabled: false
             Layout.fillWidth: true
-            label.text: isExpanded ? qsTr("Fiat") : ""
-            icon.source: General.image_path + "bill.svg"
+            type: Main.LineType.CoinSight
+            label.text: isExpanded ? qsTr("coinSight") : ""
+            icon.source: General.image_path + "menu-games-white.svg"
+            isCoinSight: true
+            onClicked: lineSelected(type)
+        }
+
+        FigurativeLine
+        {
+            id: _discordLine
+
+            Layout.fillWidth: true
+            type: Main.LineType.Discord
+            label.text: isExpanded ? qsTr("Discord") : ""
+            icon.source: General.image_path + "menu-discord-white.svg"
+            isDiscord: true
+            onClicked: lineSelected(type)
         }
     }
 }

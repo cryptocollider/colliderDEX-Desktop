@@ -13,6 +13,7 @@ import Qaterial 1.0 as Qaterial
 
 import "../Components"
 import "../Constants"
+import "../Screens"
 import "../Wallet"
 import "../Exchange/Trade"
 import App 1.0
@@ -21,7 +22,7 @@ import App 1.0
 Item {
     id: autoPlay
     enabled: true
-    visible: dashboard.current_page !== idx_dashboard_games ? false : General.inAuto ? true : false
+    visible: dashboard.currentPage !== Dashboard.PageType.Games ? false : General.inAuto ? true : false
     anchors.fill: parent
 
     property string broadcast_resul_ap: api_wallet_page.broadcast_rpc_data
@@ -253,7 +254,7 @@ Item {
         }else{
             //explorer_button.enabled = true
             //send_info_label.text = "broadcast = done!"
-//            if(dashboard.current_page !== idx_dashboard_games){
+//            if(dashboard.currentPage !== Dashboard.PageType.Games){
 //                var tmpWtTick = General.walletCurrentTicker
 //                api_wallet_page.ticker = tmpWtTick
 //                dashboard.current_ticker = api_wallet_page.ticker

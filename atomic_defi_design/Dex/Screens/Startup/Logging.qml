@@ -14,8 +14,10 @@ SetupPage
 
     onCurrent_statusChanged: if (current_status === "enabling_coins") logged()
 
-    image_path: Dex.CurrentTheme.bigLogoPath
-    image_margin: 30
+    back_image_path: General.image_path + "final-background.gif"
+    image_scale: 0.7
+    image_path: General.image_path + "login-setup-final.png"
+    image_margin: 2
     backgroundColor: 'transparent'
 
     content: ColumnLayout

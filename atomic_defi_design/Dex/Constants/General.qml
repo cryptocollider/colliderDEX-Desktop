@@ -133,7 +133,7 @@ QtObject {
     readonly property string right_arrow_icon: "⮕"
     readonly property string privacy_text: "*****"
 
-    readonly property string version_string: "Desktop v" + API.app.settings_pg.get_version()
+    readonly property string version_string: "Desktop Portal v1.8"
 
     property bool privacy_mode: false
 

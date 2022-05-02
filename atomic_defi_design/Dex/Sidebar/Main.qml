@@ -2,6 +2,7 @@ import QtQuick 2.12
 
 import "../Components"
 import "../Constants"
+import "../Screens"
 import Dex.Themes 1.0 as Dex
 
 Item
@@ -14,6 +15,10 @@ Item
         Wallet,
         DEX,         // DEX == Trading page
         Addressbook,
+        //Arbibot,
+        Games,
+        CoinSight,
+        Discord,
         Support
     }
 
@@ -100,10 +105,67 @@ Item
             anchors.topMargin: 69.5
             onLineSelected:
             {
-                if (currentLineType === lineType)
-                    return;
-                currentLineType = lineType;
-                root.lineSelected(lineType);
+                if(isCollider && General.inColliderApp && dashboard.currentPage === Dashboard.PageType.Games){
+                    if(General.inAuto){
+                        General.inAuto = false
+                    }else{
+                        if(dashboard.viewingArena){
+                            General.inArena = false
+                            General.inAuto = true
+                            dashboard.viewingArena = false
+                        }else{
+                            General.inArena = false
+                            General.inChallenge = false
+                        }
+                    }
+                }
+    //            else if(dashboard.hasCoinSight){
+    //                if(dashboard.inCoinSight && General.openedCoinSight){
+    //                    coin_sight_timer.restart()
+    //                }
+    //                if(isCoinSight){
+    //                    coin_sight_timer.stop()
+    //                    dashboard.idleCoinSight = false
+    //                    if(!General.openedCoinSight){
+    //                        webCoinS.url = "https://coinsig.ht"
+    //                        General.openedCoinSight = true
+    //                    }
+    //                }
+    //            }
+                else{
+                    if(dashboard.currentPage === Dashboard.PageType.Wallet){
+                        General.walletCurrentTicker = api_wallet_page.ticker
+                    }else if(dashboard.currentPage === Dashboard.PageType.Games){
+                        General.apCurrentTicker = api_wallet_page.ticker
+                    }else{
+                    }
+
+                    if(isWallet){
+                        var tmpWtTick = General.walletCurrentTicker
+                        api_wallet_page.ticker = tmpWtTick
+                        dashboard.current_ticker = api_wallet_page.ticker
+                    }else if(isCollider){
+                        var tmpApTick = General.apCurrentTicker
+                        api_wallet_page.ticker = tmpApTick
+                        dashboard.current_ticker = api_wallet_page.ticker
+                    }else if(isDiscord){
+                        dashboard.openedDisc = true
+                    }else if(isCoinSight && !General.openedCoinSight){
+                        webCoinS.url = "https://coinsig.ht"
+                        General.openedCoinSight = true
+                    }
+    //                if(General.inAuto){
+    //                    var tmpTick = General.apCurrentTicker
+    //                    api_wallet_page.ticker = tmpTick
+    //                    dashboard.current_ticker = api_wallet_page.ticker
+    //                }
+                    currentLineType = lineType;
+                    root.lineSelected(lineType);
+                }
+//                if (currentLineType === lineType)
+//                    return;
+//                currentLineType = lineType;
+//                root.lineSelected(lineType);
             }
         }
 

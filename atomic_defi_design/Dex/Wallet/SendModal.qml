@@ -7,6 +7,7 @@ import bignumberjs 1.0
 
 import "../Components"
 import "../Constants"
+import "../Games"
 import App 1.0
 import Dex.Themes 1.0 as Dex
 
@@ -64,8 +65,22 @@ MultipageModal
         api_wallet_page.send(address, amount, max, with_fees, fees_info)
     }
 
+    function apPrepSendCoin(address, amount, max, with_fees, fees_amount, gas_price, gas_limit){
+        const fees_info_ap = {
+            fees_amount,
+            gas_price,
+            gas_limit
+        }
+        api_wallet_page.send_ap(address, amount, max, with_fees, fees_info_ap, General.apCurrentTicker)
+        //prepareSendCoin(input_address.field.text, input_amount.field.text, custom_fees_switch.checked, input_custom_fees.field.text, isSpecialToken(), input_custom_fees_gas.field.text, input_custom_fees_gas_price.field.text)
+    }
+
     function sendCoin() {
         api_wallet_page.broadcast(send_result.withdraw_answer.tx_hex, false, send_result.withdraw_answer.max, input_amount.text)
+    }
+	
+	function apSendCoin(apSendAmount){
+        api_wallet_page.broadcast_ap(send_result.withdraw_answer.tx_hex, false, send_result.withdraw_answer.max, apSendAmount, General.apCurrentTicker)
     }
 
     function isSpecialToken() {
@@ -730,6 +745,7 @@ MultipageModal
     // Send Page
     MultipageModalContent
     {
+		visible: General.autoPlaying ? false : true
         titleText: qsTr("Send")
 
         // Address

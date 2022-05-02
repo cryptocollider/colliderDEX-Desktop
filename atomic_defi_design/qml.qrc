@@ -18,6 +18,20 @@
         <file>assets/images/circle-failed.png</file>
         <file>assets/images/circle-success.png</file>
         <file>assets/images/coins/1inch.png</file>
+		<file>assets/images/coins/32ARRR.png</file>
+		<file>assets/images/coins/32BTC.png</file>
+		<file>assets/images/coins/32CHIPS.png</file>
+		<file>assets/images/coins/32CLC.png</file>
+		<file>assets/images/coins/32DASH.png</file>
+		<file>assets/images/coins/32DGB.png</file>
+		<file>assets/images/coins/32DOGE.png</file>
+		<file>assets/images/coins/32ETH.png</file>
+		<file>assets/images/coins/32KMD.png</file>
+		<file>assets/images/coins/32LTC.png</file>
+		<file>assets/images/coins/32RVN.png</file>
+		<file>assets/images/coins/32TKL.png</file>
+		<file>assets/images/coins/32VRSC.png</file>
+		<file>assets/images/coins/32XPM.png</file>
         <file>assets/images/coins/aave.png</file>
         <file>assets/images/coins/aby.png</file>
         <file>assets/images/coins/ada.png</file>
@@ -325,6 +339,9 @@
         <file>assets/images/exchange-exchange.svg</file>
         <file>assets/images/exchange-search.svg</file>
         <file>assets/images/exchange-trade-complete.png</file>
+		<file>assets/images/final-background.gif</file>
+		<file>assets/images/games-page-challenge.avi</file>
+		<file>assets/images/games-page-collider.avi</file>
         <file>assets/images/guide_coingecko_id.gif</file>
         <file>assets/images/guide_contract_address_erc.gif</file>
         <file>assets/images/guide_contract_address_qrc.gif</file>
@@ -338,11 +355,15 @@
         <file>assets/images/lang/fr.png</file>
         <file>assets/images/lang/ru.png</file>
         <file>assets/images/lang/tr.png</file>
+		<file>assets/images/login-setup-final.png</file>
         <file>assets/images/logo/dex-logo.png</file>
         <file>assets/images/menu-assets-portfolio.svg</file>
         <file>assets/images/menu-assets-white.svg</file>
         <file>assets/images/menu-dapp-white.svg</file>
+		<file>assets/images/menu-discord-white.svg</file>
         <file>assets/images/menu-exchange-white.svg</file>
+		<file>assets/images/menu-games-exit.svg</file>
+		<file>assets/images/menu-games-white.svg</file>
         <file>assets/images/menu-news-white.svg</file>
         <file>assets/images/menu-settings-white.svg</file>
         <file>assets/images/menu-support-white.png</file>
@@ -352,13 +373,17 @@
         <file>assets/images/setup-welcome-wallet.svg</file>
         <file>assets/images/shadowed_circle_blue.svg</file>
         <file>assets/images/shadowed_circle_green.svg</file>
+		<file>assets/images/still-arena.png</file>
+		<file>assets/images/still-challenge.png</file>
         <file>assets/images/trade_icon.svg</file>
+		<file>assets/images/video-play.png</file>
         <file>assets/languages/atomic_defi_en.qm</file>
         <file>assets/languages/atomic_defi_fr.qm</file>
         <file>assets/languages/atomic_defi_ru.qm</file>
         <file>assets/languages/atomic_defi_tr.qm</file>
         <file>Dex/App.qml</file>
         <file>Dex/String.js</file>
+		<file>Dex/ArbBots/ArbBots.qml</file>
         <file>Dex/Components/AddressField.qml</file>
         <file>Dex/Components/AddressFieldWithTitle.qml</file>
         <file>Dex/Components/AmountField.qml</file>
@@ -567,6 +592,12 @@
         <file>Dex/Exchange/Trade/Trading/Items/TotalView.qml</file>
         <file>Dex/Exchange/Trade/Trading/TradeViewHeader.qml</file>
         <file>Dex/Fiat/FiatRamp.qml</file>
+		<file>Dex/Games/AutoPlay.qml</file>
+		<file>Dex/Games/CoinSight.qml</file>
+		<file>Dex/Games/ColliderDiscord.qml</file>
+		<file>Dex/Games/DiscordWeb.qml</file>
+		<file>Dex/Games/Games.qml</file>
+		<file>Dex/Games/qwebchannel.js</file>
         <file>Dex/Graphics/Color.js</file>
         <file>Dex/Graphics/qmldir</file>
         <file>Dex/NoConnection.qml</file>
