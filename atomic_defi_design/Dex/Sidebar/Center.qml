@@ -85,7 +85,6 @@ MouseArea
             type: Main.LineType.Wallet
             label.text: isExpanded ? qsTr("Wallet") : ""
             icon.source: General.image_path + "menu-assets-white.svg"
-            isWallet: true
             onClicked: lineSelected(type)
         }
 
@@ -143,7 +142,7 @@ MouseArea
             type: Main.LineType.Games
             label.text: isExpanded ? qsTr("Games") : ""
             icon.source: General.inColliderApp && dashboard.currentPage === Dashboard.PageType.Games ? General.image_path + "menu-games-exit.svg" : General.image_path + "menu-games-white.svg"
-            isCollider: true
+            isGamesLine: true
             onClicked: lineSelected(type)
         }
 
@@ -155,7 +154,6 @@ MouseArea
             type: Main.LineType.CoinSight
             label.text: isExpanded ? qsTr("coinSight") : ""
             icon.source: General.image_path + "menu-games-white.svg"
-            isCoinSight: true
             onClicked: lineSelected(type)
         }
 
@@ -167,7 +165,6 @@ MouseArea
             type: Main.LineType.Discord
             label.text: isExpanded ? qsTr("Discord") : ""
             icon.source: General.image_path + "menu-discord-white.svg"
-            isDiscord: true
             onClicked: lineSelected(type)
         }
     }

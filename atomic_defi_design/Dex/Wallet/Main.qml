@@ -12,6 +12,7 @@ import Qaterial 1.0 as Qaterial
 import "../Components"
 import "../Constants"
 import App 1.0
+import "../Screens"
 import "../Exchange/Trade"
 import Dex.Themes 1.0 as Dex
 
@@ -390,7 +391,7 @@ Item
                 // Send Button
                 DexAppButton
                 {
-                    enabled: API.app.wallet_pg.send_available  && !General.autoPlaying && General.apCanThrow
+                    enabled: API.app.wallet_pg.send_available && !General.autoPlaying && General.apCanThrow
 
                     anchors.fill: parent
                     radius: 18
@@ -556,6 +557,24 @@ Item
                 {
                     visible: API.app.portfolio_pg.global_cfg_mdl.get_coin_info(api_wallet_page.ticker).is_wallet_only
                     tooltipText: api_wallet_page.ticker + qsTr(" is wallet only")
+                }
+            }
+
+            // Addressbook button
+            Item
+            {
+                Layout.preferredWidth: 180
+                Layout.preferredHeight: 48
+
+                Item { Layout.fillWidth: true }
+
+                DexAppButton
+                {
+                    text: qsTr("Address Book")
+                    radius: 18
+                    font.pixelSize: 16
+                    anchors.fill: parent
+                    onClicked: dashboard.switchPage(Dashboard.PageType.Addressbook);
                 }
             }
 

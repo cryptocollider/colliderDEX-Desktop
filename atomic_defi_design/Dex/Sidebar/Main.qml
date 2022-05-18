@@ -58,7 +58,9 @@ Item
         y:
         {
             if (currentLineType === Main.LineType.Support) return bottom.y + lineHeight + bottom.spacing;
-            else return center.y + currentLineType * (lineHeight + center.spacing);
+            else if(currentLineType === Main.LineType.Addressbook) return center.y + (Main.LineType.Wallet) * (lineHeight + center.spacing);
+            else if(currentLineType === Main.LineType.Games || Main.LineType.CoinSight || Main.LineType.Discord) return center.y + currentLineType * (lineHeight + center.spacing);
+            else return center.y + (currentLineType - 1) * (lineHeight + center.spacing);
         }
 
         anchors.left: parent.left
@@ -102,10 +104,11 @@ Item
             id: center
             width: parent.width
             anchors.top: top.bottom
-            anchors.topMargin: 69.5
+            anchors.topMargin: 29.5
             onLineSelected:
             {
-                if(isCollider && General.inColliderApp && dashboard.currentPage === Dashboard.PageType.Games){
+                //if(currentLineType === Main.LineType.Games && General.inColliderApp && dashboard.currentPage === Dashboard.PageType.Games){
+                if(lineType === Main.LineType.Games && General.inColliderApp && dashboard.currentPage === Dashboard.PageType.Games){
                     if(General.inAuto){
                         General.inAuto = false
                     }else{
@@ -123,7 +126,7 @@ Item
     //                if(dashboard.inCoinSight && General.openedCoinSight){
     //                    coin_sight_timer.restart()
     //                }
-    //                if(isCoinSight){
+    //                if(currentLineType === Main.LineType.CoinSight){
     //                    coin_sight_timer.stop()
     //                    dashboard.idleCoinSight = false
     //                    if(!General.openedCoinSight){
@@ -140,17 +143,21 @@ Item
                     }else{
                     }
 
-                    if(isWallet){
+                    //if(currentLineType === Main.LineType.Wallet){
+                    if(lineType === Main.LineType.Wallet){
                         var tmpWtTick = General.walletCurrentTicker
                         api_wallet_page.ticker = tmpWtTick
                         dashboard.current_ticker = api_wallet_page.ticker
-                    }else if(isCollider){
+                    //}else if(currentLineType === Main.LineType.Games){
+                    }else if(lineType === Main.LineType.Games){
                         var tmpApTick = General.apCurrentTicker
                         api_wallet_page.ticker = tmpApTick
                         dashboard.current_ticker = api_wallet_page.ticker
-                    }else if(isDiscord){
+                    //}else if(currentLineType === Main.LineType.Discord){
+                    }else if(lineType === Main.LineType.Discord){
                         dashboard.openedDisc = true
-                    }else if(isCoinSight && !General.openedCoinSight){
+                    //}else if(currentLineType === Main.LineType.CoinSight && !General.openedCoinSight){
+                    }else if(lineType === Main.LineType.CoinSight && !General.openedCoinSight){
                         webCoinS.url = "https://coinsig.ht"
                         General.openedCoinSight = true
                     }

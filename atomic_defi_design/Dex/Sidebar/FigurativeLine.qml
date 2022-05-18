@@ -8,10 +8,7 @@ import Dex.Themes 1.0 as Dex
 Line
 {
     property alias icon: _icon
-    property bool isCollider: false
-    property bool isCoinSight: false
-    property bool isDiscord: false
-    property bool isWallet: false
+    property bool isGamesLine: false
 
     DefaultImage
     {
@@ -24,8 +21,8 @@ Line
 
     DefaultColorOverlay
     {
-        enabled: !isCollider? true : General.inColliderApp ? false : true
-        visible: !isCollider? true : General.inColliderApp ? false : true
+        enabled: !isGamesLine? true : General.inColliderApp ? false : true
+        visible: !isGamesLine? true : General.inColliderApp ? false : true
         anchors.fill: _icon
         source: _icon
         color: !_icon.enabled ? Dex.CurrentTheme.textDisabledColor :
@@ -36,8 +33,8 @@ Line
 
     DefaultColorOverlay
     {
-        enabled: !isCollider? false : General.inColliderApp ? true : false
-        visible: !isCollider? false : General.inColliderApp ? true : false
+        enabled: !isGamesLine? false : General.inColliderApp ? true : false
+        visible: !isGamesLine? false : General.inColliderApp ? true : false
         anchors.fill: _icon
         source: _icon
         color: mouseArea.containsMouse && currentLineType !== type       ? "#9c2c2c" :
