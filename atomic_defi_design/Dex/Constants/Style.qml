@@ -495,6 +495,7 @@ QtObject {
                                           "VAL": "#1EEC84",
                                           "VITE": "#007AFF",
                                           "VRM": "#586A7A",
+                                          "WDC": "#0152AE",
                                           "WSB": "#FEBB84",
                                           "WBTC": "#CCCCCC",
                                           "WHIVE": "#FFCC00",

@@ -299,6 +299,7 @@
         <file>assets/images/coins/vra.png</file>
         <file>assets/images/coins/vrm.png</file>
         <file>assets/images/coins/vrsc.png</file>
+		<file>assets/images/coins/wdc.png</file>
         <file>assets/images/coins/wbtc.png</file>
         <file>assets/images/coins/wcn.png</file>
         <file>assets/images/coins/whive.png</file>
@@ -592,7 +593,7 @@
         <file>Dex/Exchange/Trade/Trading/Items/TotalView.qml</file>
         <file>Dex/Exchange/Trade/Trading/TradeViewHeader.qml</file>
         <file>Dex/Fiat/FiatRamp.qml</file>
-		<file>Dex/Games/AutoPlay.qml</file>
+		<file>Dex/Games/AutoHedge.qml</file>
 		<file>Dex/Games/CoinSight.qml</file>
 		<file>Dex/Games/ColliderDiscord.qml</file>
 		<file>Dex/Games/DiscordWeb.qml</file>
