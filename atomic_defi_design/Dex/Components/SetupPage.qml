@@ -21,13 +21,10 @@ Item
     property double image_margin: 5
     property color backgroundColor: 'transparent' //Dex.CurrentTheme.floatingBackgroundColor
     property int verticalCenterOffset: 0
-    property bool isFirstLaunch: false
 
     Image {
         id: back_image
         source: General.image_path + "final-background.gif"
-//        anchors.horizontalCenter: parent.horizontalCenter
-//        anchors.verticalCenter: parent.verticalCenter
         width: window.width
         height: window.height - 30
         y: 0
@@ -40,19 +37,18 @@ Item
         id: window_layout
 
         anchors.horizontalCenter: parent.horizontalCenter
-        //anchors.verticalCenter: parent.verticalCenter
-        //anchors.verticalCenterOffset: _control.verticalCenterOffset
-        //anchors.verticalCenterOffset: isFirstLaunch ? 80 : 0    //my modified version
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: _control.verticalCenterOffset
         transformOrigin: Item.Center
-        y: isFirstLaunch ? -80 : (window.height * 0.5) - (height * 0.5)
         spacing: image_margin
 
-        DefaultImage {
+        DefaultImage
+        {
             id: image
-//            Layout.maximumWidth: 300
-//            Layout.maximumHeight: Layout.maximumWidth * paintedHeight/paintedWidth
+            Layout.maximumWidth: 300
+            Layout.maximumHeight: Layout.maximumWidth * paintedHeight / paintedWidth
 
-            Layout.alignment: Qt.AlignHCenter
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
             antialiasing: true
         }
 
@@ -62,10 +58,9 @@ Item
 
             leftPadding: 30
             rightPadding: leftPadding
-            //topPadding: leftPadding * 0.5
+            topPadding: leftPadding * 0.5
             bottomPadding: topPadding
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: isFirstLaunch ? -90 : 0
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
             background: DefaultRectangle
             {
@@ -78,14 +73,12 @@ Item
                 id: inner_space
             }
         }
-    }
 
-    Loader {
-        id: bottom_content
-        //Layout.alignment: Qt.AlignHCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-        //Layout.topMargin: isFirstLaunch ? -80 : 0
-        y: window.height - 95
+        Loader
+        {
+            id: bottom_content
+            Layout.alignment: Qt.AlignHCenter
+        }
     }
 
     DexLanguage

@@ -26,10 +26,9 @@ SetupPage
     signal walletSelected(string walletName);
 
     back_image_path: General.image_path + "final-background.gif"
-    image_scale: 0.7
+    image_scale: 1.0
     image_path: General.image_path + "login-setup-final.png"
     image_margin: 2
-    isFirstLaunch: true
 
     backgroundColor: Dex.CurrentTheme.backgroundColor
 
