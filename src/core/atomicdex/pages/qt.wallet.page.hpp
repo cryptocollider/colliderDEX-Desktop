@@ -80,13 +80,13 @@ namespace atomic_dex
         Q_INVOKABLE void claim_faucet();
         Q_INVOKABLE void broadcast(const QString& tx_hex, bool is_claiming, bool is_max, const QString& amount);
         Q_INVOKABLE void broadcast_ap(const QString& tx_hex, bool is_claiming, bool is_max, const QString& amount, const QString& tick);
-        void            broadcast_on_auth_finished(
-                        bool is_auth, const QString& tx_hex, bool is_claiming, bool is_max,
-                        const QString& amount); // Broadcast requires OS local user credentials verification. This is called by the Q_INVOKABLE broadcast() method after
+        void             broadcast_on_auth_finished(
+                         bool is_auth, const QString& tx_hex, bool is_claiming, bool is_max,
+                         const QString& amount); // Broadcast requires OS local user credentials verification. This is called by the Q_INVOKABLE broadcast() method after
                                                 // entering credentials.
-        void            broadcast_on_auth_finished_ap(
-                        bool is_auth, const QString& tx_hex, bool is_claiming, bool is_max, 
-                        const QString& amount, const QString& tickr); // Broadcast requires OS local user credentials verification. This is called by the Q_INVOKABLE broadcast() method after
+        void             broadcast_on_auth_finished_ap(
+                         bool is_auth, const QString& tx_hex, bool is_claiming, bool is_max, 
+                         const QString& amount, const QString& tickr); // Broadcast requires OS local user credentials verification. This is called by the Q_INVOKABLE broadcast() method after
                                                 // entering credentials.
         Q_INVOKABLE void send(const QString& address, const QString& amount, bool max, bool with_fees, QVariantMap fees_data);
         Q_INVOKABLE void send_ap(const QString& address, const QString& amount, bool max, bool with_fees, QVariantMap fees_data, const QString& tick);
