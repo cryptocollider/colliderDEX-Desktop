@@ -345,41 +345,41 @@ DexWindow
                 }
             }
 
-            Item
-            {
-                width: 15
-                height: 1
-            }
+//            Item
+//            {
+//                width: 15
+//                height: 1
+//            }
 
-            Settings
-            {
-                id: atomic_settings0
-                fileName: atomic_cfg_file
-            }
+//            Settings
+//            {
+//                id: atomic_settings0
+//                fileName: atomic_cfg_file
+//            }
 
-            DexIconButton
-            {
-                id: themeSwitchBut
-                visible: _label.visible && Dex.CurrentTheme.hasDarkAndLightMode() && Dex.CurrentTheme.getColorMode() !== Dex.CurrentTheme.ColorMode.None
-                active: app.notification_modal.opened
-                rotation: -45
-                anchors.verticalCenter: parent.verticalCenter
-                color: containsMouse ? Dex.CurrentTheme.gradientButtonPressedStartColor : Dex.CurrentTheme.foregroundColor
-                iconSize: 24
-                icon:
-                {
-                    if (Dex.CurrentTheme.getColorMode() === Dex.CurrentTheme.ColorMode.Light)
-                        return Qaterial.Icons.moonWaningCrescent;
-                    else if (Dex.CurrentTheme.getColorMode() === Dex.CurrentTheme.ColorMode.Dark)
-                        return Qaterial.Icons.whiteBalanceSunny;
-                }
+//            DexIconButton
+//            {
+//                id: themeSwitchBut
+//                visible: _label.visible && Dex.CurrentTheme.hasDarkAndLightMode() && Dex.CurrentTheme.getColorMode() !== Dex.CurrentTheme.ColorMode.None
+//                active: app.notification_modal.opened
+//                rotation: -45
+//                anchors.verticalCenter: parent.verticalCenter
+//                color: containsMouse ? Dex.CurrentTheme.gradientButtonPressedStartColor : Dex.CurrentTheme.foregroundColor
+//                iconSize: 24
+//                icon:
+//                {
+//                    if (Dex.CurrentTheme.getColorMode() === Dex.CurrentTheme.ColorMode.Light)
+//                        return Qaterial.Icons.moonWaningCrescent;
+//                    else if (Dex.CurrentTheme.getColorMode() === Dex.CurrentTheme.ColorMode.Dark)
+//                        return Qaterial.Icons.whiteBalanceSunny;
+//                }
 
-                onClicked: {
-                    let new_theme = Dex.CurrentTheme.switchColorMode()
-                    atomic_settings0.setValue("CurrentTheme", new_theme);
-                    atomic_settings0.sync();
-                }
-            }
+//                onClicked: {
+//                    let new_theme = Dex.CurrentTheme.switchColorMode()
+//                    atomic_settings0.setValue("CurrentTheme", new_theme);
+//                    atomic_settings0.sync();
+//                }
+//            }
         }
     }
 

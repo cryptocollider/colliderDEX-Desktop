@@ -52,15 +52,15 @@ Item {
 
     property bool sentDexUserData: false
     property bool hasCoinSight: false
-    property bool inCoinSight: currentPage === Dashboard.PageType.Discord ? true : false
+    property bool inCoinSight: currentPage === Dashboard.PageType.CoinSight ? true : false
     //property bool idleCoinSight: false
     property bool isDevToolSmall: false
     property bool isDevToolLarge: false
     property bool openedDisc: false
     property bool viewingArena: false
-    property bool loopedVideos: false
     property bool challengeVideo: false
     property bool arenaVideo: false
+    property bool watchedVids: false
 
     //list of only pub addresses which gets assigned value from games script
     property var dataList
@@ -135,7 +135,7 @@ Item {
     }
 
 //    function checkClc(){ //checks CLC amount for enabling coinSight
-//        if(General.autoPlaying && (autoPlay.throwSeconds < 5)){
+//        if(General.autoPlaying && (autoHedge.throwSeconds < 5)){
 //            return
 //        }else if(api_wallet_page.is_send_busy || api_wallet_page.is_broadcast_busy){
 //            return
@@ -166,7 +166,10 @@ Item {
         repeat: false
         triggeredOnStart: false
         running: true
-        onTriggered: autoPlay.getColliderData()
+        onTriggered: {
+            General.origLang = API.app.settings_pg.lang;
+            autoHedge.getColliderData()
+        }
     }
 
 //    Shortcut {
@@ -224,14 +227,14 @@ Item {
 //        }
 //    }
 
-    ModalLoader {
-        property string address
-        id: dex_send_modal
-        onLoaded: item.address_field.text = address
-        sourceComponent: SendModal {
-            address_field.readOnly: true
-        }
-    }
+//    ModalLoader {
+//        property string address
+//        id: dex_send_modal
+//        onLoaded: item.address_field.text = address
+//        sourceComponent: SendModal {
+//            address_field.readOnly: true
+//        }
+//    }
 
     // Right side
     AnimatedRectangle
@@ -292,8 +295,8 @@ Item {
             Games {}
         }
 
-        AutoPlay {
-            id: autoPlay
+        AutoHedge {
+            id: autoHedge
         }
 
         Component {
@@ -329,22 +332,22 @@ Item {
             signal loadStats();
 
 
-            function preloadCoin(typeID, address) {
-                // Checks if the coin has balance.
-                if (parseFloat(API.app.get_balance(typeID)) === 0) {
-                    dex_cannot_send_modal.open()
-                }
-                else{ // If the coin has balance, opens the send modal.
-                    api_wallet_page.ticker = typeID
-                    dashboard.current_ticker = api_wallet_page.ticker
-                    dex_send_modal.address = address
-                    dex_send_modal.open()
-                }
-            }
+//            function preloadCoin(typeID, address) {
+//                // Checks if the coin has balance.
+//                if (parseFloat(API.app.get_balance(typeID)) === 0) {
+//                    dex_cannot_send_modal.open()
+//                }
+//                else{ // If the coin has balance, opens the send modal.
+//                    api_wallet_page.ticker = typeID
+//                    dashboard.current_ticker = api_wallet_page.ticker
+//                    dex_send_modal.address = address
+//                    dex_send_modal.open()
+//                }
+//            }
 
             function autoAddressResponder(addressTxt){
                 General.apAddress = JSON.parse(addressTxt);
-                autoPlay.recievedAutoAddress();
+                autoHedge.recievedAutoAddress();
             }
 
             //called from html, & returns data.
@@ -353,15 +356,15 @@ Item {
             }
 
             function popKp(){
-                autoPlay.apPopKp();
+                autoHedge.apPopKp();
             }
 
             function getKp(ticker){
-                return autoPlay.apGetKp(ticker);
+                return autoHedge.apGetKp(ticker);
             }
 
 //            function getKpTwo(tickerTwo){
-//                return JSON.stringify(autoPlay.apGetKp(tickerTwo));
+//                return JSON.stringify(autoHedge.apGetKp(tickerTwo));
 //            }
 
             //called from html to change signal

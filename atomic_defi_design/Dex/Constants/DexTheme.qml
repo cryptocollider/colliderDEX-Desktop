@@ -530,6 +530,8 @@ QtObject {
                                           "WBTC": "#CCCCCC",
                                           "YFI": "#006BE6",
                                           "ZRX": "#302C2C",
-                                          "UNI": "#FF007A"
+                                          "UNI": "#FF007A",
+                                          "XPM": "#A67522",
+                                          "TKL": "#536E93"
                                       })
 }

@@ -41,7 +41,6 @@ MouseArea
     NumberAnimation
     {
         id: waitForSidebarExpansionAnimation
-        //targets: [_portfolioLine.label, _walletLine.label, _dexLine.label, _addressBookLine.label, _fiatLine.label]
         targets: [_portfolioLine.label, _walletLine.label, _dexLine.label, _arbibotLine.label, _gamesLine.label, _coinSightLine.label, _discordLine.label]
         properties: "opacity"
         duration: 200
@@ -53,7 +52,6 @@ MouseArea
     NumberAnimation
     {
         id: labelsOpacityAnimation
-        //targets: [_portfolioLine.label, _walletLine.label, _dexLine.label, _addressBookLine.label, _fiatLine.label]
         targets: [_portfolioLine.label, _walletLine.label, _dexLine.label, _arbibotLine.label, _gamesLine.label, _coinSightLine.label, _discordLine.label]
         properties: "opacity"
         duration: 350
@@ -165,6 +163,7 @@ MouseArea
             type: Main.LineType.Discord
             label.text: isExpanded ? qsTr("Discord") : ""
             icon.source: General.image_path + "menu-discord-white.svg"
+            icon.anchors.leftMargin: 26
             onClicked: lineSelected(type)
         }
     }

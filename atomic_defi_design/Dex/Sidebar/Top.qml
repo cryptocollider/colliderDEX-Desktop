@@ -75,7 +75,7 @@ MouseArea
         id: versionLabel
         anchors.horizontalCenter: dexLogo.horizontalCenter
         anchors.top: dexLogo.bottom
-        anchors.topMargin: 35
+        anchors.topMargin: 15
 
         text_value: General.version_string
         font: DexTypo.caption

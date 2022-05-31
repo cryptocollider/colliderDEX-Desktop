@@ -14,10 +14,17 @@ import "../Components"
 import "../Constants"
 import "../Wallet"
 import "../Exchange/Trade"
+import App 1.0
+import Dex.Themes 1.0 as Dex
 
 Item {
     id: games
-    anchors.fill: parent    
+    anchors.fill: parent
+    property int initialBootTime: 12
+    property bool doneInitialBoot: false
+    property string g1: qsTr("Waiting: ")
+    property string g2: qsTr("Play")
+    property string g3: qsTr("Auto Hedging")
     property string tempTickr: "t"
 
     //strings for coins pub address
@@ -91,22 +98,18 @@ Item {
     }
 
     function openArena(){
-       // buildAddyList();
 //        webIndex.url = "qrc:///atomic_defi_design/qml/Games/testCom.html"
-//        someObject.preloadCoin("KMD", "testAddress")
         if(!General.openedArena){
             webIndex.url = "https://cryptocollider.com/app/indexDex.html"
             buildAddyList();
             dex_user_data_timer.restart()
             General.openedArena = true
         }
-        if(!dashboard.loopedVideos){
-            dashboard.loopedVideos = true
-        }
         if(challenge_video.playbackState === MediaPlayer.PlayingState || arena_video.playbackState === MediaPlayer.PlayingState){
             challenge_video.stop()
             arena_video.stop()
         }
+        checkVids();
         General.inArena = true
     }
 
@@ -116,13 +119,11 @@ Item {
             buildAddyList();
             General.openedChallenge = true
         }
-        if(!dashboard.loopedVideos){
-            dashboard.loopedVideos = true
-        }
         if(challenge_video.playbackState === MediaPlayer.PlayingState || arena_video.playbackState === MediaPlayer.PlayingState){
             challenge_video.stop()
             arena_video.stop()
         }
+        checkVids();
         General.inChallenge = true
     }
 
@@ -134,20 +135,37 @@ Item {
             General.openedArena = true
         }
         if(!General.openedAutoP){
-            autoPlay.runCoinData();
+            autoHedge.runCoinData();
+            autoHedge.throwSeconds = 0;
+            General.apCanThrow = true;
             General.openedAutoP = true;
-        }
-        if(!dashboard.loopedVideos){
-            dashboard.loopedVideos = true
         }
         if(challenge_video.playbackState === MediaPlayer.PlayingState || arena_video.playbackState === MediaPlayer.PlayingState){
             challenge_video.stop()
             arena_video.stop()
         }
+        checkVids();
         tempTickr = General.apCurrentTicker
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
         General.inAuto = true
+    }
+
+    function checkVids(){
+        if(autoHedge.hasColliderData){
+            if(autoHedge.colliderJsonData.seenVids == "1"){
+                autoHedge.colliderJsonData.seenVids = "2";
+                var colliderJsonFilename = app.currentWalletName + ".col.json"
+                var overWright = true
+                if(API.qt_utilities.save_collider_data(colliderJsonFilename, autoHedge.colliderJsonData, overWright)){
+                    //testLabel.text = "set collider data"
+                }else{
+                    //testLabel.text = "failed set collider data"
+                }
+            }else{
+            }
+        }
+        dashboard.watchedVids = true;
     }
 
     function checkDexUserData(){
@@ -156,6 +174,14 @@ Item {
         if(!dashboard.sentDexUserData){
             someObject.dexAutoLogin("temp")
             dashboard.sentDexUserData = true
+        }
+    }
+
+    function initialBootWait(){
+        initialBootTime--;
+        if(initialBootTime < 1){
+            initial_boot_timer.stop();
+            doneInitialBoot = true;
         }
     }
 
@@ -238,7 +264,16 @@ Item {
         onTriggered: checkDexUserData()
     }
 
-    FloatingBackground{
+    Timer {
+        id: initial_boot_timer
+        interval: 1000
+        repeat: true
+        triggeredOnStart: false
+        running: true
+        onTriggered: initialBootWait()
+    }
+
+    DexRectangle{
         id: challenge
         enabled: General.inColliderApp ? false : true
         visible: General.inColliderApp ? false : true
@@ -246,70 +281,92 @@ Item {
         height: 500
         x: (parent.width * 0.25) - (width / 2)
         y: 40
-        ColumnLayout{
-            anchors.fill: parent
-            DexLabel{
-                Layout.alignment: Qt.AlignCenter
-                Layout.topMargin: 6
-                horizontalAlignment: Text.AlignHCenter
-                font: DexTypo.head4
-                text: qsTr("Crypto Challenge")
-            }
-            DexLabel{
-                Layout.alignment: Qt.AlignCenter
-                Layout.topMargin: -4
-                font: DexTypo.head6
-                text: qsTr("Fun way to learn Crypto")
-            }
-            DexButton{
-                Layout.alignment: Qt.AlignCenter
-                Layout.maximumWidth: 200
-                Layout.minimumWidth: 120
-                Layout.maximumHeight: 60
-                Layout.minimumHeight: 80
-                //Layout.topMargin: 70 * (arena.height / 532)
-                Layout.topMargin: 276
-                text: qsTr("Play")
-                onClicked: openChallenge()
-            }
+        gradient: Gradient
+        {
+            orientation: Gradient.Vertical
+            GradientStop { position: 0.001; color: Dex.CurrentTheme.innerBackgroundColor }
+            GradientStop { position: 1; color: Dex.CurrentTheme.backgroundColor }
+        }
+        DexLabel{
+            anchors.horizontalCenter: parent.horizontalCenter
+            horizontalAlignment: Text.AlignHCenter
+            anchors.top: parent.top
+            anchors.topMargin: 28
+            font: Qt.font({
+                pixelSize: 36,
+                letterSpacing: 0.15,
+                family: "Ubuntu",
+                weight: Font.Medium
+            })
+            text: qsTr("Crypto Challenge")
+        }
+        DexLabel{
+            anchors.horizontalCenter: parent.horizontalCenter
+            horizontalAlignment: Text.AlignHCenter
+            anchors.top: parent.top
+            anchors.topMargin: 100
+            font: Qt.font({
+                pixelSize: 20,
+                letterSpacing: 0.15,
+                family: "Ubuntu",
+                weight: Font.Normal
+            })
+            text: qsTr("Fun way to learn Crypto")
+        }
+        DexButton{
+            width: 240
+            height: 60
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 30
+            font: Qt.font({
+                pixelSize: 28,
+                letterSpacing: 0.25,
+                family: "Ubuntu",
+                weight: Font.Medium
+            })
+            border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
+            text: qsTr("Play")
+            onClicked: openChallenge()
         }
         Rectangle{
             width: 426
             height: 240
             anchors.left: parent.left
             anchors.leftMargin: 32
-            y: 116
+            y: 140
             Video {
                 id: challenge_video
-                visible: dashboard.challengeVideo ? true : dashboard.loopedVideos ? false : true
+                visible: dashboard.challengeVideo ? true : dashboard.watchedVids ? false : autoHedge.colliderJsonData.seenVids === "1" ? true : false
                 anchors.fill: parent
                 fillMode: VideoOutput.PreserveAspectFit
                 source: General.image_path + "games-page-challenge.avi"
+                autoLoad: autoHedge.colliderJsonData.seenVids === "1" ? true : false
                 autoPlay: true
-                loops: dashboard.loopedVideos ? 1 : MediaPlayer.Infinite
                 onStopped: {
                     dashboard.challengeVideo = false
+                    checkVids();
                 }
             }
             Image{
-                visible: dashboard.challengeVideo ? false : dashboard.loopedVideos ? true : false
+                visible: dashboard.challengeVideo ? false : dashboard.watchedVids ? true : autoHedge.colliderJsonData.seenVids === "1" ? false : true
                 anchors.fill: parent
                 source: General.image_path + "still-challenge.png"
             }
             Image{
                 id: challenge_play
-                visible: dashboard.challengeVideo ? false : dashboard.loopedVideos ? true : false
+                visible: dashboard.challengeVideo ? false : dashboard.watchedVids ? true : autoHedge.colliderJsonData.seenVids === "1" ? false : true
                 anchors.fill: parent
                 source: General.image_path + "video-play.png"
             }
             ColorOverlay{
-                visible: dashboard.challengeVideo ? false : dashboard.loopedVideos ? true : false
+                visible: dashboard.challengeVideo ? false : dashboard.watchedVids ? true : autoHedge.colliderJsonData.seenVids === "1" ? false : true
                 source: challenge_play
                 color: challenge_mouse.containsMouse ? Qt.rgba(1.0, 1.0, 1.0, 0.6) : Qt.rgba(1.0, 1.0, 1.0, 0.2)
             }
             MouseArea{
                 id: challenge_mouse
-                enabled: dashboard.challengeVideo ? false : dashboard.loopedVideos ? true : false
+                enabled: dashboard.challengeVideo ? false : dashboard.watchedVids ? true : autoHedge.colliderJsonData.seenVids === "1" ? false : true
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
@@ -320,7 +377,7 @@ Item {
         }
     }
 
-    FloatingBackground{
+    DexRectangle{
         id: arena
         enabled: General.inColliderApp ? false : true
         visible: General.inColliderApp ? false : true
@@ -328,76 +385,106 @@ Item {
         height: 500
         x: (parent.width * 0.75) - (width / 2)
         y: 40
-        ColumnLayout{
-            anchors.fill: parent
-            DexLabel{
-                Layout.alignment: Qt.AlignCenter
-//                Layout.maximumWidth: parent.width
-//                Layout.minimumWidth: parent.width - 30 //minus the paddings
-                Layout.topMargin: 6
-//                wrapMode: Text.WordWrap
-//                leftPadding: 15
-//                rightPadding: 15
-                horizontalAlignment: Text.AlignHCenter
-                font: DexTypo.head4
-                text: qsTr("Crypto Collider Trading Arena")
-            }
-            DexLabel{
-                Layout.alignment: Qt.AlignCenter
-                Layout.topMargin: -4
-                font: DexTypo.head6
-                text: qsTr("Use Skill and grow your assets")
-            }
-            DexButton{
-                //enabled: General.autoPlaying ? false : true //can't open CryptoCollider while using auto-play
-                Layout.alignment: Qt.AlignCenter
-                Layout.maximumWidth: 200
-                Layout.minimumWidth: 120
-                Layout.maximumHeight: 60
-                Layout.minimumHeight: 80
-                //Layout.topMargin: 60 * (arena.height / 532)
-                Layout.topMargin: 276
-                text: qsTr("Play")
-                onClicked: openArena()
-            }
+        gradient: Gradient
+        {
+            orientation: Gradient.Vertical
+            GradientStop { position: 0.001; color: Dex.CurrentTheme.innerBackgroundColor }
+            GradientStop { position: 1; color: Dex.CurrentTheme.backgroundColor }
+        }
+        DexLabel{
+            anchors.horizontalCenter: parent.horizontalCenter
+            horizontalAlignment: Text.AlignHCenter
+            anchors.top: parent.top
+            anchors.topMargin: 8
+            font: Qt.font({
+                pixelSize: 36,
+                letterSpacing: 0.15,
+                family: "Ubuntu",
+                weight: Font.Medium
+            })
+            text: qsTr("Crypto Collider")
+        }
+        DexLabel{
+            anchors.horizontalCenter: parent.horizontalCenter
+            horizontalAlignment: Text.AlignHCenter
+            anchors.top: parent.top
+            anchors.topMargin: 48
+            font: Qt.font({
+                pixelSize: 36,
+                letterSpacing: 0.15,
+                family: "Ubuntu",
+                weight: Font.Medium
+            })
+            text: qsTr("Trading Arena")
+        }
+        DexLabel{
+            anchors.horizontalCenter: parent.horizontalCenter
+            horizontalAlignment: Text.AlignHCenter
+            anchors.top: parent.top
+            anchors.topMargin: 100
+            font: Qt.font({
+                pixelSize: 20,
+                letterSpacing: 0.15,
+                family: "Ubuntu",
+                weight: Font.Normal
+            })
+            text: qsTr("Throw & Grow your Assets!")
+        }
+        DexButton{
+            enabled: autoHedge.colliderJsonData.seenVids == "2" ? true : doneInitialBoot ? true : false
+            width: 240
+            height: 60
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 30
+            font: Qt.font({
+                pixelSize: 28,
+                letterSpacing: 0.25,
+                family: "Ubuntu",
+                weight: Font.Medium
+            })
+            border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
+            text: autoHedge.colliderJsonData.seenVids == "2" ? g2 : doneInitialBoot ? g2 : g1 + initialBootTime
+            onClicked: openArena()
         }
         Rectangle{
             width: 426
             height: 240
             anchors.left: parent.left
             anchors.leftMargin: 32
-            y: 116
+            y: 140
             Video {
                 id: arena_video
-                visible: dashboard.arenaVideo ? true : dashboard.loopedVideos ? false : true
+                visible: dashboard.arenaVideo ? true : dashboard.watchedVids ? false : autoHedge.colliderJsonData.seenVids === "1" ? true : false
                 anchors.fill: parent
                 fillMode: VideoOutput.PreserveAspectFit
                 source: General.image_path + "games-page-collider.avi"
+                autoLoad: autoHedge.colliderJsonData.seenVids === "1" ? true : false
                 autoPlay: true
-                loops: dashboard.loopedVideos ? 1 : MediaPlayer.Infinite
                 onStopped: {
                     dashboard.arenaVideo = false
+                    checkVids();
                 }
             }
             Image{
-                visible: dashboard.arenaVideo ? false : dashboard.loopedVideos ? true : false
+                visible: dashboard.arenaVideo ? false : dashboard.watchedVids ? true : autoHedge.colliderJsonData.seenVids === "1" ? false : true
                 anchors.fill: parent
                 source: General.image_path + "still-arena.png"
             }
             Image{
                 id: arena_play
-                visible: dashboard.arenaVideo ? false : dashboard.loopedVideos ? true : false
+                visible: dashboard.arenaVideo ? false : dashboard.watchedVids ? true : autoHedge.colliderJsonData.seenVids === "1" ? false : true
                 anchors.fill: parent
                 source: General.image_path + "video-play.png"
             }
             ColorOverlay{
-                visible: dashboard.arenaVideo ? false : dashboard.loopedVideos ? true : false
+                visible: dashboard.arenaVideo ? false : dashboard.watchedVids ? true : autoHedge.colliderJsonData.seenVids === "1" ? false : true
                 source: arena_play
                 color: arena_mouse.containsMouse ? Qt.rgba(1.0, 1.0, 1.0, 0.6) : Qt.rgba(1.0, 1.0, 1.0, 0.2)
             }
             MouseArea{
                 id: arena_mouse
-                enabled: dashboard.arenaVideo ? false : dashboard.loopedVideos ? true : false
+                enabled: dashboard.arenaVideo ? false : dashboard.watchedVids ? true : autoHedge.colliderJsonData.seenVids === "1" ? false : true
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
@@ -408,38 +495,53 @@ Item {
         }
     }
 
-    FloatingBackground{
+    DexRectangle{
         enabled: General.inColliderApp ? false : true
         visible: General.inColliderApp ? false : true
-        width: 560
+        width: 640
         height: 160
         x: (parent.width / 2) - (width / 2)
         y: 580 + (0.625 * (window.height - (General.minimumHeight - 1)))
+        gradient: Gradient
+        {
+            orientation: Gradient.Vertical
+            GradientStop { position: 0.001; color: Dex.CurrentTheme.innerBackgroundColor }
+            GradientStop { position: 1; color: Dex.CurrentTheme.backgroundColor }
+        }
+        DexButton{
+            enabled: autoHedge.colliderJsonData.seenVids == "2" ? true : doneInitialBoot ? true : false
+            width: API.app.settings_pg.lang == "ru" || "tr" ? 460 : 320
+            height: 60
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 16
+            font: Qt.font({
+                pixelSize: 28,
+                letterSpacing: 0.25,
+                family: "Ubuntu",
+                weight: Font.Medium
+            })
+            border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
+            text: autoHedge.colliderJsonData.seenVids == "2" ? g3 : doneInitialBoot ? g3 : g1 + initialBootTime
+            onClicked: openAutoPlay()
+        }
         ColumnLayout{
             anchors.fill: parent
-            DexButton{
-                Layout.alignment: Qt.AlignCenter
-                Layout.maximumWidth: 240
-                Layout.minimumWidth: 160
-                Layout.maximumHeight: 60
-                Layout.minimumHeight: 80
-                //Layout.topMargin: 70 * (arena.height / 532)
-                Layout.topMargin: 16
-                text: qsTr("Auto Hedging")
-                onClicked: openAutoPlay()
-                //onClicked: someObject.preloadCoin("KMD", "testAddress")
-            }
-
             DexLabel{
                 Layout.alignment: Qt.AlignCenter
                 Layout.maximumWidth: parent.width
                 Layout.minimumWidth: parent.width - 30 //minus the paddings
-                Layout.topMargin: 10
+                Layout.topMargin: 84
                 wrapMode: Text.WordWrap
                 leftPadding: 15
                 rightPadding: 15
                 horizontalAlignment: Text.AlignHCenter
-                font: DexTypo.head6
+                font: Qt.font({
+                    pixelSize: 20,
+                    letterSpacing: 0.15,
+                    family: "Ubuntu",
+                    weight: Font.Normal
+                })
                 text: qsTr("Provide automated game liquidity to")
             }
             DexLabel{
@@ -447,114 +549,18 @@ Item {
                 Layout.maximumWidth: parent.width
                 Layout.minimumWidth: parent.width - 30 //minus the paddings
                 wrapMode: Text.WordWrap
-                bottomPadding: 10
+                bottomPadding: 20
                 leftPadding: 15
                 rightPadding: 15
                 horizontalAlignment: Text.AlignHCenter
-                font: DexTypo.head6
+                font: Qt.font({
+                    pixelSize: 20,
+                    letterSpacing: 0.15,
+                    family: "Ubuntu",
+                    weight: Font.Normal
+                })
                 text: qsTr("diversify your assets & mine Collider Coin")
             }
         }
     }
-
-//    FloatingBackground{
-//        enabled: General.inColliderApp ? false : true
-//        visible: General.inColliderApp ? false : true
-//        width: parent.width * 0.35
-//        height: parent.height * 0.7
-//        x: (parent.width * 0.5) - (width + 40) //half window - (width + margin)
-//        y: ((parent.height * 0.5) - (height * 0.5)) //half window - half height
-
-//        ColumnLayout{
-//            width: parent.width
-
-//            DexLabel {
-//                Layout.alignment: Qt.AlignCenter
-//                Layout.topMargin: 15
-//                font: DexTypo.head6
-//                text: qsTr("Crypto Challenge")
-//            }
-
-//            DefaultText {
-//                Layout.alignment: Qt.AlignCenter
-//                Layout.maximumWidth: parent.width
-//                Layout.topMargin: 15
-//                wrapMode: Text.WordWrap
-//                leftPadding: 15
-//                rightPadding: 15
-//                text_value: qsTr("Lorem ipsum dolor sit amet, sea modus choro constituto eu. Ex nec ignota delenit officiis, ei nam ferri tantas doming. Vel ei solet populo, per ad facilis iracundia definitionem. Mei option dissentiunt cu, mea legimus placerat et. Praesent postulant vis ut, in utinam bonorum fabulas has")
-//            }
-
-//            DexButton {
-//                Layout.alignment: Qt.AlignCenter
-//                Layout.maximumWidth: parent.width - 80
-//                Layout.minimumWidth: parent.width - 80
-//                Layout.maximumHeight: 60
-//                Layout.minimumHeight: 60
-//                Layout.topMargin: 70 * (arena.height / 532)
-//                text: qsTr("Play Crypto Challenge")
-//                onClicked: openChallenge()
-//            }
-//        }
-//    }
-
-//    FloatingBackground{
-//        enabled: General.inColliderApp ? false : true
-//        visible: General.inColliderApp ? false : true
-//        width: parent.width * 0.35
-//        height: parent.height * 0.7
-//        x: ((parent.width * 0.5) + 40) //half window + margin
-//        y: ((parent.height * 0.5) - (height * 0.5)) //half window - half height
-
-//        ColumnLayout{
-//            width: parent.width
-
-//            DexLabel {
-//                Layout.alignment: Qt.AlignCenter
-//                Layout.maximumWidth: parent.width
-//                Layout.minimumWidth: parent.width - 30 //minus the paddings
-//                Layout.topMargin: 15
-//                wrapMode: Text.WordWrap
-//                leftPadding: 15
-//                rightPadding: 15
-//                horizontalAlignment: Text.AlignHCenter
-//                font: DexTypo.head6
-//                text: qsTr("Crypto Collider Trading Arena")
-//            }
-
-//            DefaultText {
-//                Layout.alignment: Qt.AlignCenter
-//                Layout.maximumWidth: parent.width
-//                Layout.topMargin: 15
-//                wrapMode: Text.WordWrap
-//                leftPadding: 15
-//                rightPadding: 15
-//                text_value: qsTr("Lorem ipsum dolor sit amet, sea modus choro constituto eu. Ex nec ignota delenit officiis, ei nam ferri tantas doming. Vel ei solet populo, per ad facilis iracundia definitionem. Mei option dissentiunt cu, mea legimus placerat et. Praesent postulant vis ut, in utinam bonorum fabulas has")
-//            }
-
-//            DexButton {
-////                enabled: General.autoPlaying ? false : true //can't open CryptoCollider while using auto-play
-//                Layout.alignment: Qt.AlignCenter
-//                Layout.maximumWidth: parent.width - 80
-//                Layout.minimumWidth: parent.width - 80
-//                Layout.maximumHeight: 60
-//                Layout.minimumHeight: 60
-//                Layout.topMargin: 60 * (arena.height / 532)
-//                text: qsTr("Play Collider Arena")
-//                onClicked: openArena()
-//            }
-
-//            DexButton {
-//                Layout.alignment: Qt.AlignCenter
-//                Layout.maximumWidth: parent.width - 80
-//                Layout.minimumWidth: parent.width - 80
-//                Layout.maximumHeight: 60
-//                Layout.minimumHeight: 60
-//                Layout.topMargin: 60 * (arena.height / 532)
-//                text: qsTr("Auto-Play")
-//                onClicked: openAutoPlay()
-////                onClicked: someObject.preloadCoin("KMD", "testAddress")
-//            }
-//        }
-//    }
 }

@@ -5,6 +5,7 @@ import QtQuick.Controls 2.15
 import QtGraphicalEffects 1.0
 import "../Components"
 import "../Constants"
+import "../Games"
 import App 1.0
 
 ColumnLayout {
@@ -52,13 +53,30 @@ ColumnLayout {
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
                             hoverEnabled: true
                             onClicked: {
-                                API.app.settings_pg.lang = model.modelData;
-                                console.info("Switched language to %1".arg(API.app.settings_pg.lang));
+                                if(General.autoPlaying){
+                                    lang_warn.text = qsTr("Please stop Auto Hedge before changing language");
+                                }else{
+                                    API.app.settings_pg.lang = model.modelData;
+                                    console.info("Switched language to %1".arg(API.app.settings_pg.lang));
+                                    lang_warn.text = qsTr("Exit and restart ColliderDEX to use Auto Hedging with changed language");
+                                    autoHedge.chngedLang();
+                                    if(!General.chngdLang && General.origLang != API.app.settings_pg.lang){
+                                        General.chngdLang = true;
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         }
+    }
+    DefaultText{
+        id: lang_warn
+        Layout.alignment: Qt.AlignVCenter
+        Layout.maximumWidth: 560
+        wrapMode: Text.WordWrap
+        color: 'darkred'
+        text: ""
     }
 }

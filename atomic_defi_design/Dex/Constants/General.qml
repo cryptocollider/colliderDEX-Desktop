@@ -155,6 +155,7 @@ QtObject {
 
     property string apCurrentTicker: "KMD"
     property string walletCurrentTicker: "KMD"
+    property string origLang: ""
     property int apThrows: 0
     property bool apCanThrow: true
     property bool apHasSelected: false
@@ -168,6 +169,7 @@ QtObject {
 	property bool openedAutoP: false
     property bool openedChallenge: false
     property bool openedCoinSight: false
+    property bool chngdLang: false
     property var apAddress
     readonly property string default_base: atomic_app_primary_coin
     readonly property string default_rel: atomic_app_secondary_coin
@@ -184,6 +186,7 @@ QtObject {
         inChallenge = false
         openedArena = false
         openedChallenge = false
+        openedAutoP = false
         apAddress = undefined
     }
 

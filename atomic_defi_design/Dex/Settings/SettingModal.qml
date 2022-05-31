@@ -301,7 +301,7 @@ Qaterial.Dialog
                         {
                             anchors.fill: parent
                             topPadding: 10
-                            spacing: 15
+                            spacing: 48
                             RowLayout
                             {
                                 width: parent.width - 30
@@ -367,45 +367,45 @@ Qaterial.Dialog
                                 }
                             }
 
-                            RowLayout
-                            {
-                                width: parent.width - 30
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                height: 30
+//                            RowLayout
+//                            {
+//                                width: parent.width - 30
+//                                anchors.horizontalCenter: parent.horizontalCenter
+//                                height: 30
 
-                                DexLabel
-                                {
-                                    Layout.alignment: Qt.AlignVCenter
-                                    Layout.fillWidth: true
-                                    font: DexTypo.subtitle1
-                                    text: qsTr("Theme")
-                                }
-                            }
+//                                DexLabel
+//                                {
+//                                    Layout.alignment: Qt.AlignVCenter
+//                                    Layout.fillWidth: true
+//                                    font: DexTypo.subtitle1
+//                                    text: qsTr("Theme")
+//                                }
+//                            }
 
-                            DexComboBox
-                            {
-                                width: parent.width - 200
+//                            DexComboBox
+//                            {
+//                                width: parent.width - 200
 
-                                model: API.qt_utilities.get_themes_list()
+//                                model: API.qt_utilities.get_themes_list()
 
-                                currentIndex: model.indexOf(atomic_settings2.value("CurrentTheme"))
+//                                currentIndex: model.indexOf(atomic_settings2.value("CurrentTheme"))
 
-                                onActivated:
-                                {
-                                    let chosenTheme = model[index];
+//                                onActivated:
+//                                {
+//                                    let chosenTheme = model[index];
 
-                                    console.info(qsTr("Changing theme to %1").arg(chosenTheme));
-                                    atomic_settings2.setValue("CurrentTheme", chosenTheme);
-                                    atomic_settings2.sync();
-                                    Dex.CurrentTheme.loadFromFilesystem(chosenTheme);
-                                }
+//                                    console.info(qsTr("Changing theme to %1").arg(chosenTheme));
+//                                    atomic_settings2.setValue("CurrentTheme", chosenTheme);
+//                                    atomic_settings2.sync();
+//                                    Dex.CurrentTheme.loadFromFilesystem(chosenTheme);
+//                                }
 
-                                Component.onCompleted:
-                                {
-                                    let current = atomic_settings2.value("CurrentTheme")
-                                    currentIndex = model.indexOf(current)
-                                }
-                            }
+//                                Component.onCompleted:
+//                                {
+//                                    let current = atomic_settings2.value("CurrentTheme")
+//                                    currentIndex = model.indexOf(current)
+//                                }
+//                            }
                         }
                     }
                     Item

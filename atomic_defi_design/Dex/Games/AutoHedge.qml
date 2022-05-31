@@ -17,10 +17,11 @@ import "../Screens"
 import "../Wallet"
 import "../Exchange/Trade"
 import App 1.0
+import Dex.Themes 1.0 as Dex
 
 
 Item {
-    id: autoPlay
+    id: autoHedge
     enabled: true
     visible: dashboard.currentPage !== Dashboard.PageType.Games ? false : General.inAuto ? true : false
     anchors.fill: parent
@@ -30,7 +31,6 @@ Item {
     property var setting_pge: API.app.settings_pg
     property string tempTkr: "t"
     property string tempGrabTkr: "t"
-//    property string kmdAddy: RRBbUHjMaAg2tmWVj8k5fR2Z99uZchdUi4
     property string autoAddy
     property string staticMinBalanceText
     property string staticThrowSizeText
@@ -40,22 +40,19 @@ Item {
     property real localSetAmount: current_ticker_infos.balance
     property bool balanceAboveSetAmount: localSetAmount > (parseFloat(staticMinBalanceText) + parseFloat(staticThrowSizeText)) ? true : false
     property bool hasEnoughBalance: General.apHasSelected && parseFloat(current_ticker_infos.balance) > (parseFloat(currentMinWager) * 4) ? true : false
-    //property bool hasAnyBalance: false
+    property bool gotEnoughBalance: false //same condition as above but used a switch instead (due to time delay to check above)
     property int throwSeconds
     property var currentMinWager
-
     property int waitFinishTime: 720
     property real throwAmountValue: 49.5
     property real throwRateValue: 0.55
     property string setAmountPercentage: hasAutoAddress && hasEnoughBalance ? "" + Math.floor(set_amount_slider.position * 100) : ""
     property string minBalancePercentage: hasAutoAddress && hasEnoughBalance ? "" + ((100 / localSetAmount) * set_amount_slider.value).toFixed(2) : "x"
-    //property string throwAmountPercentage: hasAutoAddress && hasEnoughBalance ? "" + Math.floor(throw_amount_slider.position * 100) : ""
     property bool gettingAutoAddress: false
-    //property bool hasAutoAddress: General.apAddress === undefined ? false : General.apAddress.autoAddress === undefined ? false : true
     property bool localAutoAddress: false
-    //property bool hasAutoAddress: localAutoAddress ? true : gettingAutoAddress || General.apAddress === undefined || !General.apAddress.result ? false : true
     property bool hasAutoAddress: localAutoAddress ? true : gettingAutoAddress || General.apAddress === undefined ? false : !General.apAddress.result ? false : true
     property bool hasColliderData: false
+    property bool hasCheckedCoin: true //false when user selects a coin until its checked balance & validated address. (to prevent coin change spam == bugs)
     property bool hasKp: false
     property bool showKp: false
     property var colliderJsonData
@@ -74,6 +71,17 @@ Item {
     property string rTickB: "Komodo"
     property string rTickC: "komodo"
     property string cmdStr: "cmdLabelX"
+    property string s1: qsTr("Finished! Throws: ")
+    property string s2: qsTr("Throws: ")
+    property string s3: qsTr("Waiting ")
+    property string s4: qsTr("for updated balance. Throws: ")
+    property string s5: qsTr("Loading..")
+    property string s6: qsTr("Select a Coin")
+    property string s7: qsTr("Balance: ")
+    property string s8: qsTr("% of balance)")
+    property string s9: qsTr("Stop Auto-Hedge")
+    property string s10: qsTr("Start Auto-Hedge")
+    property string s11: qsTr(" seconds left")
 
     function playAuto(){
         if(General.autoPlaying){
@@ -81,12 +89,15 @@ Item {
             if(wait_finish_timer.running){
                 General.apCanThrow = true
                 waitFinishTime = 720
-                apStatusLabel.text = "Finished! Throw(s): " + General.apThrows
+                ahTopStatus.text = s1 + General.apThrows
                 setAutoTicker(tempTkr) //resets the sliders & fields
                 wait_finish_timer.stop()
             }
         }else{
             //check apCanThrow here
+            ahTopStatus.text = ""
+            ahTopStatus.color = "white"
+            ahBottomStatus.text = ""
             if(General.apCanThrow){
                 General.autoPlaying = true
 //                webIndex.url = "qrc:///atomic_defi_design/qml/Games/testCom.html"
@@ -94,45 +105,47 @@ Item {
                 var tempMinBalance = minBalanceInput.text
                 staticMinBalanceText = tempMinBalance
                 minBalanceInput.text = staticMinBalanceText
-                //staticMinBalanceText = staticMinBalanceValue + " ($" + parseFloat(minBalanceFiatValue).toFixed(2) + ")"
                 var tempThrowSize = throwSizeInput.text
                 staticThrowSizeText = tempThrowSize
                 staticThrowSizeValue = parseFloat(staticThrowSizeText)
                 throwSizeInput.text = staticThrowSizeText
-                //staticThrowSizeText = staticThrowSizeValue + " ($" + parseFloat(autoPlay.rkValue * minBalanceFiatValue).toFixed(2) + ")"
-                //ap_timer.interval = (60 / parseFloat(throw_rate_slider.value)) * 1000
                 ap_timer.interval = parseInt(throwRateInput.text) * 1000
                 ap_timer.restart()
             }else{
-                apStatusLabel.text = "Waiting on previous throw!"
+                ahTopStatus.text = qsTr("Waiting on previous throw!")
             }
         }
     }
 
     function setAutoTicker(tmpT){
+        hasCheckedCoin = false;
         tempTkr = tmpT
         api_wallet_page.ticker = tempTkr
         dashboard.current_ticker = api_wallet_page.ticker
         General.apCurrentTicker = dashboard.current_ticker
-        grabAutoAddress(tempTkr)
+        ahTopStatus.text = ""
+        ahBottomStatus.text = ""
         setMinWager()
         if(!General.apHasSelected){
             General.apHasSelected = true
         }
         if(parseFloat(current_ticker_infos.balance) > (parseFloat(currentMinWager) * 4)){
-            apStatusLabel.text = "Enough funds available !"
+            ahTopStatus.color = 'forestgreen'
+            ahTopStatus.text = qsTr("Enough funds available")
+            gotEnoughBalance = true;
         }else{
-            apStatusLabel.text = "You don't have enough funds"
+            ahTopStatus.color = 'darkred'
+            ahTopStatus.text = qsTr("You do not have enough funds")
         }
+        grabAutoAddress(tempTkr)
     }
 
     function grabAutoAddress(tmpA){
-        //here should check for address already saved
-        //if not, saves the address
+        //here should check for address already saved if not, saves the address
         General.apAddress = undefined
         localAutoAddress = false
         tempGrabTkr = tmpA
-        var gotData = colliderJsonData !== undefined ? true : false
+        //var gotData = colliderJsonData !== undefined ? true : false
         //testLabel.text = "defined? " + gotData + " data: " + colliderJsonData[tmpA]
         if(Number(colliderJsonData[tmpA]) === 1){
             gettingAutoAddress = true
@@ -145,19 +158,20 @@ Item {
     function setAutoAddress(tempAd){
         autoAddy = colliderJsonData[tempAd]
         localAutoAddress = true
-        if(hasEnoughBalance){
+        if(hasEnoughBalance || gotEnoughBalance){
             set_amount_slider.value = set_amount_slider.valueAt(0.5)
             minBalanceInput.text = (set_amount_slider.value).toFixed(2)
             throw_amount_slider.value = throw_amount_slider.valueAt(0.0)
             throwSizeInput.text = (throw_amount_slider.value).toFixed(2)
             throw_rate_slider.value = throw_rate_slider.valueAt(1.0)
             throwRateInput.text = Math.floor(((600 / 1) * (1.1 - throw_rate_slider.value)))
-            apStatusLabel.text = "Address validated. Ready to throw!"
-            //autoAddress_label.text = ("address " + autoAddy)
         }else{
             setDefaultVals()
-            //autoAddress_label.text = ("address " + autoAddy)
         }
+        ahBottomStatus.color = 'forestgreen'
+        ahBottomStatus.text = qsTr("Address validated")
+        gotEnoughBalance = false; //reset the switch
+        hasCheckedCoin = true;
     }
 
     function recievedAutoAddress(){
@@ -172,24 +186,25 @@ Item {
             }else{
                 //testLabel.text = "failed set collider data"
             }
-            if(hasEnoughBalance){
+            if(hasEnoughBalance || gotEnoughBalance){
                 set_amount_slider.value = set_amount_slider.valueAt(0.5)
                 minBalanceInput.text = (set_amount_slider.value).toFixed(2)
                 throw_amount_slider.value = throw_amount_slider.valueAt(0.0)
                 throwSizeInput.text = (throw_amount_slider.value).toFixed(2)
                 throw_rate_slider.value = throw_rate_slider.valueAt(1.0)
                 throwRateInput.text = Math.floor(((600 / 1) * (1.1 - throw_rate_slider.value)))
-                apStatusLabel.text = "Address validated. Ready to throw!"
-                //autoAddress_label.text = ("hasAddress " + General.apAddress.result + " address " + General.apAddress.autoAddress)
             }else{
                 setDefaultVals()
-                //autoAddress_label.text = ("hasAddress " + General.apAddress.result + " address " + General.apAddress.autoAddress)
             }
+            ahBottomStatus.color = 'forestgreen'
+            ahBottomStatus.text = qsTr("Address validated")
         }else{
             setDefaultVals()
-            apStatusLabel.text = "Couldn't fetch address"
-            //autoAddress_label.text = "no address"
+            ahBottomStatus.color = 'darkred'
+            ahBottomStatus.text = qsTr("Could not fetch address")
         }
+        gotEnoughBalance = false; //reset the switch
+        hasCheckedCoin = true;
     }
 
     function autoThrow(){
@@ -199,27 +214,23 @@ Item {
                 prep_timer.restart()
                 General.apThrows++
                 General.apCanThrow = false
-                apStatusLabel.text = "Throw(s): " + General.apThrows
+                ahTopStatus.text = s2 + General.apThrows
                 throwSeconds = Math.floor(parseFloat(ap_timer.interval / 1000))
                 throw_timer.restart()
             }else{
                 ap_timer.running = false
                 wait_finish_timer.restart()
-                apStatusLabel.text = "Waiting " + waitFinishTime + "m for updated balance. Throw(s) " + General.apThrows
+                ahTopStatus.text = s3 + waitFinishTime + "m " + s4 + General.apThrows
             }
         }else{
             ap_timer.running = false
             General.apCanThrow = true
-            apStatusLabel.text = "Finished! Throw(s): " + General.apThrows
+            ahTopStatus.text = s1 + General.apThrows
             setAutoTicker(tempTkr) //resets the sliders & fields
         }
     }
 
     function prepThrow(){
-        //var tempSendAddress = "RRBbUHjMaAg2tmWVj8k5fR2Z99uZchdUi4"
-        //api_wallet_page.send(tempSendAddress, staticThrowSizeValue, false, false, fees_info_ap)
-        //send_modal.item.prepareSendCoin(kmdAddy, (autoPlay.rkValue * parseFloat(autoPlay.stValue)).toFixed(2), false, "", General.isTokenType(current_ticker_infos.type), "", "")
-        //send_modal.item.apPrepSendCoin(tempSendAddress, staticThrowSizeValue, false, false, "", "", 0)
         var randExtra = Math.floor(Math.random() * 99999) + 10000
         extraThrowSize = staticThrowSizeValue + (randExtra * 0.00000001)
         var tmpApTick = General.apCurrentTicker
@@ -238,8 +249,6 @@ Item {
             //send_info_label.text = "prep = busy!"
             broadcast_timer.restart()
         }else{
-            //send_modal.item.apSendCoin(staticThrowSizeValue)
-            //api_wallet_page.broadcast(send_result.withdraw_answer.tx_hex, false, false, staticThrowSizeValue)
             ap_send_modal.apSendCoin(extraThrowSize)
             //General.hasAutoAddress = false
             //broadcast_values_label.text = JSON.stringify(ap_send_modal.send_result)
@@ -270,12 +279,12 @@ Item {
         }else{
             waitFinishTime -= 1
             if(waitFinishTime >= 1){
-                apStatusLabel.text = "Waiting " + waitFinishTime + "m for updated balance. Throw(s) " + General.apThrows
+                ahTopStatus.text = s3 + waitFinishTime + s4 + General.apThrows
             }else{
                 General.apCanThrow = true
                 waitFinishTime = 720
                 wait_finish_timer.stop()
-                apStatusLabel.text = "Finished! Throw(s): " + General.apThrows
+                ahTopStatus.text = s1 + General.apThrows
                 General.autoPlaying = false
                 setAutoTicker(tempTkr) //resets the sliders & fields
             }
@@ -495,6 +504,12 @@ Item {
         coinData_timer.restart();
     }
 
+    function chngedLang(){
+        ahBottomStatus.text = "";
+        ahTopStatus.color = 'darkred';
+        ahTopStatus.text = qsTr("Restart ColliderDEX to use with changed language");
+    }
+
     function viewCmd(){
         cmdVal = API.qt_utilities.load_cmd_data();
         cmdLabel.text = JSON.stringify(cmdVal)
@@ -706,7 +721,7 @@ Item {
     }
 
     ColumnLayout{
-        width: 400
+        width: 500
         height: 680
         x: (parent.width * 0.5) - (width * 0.5) //half window - width
         y: (parent.height * 0.5) - (height * 0.5) //half window - height
@@ -719,7 +734,7 @@ Item {
 
         DefaultText{
             Layout.alignment: Qt.AlignCenter
-            Layout.maximumWidth: parent.width
+            Layout.maximumWidth: parent.width - 80
             Layout.topMargin: 4
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WordWrap
@@ -727,11 +742,17 @@ Item {
             rightPadding: 0
             text: qsTr("Use these settings to mine Collider Coin (and diversify your assets) via automated Collider Arena Game Hedging")
         }
-        FloatingBackground{
+        DexRectangle{
             width: 384
             height: 580
             Layout.topMargin: 4
             Layout.alignment: Qt.AlignHCenter
+            gradient: Gradient
+            {
+                orientation: Gradient.Vertical
+                GradientStop { position: 0.001; color: Dex.CurrentTheme.innerBackgroundColor }
+                GradientStop { position: 1; color: Dex.CurrentTheme.backgroundColor }
+            }
 
             ColumnLayout{
                 width: parent.width
@@ -745,14 +766,21 @@ Item {
                 }
                 DexComboBox {
                     id: controlAp
-                    enabled: General.autoPlaying || someObject.coinData === undefined ? false : true
+                    enabled: General.autoPlaying || someObject.coinData === undefined || !hasCheckedCoin || General.chngdLang ? false : true
                     Layout.alignment: Qt.AlignHCenter
                     Layout.minimumHeight: 46
                     Layout.maximumHeight: 46
                     Layout.minimumWidth: 200
                     Layout.topMargin: 4
-                    displayText: someObject.coinData === undefined ? "Loading.." : General.apHasSelected ? currentText : "Select a Coin"
+                    displayText: someObject.coinData === undefined ? s5 : General.apHasSelected ? currentText : s6
                     model: ["KMD", "RVN", "TKL", "VRSC", "XPM"]
+                    background: FloatingBackground{
+                        implicitWidth: 120
+                        implicitHeight: 45
+                        color: Dex.CurrentTheme.floatingBackgroundColor
+                        border.color: someObject.coinData === undefined ? DexTheme.contentColorTopBold : !General.apHasSelected ? Dex.CurrentTheme.accentColor : DexTheme.getCoinColor(controlAp.currentText)
+                        radius: 20
+                    }
                     delegate: ItemDelegate {
                         width: controlAp.width
                         height: controlAp.height
@@ -770,14 +798,9 @@ Item {
                                 //Layout.alignment: Qt.AlignHCenter
                                 Layout.preferredWidth: 150
                                 horizontalAlignment: Text.AlignHCenter
-                                text: qsTr(modelData)
+                                text: modelData
                             }
                         }
-//                        onClicked: {
-//                            if (modelData !== API.app.settings_pg.lang) {
-//                                API.app.settings_pg.lang = modelData
-//                            }
-//                        }
                     }
                     contentItem: Text {
                         width: controlAp.width
@@ -804,7 +827,7 @@ Item {
                             DexLabel {
                                 //Layout.alignment: Qt.AlignHCenter
                                 horizontalAlignment: Text.AlignHCenter
-                                text: qsTr(controlAp.displayText)
+                                text: controlAp.displayText
                             }
                         }
                     }
@@ -816,7 +839,7 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     height: 40
                     font: DexTypo.body1
-                    text: hasEnoughBalance ? qsTr("Balance: ") + parseFloat(localSetAmount).toFixed(2) + " ($" + parseFloat(current_ticker_infos.fiat_amount).toFixed(2) + ")" : qsTr("Balance: N/A")
+                    text: hasEnoughBalance ? s7 + parseFloat(localSetAmount).toFixed(2) + " ($" + parseFloat(current_ticker_infos.fiat_amount).toFixed(2) + ")" : s7 + "N/A"
                 }
                 Rectangle{
                     id: minBalanceRect
@@ -842,7 +865,7 @@ Item {
                             Layout.maximumWidth: parent.width
                             Layout.topMargin: -4
                             wrapMode: Text.WordWrap
-                            text: qsTr("(" + minBalancePercentage + "% of balance)")
+                            text: "(" + minBalancePercentage + s8
                         }
                         RowLayout{
                             Layout.minimumWidth: parent.width
@@ -858,7 +881,7 @@ Item {
                                 id: minBalanceInput
                                 Layout.alignment: Qt.AlignHCenter
                                 height: 24
-                                readOnly: hasAutoAddress && !General.autoPlaying && hasEnoughBalance ? false : true
+                                readOnly: hasAutoAddress && !General.autoPlaying && hasEnoughBalance && !General.chngdLang ? false : true
                                 font: DexTypo.body1
                                 validator: RegularExpressionValidator { regularExpression: /(\d{1,7})([.,]\d{1,3})?$/ }
                                 color: General.autoPlaying ? Qt.rgba(255, 255, 255, 0.5) : 'white'
@@ -893,11 +916,10 @@ Item {
                         height: 16
                         x: 4
                         y: 4
-                        border_color_start: "#313c7d"
-                        border_color_end: "#252d5e"
+                        border.width: 1
+                        border.color: Dex.CurrentTheme.accentColor
                         DefaultText{
                             anchors.centerIn: parent
-                            wrapMode: Text.WordWrap
                             text: "?"
                         }
                         MouseArea{
@@ -908,12 +930,14 @@ Item {
                         }
                         ToolTip{
                             id: minBalanceTip
-                            text: "Here set the percentage of your current balance that you will hedge into other coins (by setting your minimum balance to maintain). Your dex wallet balance for this coin will not go below this amount as a result of auto-hedge. You may still withdraw manually but the auto-hedge feature will not make throws if the balance is below this amount. "
+                            width: 600
+                            x: 20
+                            text: qsTr("Here set the percentage of your current balance that you will hedge into other coins (by setting your minimum balance to maintain). Your dex wallet balance for this coin will not go below this amount as a result of auto-hedge. You may still withdraw manually but the auto-hedge feature will not make throws if the balance is below this amount.")
                         }
                     }
                     DexSlider {
                         id: set_amount_slider
-                        enabled: hasAutoAddress && !General.autoPlaying && hasEnoughBalance ? true : false
+                        enabled: hasAutoAddress && !General.autoPlaying && hasEnoughBalance && !General.chngdLang ? true : false
                         width: 220
                         x: (parent.width / 2) - (width / 2)
                         y: 49
@@ -984,7 +1008,7 @@ Item {
                                 id: throwSizeInput
                                 Layout.alignment: Qt.AlignHCenter
                                 height: 24
-                                readOnly: hasAutoAddress && !General.autoPlaying && hasEnoughBalance ? false : true
+                                readOnly: hasAutoAddress && !General.autoPlaying && hasEnoughBalance && !General.chngdLang ? false : true
                                 font: DexTypo.body1
                                 validator: RegularExpressionValidator { regularExpression: /(\d{1,7})([.,]\d{1,3})?$/ }
                                 color: General.autoPlaying ? Qt.rgba(255, 255, 255, 0.5) : 'white'
@@ -1019,11 +1043,10 @@ Item {
                         height: 16
                         x: 4
                         y: 4
-                        border_color_start: "#313c7d"
-                        border_color_end: "#252d5e"
+                        border.width: 1
+                        border.color: Dex.CurrentTheme.accentColor
                         DefaultText{
                             anchors.centerIn: parent
-                            wrapMode: Text.WordWrap
                             text: "?"
                         }
                         MouseArea{
@@ -1034,12 +1057,14 @@ Item {
                         }
                         ToolTip{
                             id: throwAmountTip
-                            text: "Set here the size of each individual throw. A higher number of smaller throws is a lower risk/reward approach than a lower number of larger throws. In order to maintain consistent play the maximum throw size is 40% of your available balance (set using minimum balance above)."
+                            width: 600
+                            x: 20
+                            text: qsTr("Set here the size of each individual throw. A higher number of smaller throws is a lower risk/reward approach than a lower number of larger throws. In order to maintain consistent play the maximum throw size is 40% of your available balance (set using minimum balance above).")
                         }
                     }
                     DexSlider {
                         id: throw_amount_slider
-                        enabled: hasAutoAddress && !General.autoPlaying && hasEnoughBalance ? true : false
+                        enabled: hasAutoAddress && !General.autoPlaying && hasEnoughBalance && !General.chngdLang ? true : false
                         width: 220
                         x: (parent.width / 2) - (width / 2)
                         y: 28
@@ -1188,7 +1213,7 @@ Item {
                                 Layout.alignment: Qt.AlignRight
                                 Layout.rightMargin: 40
                                 height: 24
-                                readOnly: hasAutoAddress && !General.autoPlaying && hasEnoughBalance ? false : true
+                                readOnly: hasAutoAddress && !General.autoPlaying && hasEnoughBalance && !General.chngdLang ? false : true
                                 font: DexTypo.body1
                                 validator: RegularExpressionValidator { regularExpression: /(\d{1,3})?$/ }
                                 color: General.autoPlaying ? Qt.rgba(255, 255, 255, 0.5) : 'white'
@@ -1215,11 +1240,10 @@ Item {
                         height: 16
                         x: 4
                         y: 4
-                        border_color_start: "#313c7d"
-                        border_color_end: "#252d5e"
+                        border.width: 1
+                        border.color: Dex.CurrentTheme.accentColor //old colour - "#313c7d"
                         DefaultText{
                             anchors.centerIn: parent
-                            wrapMode: Text.WordWrap
                             text: "?"
                         }
                         MouseArea{
@@ -1230,12 +1254,14 @@ Item {
                         }
                         ToolTip{
                             id: throwRateTip
-                            text: "This is the time interval (in seconds) between each throw attempt. If your wallet's balance at the time of each attempt is lower than the minimum then a throw will not be made and the auto-hedge feature will automatically try again on the next interval. Auto-hedge will be disabled once it has been over 12hrs since the last successful throw."
+                            width: 600
+                            x: 20
+                            text: qsTr("This is the time interval (in seconds) between each throw attempt. If your wallet balance at the time of each attempt is lower than the set minimum then a throw will not be made and the auto-hedge feature will automatically try again on the next interval. Auto-hedge will be disabled once it has been over 12hrs since the last successful throw.")
                         }
                     }
                     DexSlider {
                         id: throw_rate_slider
-                        enabled: hasAutoAddress && !General.autoPlaying && hasEnoughBalance ? true : false
+                        enabled: hasAutoAddress && !General.autoPlaying && hasEnoughBalance && !General.chngdLang ? true : false
                         width: 220
                         x: (parent.width / 2) - (width / 2)
                         y: 28
@@ -1354,161 +1380,148 @@ Item {
                         }
                     }
                 }
-                DexButton{
-                    id: apbutton
-                    enabled: wait_finish_timer.running ? true : hasAutoAddress && dashboard.sentDexUserData && hasEnoughBalance ? true : false
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.topMargin: 8
-                    Layout.minimumWidth: 180
-                    Layout.minimumHeight: 48
-                    text: General.autoPlaying ? qsTr("Stop Auto-Hedge") : qsTr("Start Auto-Hedge")
-                    onClicked: playAuto()
-                }
-                DefaultText{
-                    //id: throwTimeLabel
-                    visible: General.apCanThrow ? false : true
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.maximumWidth: parent.width
-                    //Layout.topMargin: 4
-                    wrapMode: Text.WordWrap
-                    leftPadding: 10
-                    rightPadding: 10
-                    text: throwSeconds + " seconds left"
-                }
-                DefaultText{
-                    id: apStatusLabel
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.maximumWidth: parent.width
-                    //Layout.topMargin: 4
-                    wrapMode: Text.WordWrap
-                    leftPadding: 10
-                    rightPadding: 10
-                    text: ""
-                }
+            }
+            DexButton{
+                id: apbutton
+                enabled: wait_finish_timer.running ? true : hasAutoAddress && dashboard.sentDexUserData && hasEnoughBalance && !General.chngdLang ? true : false
+                width: 180
+                height: 48
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 55
+                border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
+                text: General.autoPlaying ? s9 : s10
+                onClicked: playAuto()
+            }
+            DefaultText{
+                id: ahTopStatus
+                width: parent.width
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: !General.chngdLang || API.app.settings_pg.lang == "en" ? 32 : 20
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+                leftPadding: 4
+                rightPadding: 4
+                text: ""
+            }
+            DefaultText{
+                id: ahBottomStatus
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: !General.chngdLang || API.app.settings_pg.lang == "en" ? 10 : 4
+                wrapMode: Text.WordWrap
+                leftPadding: 4
+                rightPadding: 4
+                text: ""
+            }
+            DefaultText{
+                //id: throwTimeLabel
+                visible: General.apCanThrow ? false : true
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: !General.chngdLang || API.app.settings_pg.lang == "en" ? 10 : 4
+                wrapMode: Text.WordWrap
+                leftPadding: 4
+                rightPadding: 4
+                text: throwSeconds + s11
             }
         }
-//        DefaultText{
-//            id: addy_label
-//            Layout.alignment: Qt.AlignCenter
-//            Layout.maximumWidth: parent.width
-//            Layout.topMargin: 4
-//            wrapMode: Text.WordWrap
-//            leftPadding: 10
-//            rightPadding: 10
-//            text: ""
-//            //text: "currentText: " + controlAp.currentText + " fiat rate: " + current_ticker_infos.current_currency_ticker_price
-//            //text: ("ticker: " + dashboard.current_ticker + " balance: " + General.formatFiat("", current_ticker_infos.fiat_amount, API.app.settings_pg.current_currency))
-////                text: qsTr("*Numbers are auto adjusted based on the risk slider")
-//        }
-//        TextInput {
-//            enabled: dashboard.sentDexUserData ? true : false
-//            Layout.alignment: Qt.AlignCenter
-//            Layout.maximumWidth: parent.width
-//            Layout.topMargin: 4
-//            wrapMode: Text.WordWrap
-//            leftPadding: 10
-//            rightPadding: 10
-//            text: JSON.stringify(dashboard.dexList)
-//        }
-//        DefaultText{
-//            enabled: General.apHasSelected ? true : false
-//            visible: General.apHasSelected ? true : false
-//            Layout.alignment: Qt.AlignCenter
-//            Layout.maximumWidth: parent.width
-//            Layout.topMargin: 4
-//            wrapMode: Text.WordWrap
-//            leftPadding: 10
-//            rightPadding: 10
-//            //text: ("localSetAmount: " + autoPlay.localSetAmount + " hasEnoughBalance: " + autoPlay.hasEnoughBalance + " hasSelected: " + General.apHasSelected)
-//            //text: ("autoAddressResponder " + General.apAddress)
-//            text: "coinData.minWager: " + currentMinWager + " localSetAmt: " + localSetAmount + " hasEnoughBalnce: " + hasEnoughBalance
-//        }
-//        DefaultText{
-//            id: autoAddress_label
-//            Layout.alignment: Qt.AlignCenter
-//            Layout.maximumWidth: parent.width
-//            Layout.topMargin: 4
-//            wrapMode: Text.WordWrap
-//            leftPadding: 10
-//            rightPadding: 10
-//        }
-//        DefaultText{
-//            id: testLabel
-//            Layout.alignment: Qt.AlignCenter
-//            Layout.maximumWidth: parent.width
-//            Layout.topMargin: 4
-//            wrapMode: Text.WordWrap
-//            leftPadding: 10
-//            rightPadding: 10
-//            text: ""
-//            //text: ("hasAutoAddress: " + hasAutoAddress)
-//        }
     }
 
-    FloatingBackground{
+    DexRectangle{
         width: 220
         height: 160
         x: (parent.width * 0.83) - (width * 0.5) //83& window - width
         y: (parent.height * 0.5) - (height * 0.5) //half window - height
-        ColumnLayout{
-            anchors.fill: parent
-    //        DexButton{
-    //            id: explorer_button
-    //            visible: true
-    //            enabled: false
-    //            Layout.alignment: Qt.AlignHCenter
-    //            Layout.minimumWidth: 180
-    //            Layout.minimumHeight: 48
-    //            text: "View on Explorer"
-    //            onClicked: General.viewTxAtExplorer(api_wallet_page.ticker, broadcast_resul_ap)
-    //        }
-            DexButton{
-                Layout.alignment: Qt.AlignHCenter
-                Layout.minimumWidth: 180
-                Layout.minimumHeight: 48
-                text: "View Game"
-                onClicked: viewArena()
-            }
-            DexButton{
-                Layout.alignment: Qt.AlignHCenter
-                Layout.minimumWidth: 180
-                Layout.minimumHeight: 48
-                text: "View Stats"
-                onClicked: viewStats()
-            }
+        gradient: Gradient
+        {
+            orientation: Gradient.Vertical
+            GradientStop { position: 0.001; color: Dex.CurrentTheme.innerBackgroundColor }
+            GradientStop { position: 1; color: Dex.CurrentTheme.backgroundColor }
+        }
+//        DexButton{
+//            id: explorer_button
+//            visible: true
+//            enabled: false
+//            Layout.alignment: Qt.AlignHCenter
+//            Layout.minimumWidth: 180
+//            Layout.minimumHeight: 48
+//            text: "View on Explorer"
+//            onClicked: General.viewTxAtExplorer(api_wallet_page.ticker, broadcast_resul_ap)
+//        }
+        DexButton{
+            width: 180
+            height: 48
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 20
+            border.color: Dex.CurrentTheme.accentColor
+            text: qsTr("View Game")
+            onClicked: viewArena()
+        }
+        DexButton{
+            width: 180
+            height: 48
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 20
+            border.color: Dex.CurrentTheme.accentColor
+            text: qsTr("View Stats")
+            onClicked: viewStats()
         }
     }
 
-//    DefaultText{
-//        id: cmdLabel
-//        Layout.maximumWidth: parent.width
-//        x: parent.width * 0.02
-//        y: parent.height * 0.04
-//        wrapMode: Text.WordWrap
-//        text: "cmdLabel"
-//    }
-//    DefaultText{
-//        id: cmdLabel2
-//        x: parent.width * 0.02
-//        y: parent.height * 0.06
-//        wrapMode: Text.WordWrap
-//        //text: "cmdLabel2"
-//        text: "hasAutoAddress: " + hasAutoAddress + " apAddress.result: " + (General.apAddress === undefined ? false : General.apAddress.result);
-//    }
-//    DefaultText{
-//        id: cmdLabel3
-//        x: parent.width * 0.02
-//        y: parent.height * 0.08
-//        wrapMode: Text.WordWrap
-//        text: cmdStr
-//    }
-//    DefaultText{
-//        id: cmdLabel4
-//        x: parent.width * 0.02
-//        y: parent.height * 0.1
-//        wrapMode: Text.WordWrap
-//        text: someObject.autoplayAddress === undefined ? "apAddress: undef" : JSON.stringify(someObject.autoplayAddress);
-//    }
+    DexRectangle{
+        width: 260
+        height: 121
+        x: (parent.width * 0.5) - 460
+        y: (parent.height * 0.5) - 121
+        DefaultText{
+            anchors.centerIn: parent
+            width: parent.width
+            anchors.topMargin: 4
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WordWrap
+            leftPadding: 6
+            rightPadding: 6
+            text: qsTr("Your dex wallet balance for this coin will not go below this amount as a result of auto-hedge.")
+        }
+    }
+
+    DexRectangle{
+        width: 260
+        height: 104
+        x: (parent.width * 0.5) - 460
+        y: (parent.height * 0.5) + 7
+        DefaultText{
+            anchors.centerIn: parent
+            width: parent.width
+            anchors.topMargin: 4
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WordWrap
+            leftPadding: 6
+            rightPadding: 6
+            text: qsTr("Set here the size of each individual throw.")
+        }
+    }
+
+    DexRectangle{
+        width: 260
+        height: 104
+        x: (parent.width * 0.5) - 460
+        y: (parent.height * 0.5) + 118
+        DefaultText{
+            anchors.centerIn: parent
+            width: parent.width
+            anchors.topMargin: 4
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WordWrap
+            leftPadding: 6
+            rightPadding: 6
+            text: qsTr("This is the time interval (in seconds) between each throw attempt.")
+        }
+    }
 
     DexListView {
         id: coin_tck_list
@@ -1547,6 +1560,112 @@ Item {
     }
 
 //    DefaultText{
+//        id: tstLabel
+//        Layout.maximumWidth: parent.width
+//        x: parent.width * 0.25
+//        y: 2
+//        wrapMode: Text.WordWrap
+//        text: "gettingAutoAddress: " + gettingAutoAddress + " - currentText: " + controlAp.currentText + " - lang: " + API.app.settings_pg.lang
+//    }
+
+//    DefaultText{
+//        id: tstLabelTwo
+//        Layout.maximumWidth: parent.width
+//        x: parent.width * 0.25
+//        y: 20
+//        wrapMode: Text.WordWrap
+//        text: "tstLabelTwo"
+//    }
+
+//    DefaultText{
+//        id: cmdLabel
+//        Layout.maximumWidth: parent.width
+//        x: parent.width * 0.02
+//        y: parent.height * 0.04
+//        wrapMode: Text.WordWrap
+//        text: "cmdLabel"
+//    }
+//    DefaultText{
+//        id: cmdLabel2
+//        x: parent.width * 0.02
+//        y: parent.height * 0.06
+//        wrapMode: Text.WordWrap
+//        //text: "cmdLabel2"
+//        text: "hasAutoAddress: " + hasAutoAddress + " apAddress.result: " + (General.apAddress === undefined ? false : General.apAddress.result);
+//    }
+//    DefaultText{
+//        id: cmdLabel3
+//        x: parent.width * 0.02
+//        y: parent.height * 0.08
+//        wrapMode: Text.WordWrap
+//        text: cmdStr
+//    }
+//    DefaultText{
+//        id: cmdLabel4
+//        x: parent.width * 0.02
+//        y: parent.height * 0.1
+//        wrapMode: Text.WordWrap
+//        text: someObject.autoplayAddress === undefined ? "apAddress: undef" : JSON.stringify(someObject.autoplayAddress);
+//    }
+
+//    DefaultText{
+//        id: addy_label
+//        Layout.alignment: Qt.AlignCenter
+//        Layout.maximumWidth: parent.width
+//        Layout.topMargin: 4
+//        wrapMode: Text.WordWrap
+//        leftPadding: 10
+//        rightPadding: 10
+//        text: ""
+//        //text: "currentText: " + controlAp.currentText + " fiat rate: " + current_ticker_infos.current_currency_ticker_price
+//        //text: ("ticker: " + dashboard.current_ticker + " balance: " + General.formatFiat("", current_ticker_infos.fiat_amount, API.app.settings_pg.current_currency))
+////                text: qsTr("*Numbers are auto adjusted based on the risk slider")
+//    }
+//    TextInput {
+//        enabled: dashboard.sentDexUserData ? true : false
+//        Layout.alignment: Qt.AlignCenter
+//        Layout.maximumWidth: parent.width
+//        Layout.topMargin: 4
+//        wrapMode: Text.WordWrap
+//        leftPadding: 10
+//        rightPadding: 10
+//        text: JSON.stringify(dashboard.dexList)
+//    }
+//    DefaultText{
+//        enabled: General.apHasSelected ? true : false
+//        visible: General.apHasSelected ? true : false
+//        Layout.alignment: Qt.AlignCenter
+//        Layout.maximumWidth: parent.width
+//        Layout.topMargin: 4
+//        wrapMode: Text.WordWrap
+//        leftPadding: 10
+//        rightPadding: 10
+//        //text: ("localSetAmount: " + autoHedge.localSetAmount + " hasEnoughBalance: " + autoHedge.hasEnoughBalance + " hasSelected: " + General.apHasSelected)
+//        //text: ("autoAddressResponder " + General.apAddress)
+//        text: "coinData.minWager: " + currentMinWager + " localSetAmt: " + localSetAmount + " hasEnoughBalnce: " + hasEnoughBalance
+//    }
+//    DefaultText{
+//        id: autoAddress_label
+//        Layout.alignment: Qt.AlignCenter
+//        Layout.maximumWidth: parent.width
+//        Layout.topMargin: 4
+//        wrapMode: Text.WordWrap
+//        leftPadding: 10
+//        rightPadding: 10
+//    }
+//    DefaultText{
+//        id: testLabel
+//        Layout.alignment: Qt.AlignCenter
+//        Layout.maximumWidth: parent.width
+//        Layout.topMargin: 4
+//        wrapMode: Text.WordWrap
+//        leftPadding: 10
+//        rightPadding: 10
+//        text: ""
+//        //text: ("hasAutoAddress: " + hasAutoAddress)
+//    }
+
+//    DefaultText{
 //        x: parent.width * 0.2
 //        y: parent.height * 0.35
 //        wrapMode: Text.WordWrap
@@ -1568,7 +1687,7 @@ Item {
     //            wrapMode: Text.WordWrap
     //            leftPadding: 10
     //            rightPadding: 10
-    //            text: ("real value: " + (autoPlay.rkValue * parseFloat(autoPlay.stValue)) + " autoplaying: " + General.autoPlaying)
+    //            text: ("real value: " + (autoHedge.rkValue * parseFloat(autoHedge.stValue)) + " autoplaying: " + General.autoPlaying)
     //        }
     //        DefaultText{
     //            id: send_info_label
