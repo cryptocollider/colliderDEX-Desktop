@@ -160,7 +160,7 @@ namespace atomic_dex
             .price_numer                    = is_selected_order ? m_preferred_order->at("price_numer").get<std::string>() : "",
             .volume_denom                   = is_selected_order ? m_preferred_order->at("base_max_volume_denom").get<std::string>() : "",
             .volume_numer                   = is_selected_order ? m_preferred_order->at("base_max_volume_numer").get<std::string>() : "",
-            .is_exact_selected_order_volume = is_selected_max && m_max_volume.toStdString() == m_preferred_order->at("base_max_volume").get<std::string>(),
+            .is_exact_selected_order_volume = is_selected_max && m_max_volume.toStdString() == utils::extract_large_float(m_preferred_order->at("base_max_volume").get<std::string>()),
             .base_nota                      = base_nota.isEmpty() ? std::optional<bool>{std::nullopt} : boost::lexical_cast<bool>(base_nota.toStdString()),
             .base_confs                     = base_confs.isEmpty() ? std::optional<std::size_t>{std::nullopt} : base_confs.toUInt(),
             .min_volume = (rel_min_volume_f <= rel_min_trade) ? std::optional<std::string>{std::nullopt} : get_min_trade_vol().toStdString()};
@@ -1158,6 +1158,13 @@ namespace atomic_dex
                 auto           answers               = nlohmann::json::parse(body);
                 nlohmann::json answer                = answers[0];
                 auto           trade_preimage_answer = ::mm2::api::rpc_process_answer_batch<t_trade_preimage_answer>(answer, "trade_preimage");
+                if (trade_preimage_answer.error.has_value())
+                {
+                    auto        error_answer = trade_preimage_answer.error.value();
+                    QVariantMap fees;
+                    fees["error"] = QString::fromStdString(error_answer);
+                    this->set_fees(fees);
+                }
                 if (trade_preimage_answer.result.has_value())
                 {
                     auto        success_answer = trade_preimage_answer.result.value();

@@ -42,6 +42,8 @@ namespace
             {"is_enabled", coin.currently_enabled},
             {"has_parent_fees_ticker", coin.has_parent_fees_ticker},
             {"is_testnet", coin.is_testnet.value_or(false)},
+            {"is_erc_family", coin.is_erc_family},
+            {"is_wallet_only", coin.wallet_only},
             {"fees_ticker", QString::fromStdString(coin.fees_ticker)}};
         return j;
     }

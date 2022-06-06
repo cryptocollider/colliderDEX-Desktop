@@ -115,7 +115,7 @@ namespace atomic_dex
     }
 
     QStringList
-    qt_wallet_manager::get_wallets()
+    qt_wallet_manager::get_wallets(const QString& wallet_name)
     {
         QStringList out;
 
@@ -123,12 +123,14 @@ namespace atomic_dex
         {
             if (p.path().extension().string() == ".seed")
             {
-                out.push_back(QString::fromStdString(p.path().stem().string()));
+                if (wallet_name == "" || QString::fromStdString(p.path().stem().string()).contains(wallet_name, Qt::CaseInsensitive))
+                {
+                    out.push_back(QString::fromStdString(p.path().stem().string()));
+                }
             }
         }
 
         out.sort();
-
         return out;
     }
 
