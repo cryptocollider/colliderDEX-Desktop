@@ -76,6 +76,8 @@ namespace atomic_dex
             const fs::path    wallet_cfg_path    = utils::get_atomic_dex_config_folder() / wallet_cfg_file;
             const fs::path    collider_file      = "collider.json"s;
             const fs::path    collider_path      = utils::get_atomic_dex_collider_folder() / collider_file;
+            const fs::path    arbibot_file       = wallet_name.toStdString() + ".arb.json"s;
+            const fs::path    arbibot_path       = utils::get_atomic_dex_arbibot_folder() / arbibot_file;
 
 
             if (not fs::exists(wallet_cfg_path))
@@ -90,6 +92,13 @@ namespace atomic_dex
                 const auto  col_path = ag::core::assets_real_path() / "config";
                 std::string filename = "collider.json";
                 fs::copy(col_path / filename, collider_path);
+            }
+
+            if (not fs::exists(arbibot_path))
+            {
+                const auto  arb_path = ag::core::assets_real_path() / "config";
+                std::string filename = "arbibot.json";
+                fs::copy(arb_path / filename, arbibot_path);
             }
 
             // Encrypt seed

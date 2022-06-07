@@ -197,6 +197,14 @@ namespace atomic_dex::utils
     }
 
     fs::path
+    get_atomic_dex_arbibot_folder()
+    {
+        const auto fs_arbibot_folder = get_atomic_dex_data_folder() / "arbibot";
+        create_if_doesnt_exist(fs_arbibot_folder);
+        return fs_arbibot_folder;
+    }
+
+    fs::path
     get_atomic_dex_current_export_recent_swaps_file()
     {
         return get_atomic_dex_export_folder() / ("swap-export.json");

@@ -166,6 +166,27 @@ namespace atomic_dex
         return result;
     }
 
+    bool
+    qt_utilities::save_arbibot_data(const QString& filename, const QVariantMap& arbibot_object, bool overwrite)
+    {
+        bool     result    = true;
+        fs::path file_path = atomic_dex::utils::get_atomic_dex_arbibot_folder() / filename.toStdString();
+        if (!overwrite && fs::exists(file_path))
+        {
+            result = false;
+        }
+        else
+        {
+            LOG_PATH("saving user arbibot data: {}", file_path);
+            QFile file;
+            file.setFileName(std_path_to_qstring(file_path));
+            file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
+            file.write(QJsonDocument(QJsonObject::fromVariantMap(arbibot_object)).toJson(QJsonDocument::Indented));
+            file.close();
+        }
+        return result;
+    }
+
     QVariantMap
     atomic_dex::qt_utilities::load_theme(const QString& theme_name) const
     {
@@ -196,6 +217,25 @@ namespace atomic_dex
         if (fs::exists(file_path))
         {
             LOG_PATH("load user collider data: {}", file_path);
+            QFile file;
+            file.setFileName(std_path_to_qstring(file_path));
+            file.open(QIODevice::ReadOnly | QIODevice::Text);
+            QString val = file.readAll();
+            file.close();
+            return QJsonDocument::fromJson(val.toUtf8()).object().toVariantMap();
+        }
+        return out;
+    }
+
+    QVariantMap
+    atomic_dex::qt_utilities::load_arbibot_data(const QString& wallet_name) const
+    {
+        QVariantMap out;
+        using namespace std::string_literals;
+        fs::path file_path = atomic_dex::utils::get_atomic_dex_arbibot_folder() / (wallet_name.toStdString() + ".arb.json"s);
+        if (fs::exists(file_path))
+        {
+            LOG_PATH("load user arbibot data: {}", file_path);
             QFile file;
             file.setFileName(std_path_to_qstring(file_path));
             file.open(QIODevice::ReadOnly | QIODevice::Text);

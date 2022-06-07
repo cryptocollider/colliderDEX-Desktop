@@ -92,6 +92,8 @@ namespace atomic_dex::utils
 
     fs::path get_atomic_dex_collider_folder();
 
+    fs::path get_atomic_dex_arbibot_folder();
+
     fs::path get_atomic_dex_current_export_recent_swaps_file();
 
     ENTT_API fs::path get_themes_path();
