@@ -123,13 +123,11 @@ MouseArea
         {
             id: _arbibotLine
 
-            label.enabled: false
-            icon.enabled: false
             Layout.fillWidth: true
-            //type: Main.LineType.Arbibot
+            type: Main.LineType.Arbibot
             label.text: isExpanded ? qsTr("Arbitration Bot") : ""
             icon.source: General.image_path + "bill.svg"
-            //onClicked: lineSelected(type)
+            onClicked: lineSelected(type)
         }
 
         FigurativeLine

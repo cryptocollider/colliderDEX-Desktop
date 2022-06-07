@@ -15,7 +15,7 @@ Item
         Wallet,
         DEX,         // DEX == Trading page
         Addressbook,
-        //Arbibot,
+        Arbibot,
         Games,
         CoinSight,
         Discord,
@@ -72,7 +72,7 @@ Item
         {
             if (currentLineType === Main.LineType.Support) return bottom.y + lineHeight + bottom.spacing;
             else if(currentLineType === Main.LineType.Addressbook) return center.y + (Main.LineType.Wallet) * (lineHeight + center.spacing);
-            else if(currentLineType === Main.LineType.Games || Main.LineType.CoinSight || Main.LineType.Discord) return center.y + currentLineType * (lineHeight + center.spacing);
+            else if(currentLineType === Main.LineType.Arbibot || Main.LineType.Games || Main.LineType.CoinSight || Main.LineType.Discord) return center.y + (currentLineType - 1) * (lineHeight + center.spacing);
             else return center.y + (currentLineType - 1) * (lineHeight + center.spacing);
         }
 

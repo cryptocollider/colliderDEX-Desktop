@@ -35,7 +35,7 @@ Item {
         Wallet,
         DEX,            // DEX == Trading page
         Addressbook,
-        //Arbibot,
+        Arbibot,
         Games,
         CoinSight,
         Discord,
@@ -43,7 +43,7 @@ Item {
     }
 
     property var currentPage: Dashboard.PageType.Portfolio
-    property var availablePages: [portfolio, wallet, exchange, addressbook, games, coinSight, colliderDiscord, support]
+    property var availablePages: [portfolio, wallet, exchange, addressbook, arb_bots, games, coinSight, colliderDiscord, support]
 
     property alias webEngineView: webEngineView
 
@@ -192,6 +192,14 @@ Item {
         onTriggered: {
             autoHedge.setWalletData();
         }
+    }
+
+    Timer {
+        interval: 500
+        repeat: false
+        triggeredOnStart: false
+        running: true
+        onTriggered: bot_logic.getArbData()
     }
 
 //    Shortcut {
@@ -376,6 +384,10 @@ Item {
         }
 
         DiscordWeb {}
+
+        BotLogic {
+            id: bot_logic
+        }
 
         // -------------------------------------------------------------------------------------
 
