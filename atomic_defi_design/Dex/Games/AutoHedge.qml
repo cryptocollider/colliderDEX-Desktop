@@ -44,10 +44,12 @@ Item {
     property int throwSeconds
     property var currentMinWager
     property int waitFinishTime: 720
+    property int initialBootTime: 12
     property real throwAmountValue: 49.5
     property real throwRateValue: 0.55
     property string setAmountPercentage: hasAutoAddress && hasEnoughBalance ? "" + Math.floor(set_amount_slider.position * 100) : ""
     property string minBalancePercentage: hasAutoAddress && hasEnoughBalance ? "" + ((100 / localSetAmount) * set_amount_slider.value).toFixed(2) : "x"
+    property bool doneInitialBoot: false
     property bool gettingAutoAddress: false
     property bool localAutoAddress: false
     property bool hasAutoAddress: localAutoAddress ? true : gettingAutoAddress || General.apAddress === undefined ? false : !General.apAddress.result ? false : true
@@ -510,6 +512,14 @@ Item {
         ahTopStatus.text = qsTr("Restart ColliderDEX to use with changed language");
     }
 
+    function initialBootWait(){
+        initialBootTime--;
+        if(initialBootTime < 1){
+            initial_boot_timer.stop();
+            doneInitialBoot = true;
+        }
+    }
+
     function viewCmd(){
         cmdVal = API.qt_utilities.load_cmd_data();
         cmdLabel.text = JSON.stringify(cmdVal)
@@ -672,6 +682,15 @@ Item {
         triggeredOnStart: false
         running: false
         onTriggered: clearKp()
+    }
+
+    Timer {
+        id: initial_boot_timer
+        interval: 1000
+        repeat: true
+        triggeredOnStart: false
+        running: true
+        onTriggered: initialBootWait()
     }
 
 //    Timer {

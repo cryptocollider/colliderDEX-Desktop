@@ -20,8 +20,6 @@ import Dex.Themes 1.0 as Dex
 Item {
     id: games
     anchors.fill: parent
-    property int initialBootTime: 12
-    property bool doneInitialBoot: false
     property string g1: qsTr("Waiting: ")
     property string g2: qsTr("Play")
     property string g3: qsTr("Auto Hedging")
@@ -177,14 +175,6 @@ Item {
         }
     }
 
-    function initialBootWait(){
-        initialBootTime--;
-        if(initialBootTime < 1){
-            initial_boot_timer.stop();
-            doneInitialBoot = true;
-        }
-    }
-
     function buildAddyList(){
         tempTickr = "KMD"
         api_wallet_page.ticker = tempTickr
@@ -262,15 +252,6 @@ Item {
         triggeredOnStart: false
         running: false
         onTriggered: checkDexUserData()
-    }
-
-    Timer {
-        id: initial_boot_timer
-        interval: 1000
-        repeat: true
-        triggeredOnStart: false
-        running: true
-        onTriggered: initialBootWait()
     }
 
     DexRectangle{
@@ -431,7 +412,7 @@ Item {
             text: qsTr("Throw & Grow your Assets!")
         }
         DexButton{
-            enabled: autoHedge.colliderJsonData.seenVids == "2" ? true : doneInitialBoot ? true : false
+            enabled: autoHedge.colliderJsonData.seenVids == "2" ? true : autoHedge.doneInitialBoot ? true : false
             width: 240
             height: 60
             anchors.horizontalCenter: parent.horizontalCenter
@@ -444,7 +425,7 @@ Item {
                 weight: Font.Medium
             })
             border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
-            text: autoHedge.colliderJsonData.seenVids == "2" ? g2 : doneInitialBoot ? g2 : g1 + initialBootTime
+            text: autoHedge.colliderJsonData.seenVids == "2" ? g2 : autoHedge.doneInitialBoot ? g2 : g1 + autoHedge.initialBootTime
             onClicked: openArena()
         }
         Rectangle{
@@ -509,7 +490,7 @@ Item {
             GradientStop { position: 1; color: Dex.CurrentTheme.backgroundColor }
         }
         DexButton{
-            enabled: autoHedge.colliderJsonData.seenVids == "2" ? true : doneInitialBoot ? true : false
+            enabled: autoHedge.colliderJsonData.seenVids == "2" ? true : autoHedge.doneInitialBoot ? true : false
             width: API.app.settings_pg.lang == "ru" || "tr" ? 460 : 320
             height: 60
             anchors.horizontalCenter: parent.horizontalCenter
@@ -522,7 +503,7 @@ Item {
                 weight: Font.Medium
             })
             border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
-            text: autoHedge.colliderJsonData.seenVids == "2" ? g3 : doneInitialBoot ? g3 : g1 + initialBootTime
+            text: autoHedge.colliderJsonData.seenVids == "2" ? g3 : autoHedge.doneInitialBoot ? g3 : g1 + autoHedge.initialBootTime
             onClicked: openAutoPlay()
         }
         ColumnLayout{

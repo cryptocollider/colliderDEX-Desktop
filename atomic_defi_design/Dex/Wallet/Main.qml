@@ -381,7 +381,7 @@ Item
             Layout.rightMargin: layout_margin
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter
-            spacing: 25
+            spacing: 18
 
             Item
             {
@@ -563,7 +563,7 @@ Item
             // Addressbook button
             Item
             {
-                Layout.preferredWidth: 180
+                Layout.preferredWidth: 148
                 Layout.preferredHeight: 48
 
                 Item { Layout.fillWidth: true }
