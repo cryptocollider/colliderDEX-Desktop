@@ -347,11 +347,17 @@
         <file>assets/images/guide_contract_address_erc.gif</file>
         <file>assets/images/guide_contract_address_qrc.gif</file>
         <file>assets/images/guide_contract_address_bep.gif</file>
+		<file>assets/images/icon-cancel.png</file>
+		<file>assets/images/icon-delete.png</file>
         <file>assets/images/icon-discord.png</file>
         <file>assets/images/icon-email.png</file>
+		<file>assets/images/icon-new.png</file>
+		<file>assets/images/icon-okay.png</file>
+		<file>assets/images/icon-stats.png</file>
         <file>assets/images/icon-support.png</file>
         <file>assets/images/icon-twitter.png</file>
         <file>assets/images/komodo-icon.png</file>
+		<file>assets/images/kucoin.png</file>
         <file>assets/images/lang/en.png</file>
         <file>assets/images/lang/fr.png</file>
         <file>assets/images/lang/ru.png</file>
@@ -385,6 +391,9 @@
         <file>Dex/App.qml</file>
         <file>Dex/String.js</file>
 		<file>Dex/ArbBots/ArbBots.qml</file>
+		<file>Dex/ArbBots/arbibot.js</file>
+		<file>Dex/ArbBots/BotLogic.qml</file>
+		<file>Dex/ArbBots/CreateArb.qml</file>
         <file>Dex/Components/AddressField.qml</file>
         <file>Dex/Components/AddressFieldWithTitle.qml</file>
         <file>Dex/Components/AmountField.qml</file>
