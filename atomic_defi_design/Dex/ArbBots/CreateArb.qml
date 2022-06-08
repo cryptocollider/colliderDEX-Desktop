@@ -91,13 +91,13 @@ Item {
                     DefaultImage {
                         width: 32
                         height: 32
-                        x: -16
+                        x: 10
                         y: 4
                         source: General.image_path + create_bot_cexSelect_combo.currentText.toLowerCase() + ".png"
                     }
                     DexLabel {
                         width: 140
-                        x: 14
+                        x: 40
                         horizontalAlignment: Text.AlignHCenter
                         anchors.verticalCenter: parent.verticalCenter
                         font: DexTypo.head6
@@ -300,6 +300,7 @@ Item {
                     radius: 6
                 }
                 placeholderText: "N/A"
+                placeholderTextColor: 'white'
                 //onEditingFinished: validateMinBalance(text)
             }
         }
@@ -341,6 +342,7 @@ Item {
                     radius: 6
                 }
                 placeholderText: "N/A"
+                placeholderTextColor: 'white'
                 //onEditingFinished: validateMinBalance(text)
                 Qaterial.AppBarButton {
                     width: 40
@@ -403,6 +405,7 @@ Item {
                     radius: 6
                 }
                 placeholderText: "N/A"
+                placeholderTextColor: 'white'
                 //onEditingFinished: validateMinBalance(text)
                 Qaterial.AppBarButton {
                     width: 40
@@ -465,6 +468,7 @@ Item {
                     radius: 6
                 }
                 placeholderText: "N/A"
+                placeholderTextColor: 'white'
                 //onEditingFinished: validateMinBalance(text)
                 Qaterial.AppBarButton {
                     width: 40
@@ -588,6 +592,7 @@ Item {
                     radius: 6
                 }
                 placeholderText: "N/A"
+                placeholderTextColor: 'white'
                 //onEditingFinished: validateMinBalance(text)
             }
         }
@@ -690,6 +695,7 @@ Item {
                     radius: 6
                 }
                 placeholderText: "N/A"
+                placeholderTextColor: 'white'
                 //onEditingFinished: validateMinBalance(text)
             }
         }
