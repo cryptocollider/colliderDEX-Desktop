@@ -44,12 +44,11 @@ Item {
     property int throwSeconds
     property var currentMinWager
     property int waitFinishTime: 720
-    property int initialBootTime: 12
+    property int initialBootTime: 15
     property real throwAmountValue: 49.5
     property real throwRateValue: 0.55
     property string setAmountPercentage: hasAutoAddress && hasEnoughBalance ? "" + Math.floor(set_amount_slider.position * 100) : ""
     property string minBalancePercentage: hasAutoAddress && hasEnoughBalance ? "" + ((100 / localSetAmount) * set_amount_slider.value).toFixed(2) : "x"
-    property bool doneInitialBoot: false
     property bool gettingAutoAddress: false
     property bool localAutoAddress: false
     property bool hasAutoAddress: localAutoAddress ? true : gettingAutoAddress || General.apAddress === undefined ? false : !General.apAddress.result ? false : true
@@ -181,13 +180,7 @@ Item {
         if(General.apAddress.result){
             colliderJsonData[General.apCurrentTicker] = General.apAddress.autoAddress
             autoAddy = colliderJsonData[General.apCurrentTicker]
-            var colliderJsonFilename = app.currentWalletName + ".col.json"
-            var overWright = true
-            if(API.qt_utilities.save_collider_data(colliderJsonFilename, colliderJsonData, overWright)){
-                //testLabel.text = "set collider data"
-            }else{
-                //testLabel.text = "failed set collider data"
-            }
+            setColliderData();
             if(hasEnoughBalance || gotEnoughBalance){
                 set_amount_slider.value = set_amount_slider.valueAt(0.5)
                 minBalanceInput.text = (set_amount_slider.value).toFixed(2)
@@ -452,7 +445,6 @@ Item {
     }
 
     function setColliderData(){
-        colliderJsonData.test = "testingback"
         var colliderJsonFilename = app.currentWalletName + ".col.json"
         var overWright = true
         if(API.qt_utilities.save_collider_data(colliderJsonFilename, colliderJsonData, overWright)){
@@ -460,6 +452,7 @@ Item {
         }else{
             //testLabel.text = "failed set collider data"
         }
+        colliderJsonData = API.qt_utilities.load_collider_data(app.currentWalletName)
     }
 
     function apPopKp(){
@@ -516,7 +509,11 @@ Item {
         initialBootTime--;
         if(initialBootTime < 1){
             initial_boot_timer.stop();
-            doneInitialBoot = true;
+            if(colliderJsonData.waitedInitial == "1"){
+                colliderJsonData.waitedInitial = "2";
+                setColliderData();
+            }else{
+            }
         }
     }
 
@@ -1409,6 +1406,7 @@ Item {
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 55
                 border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
+                opacity: 1
                 text: General.autoPlaying ? s9 : s10
                 onClicked: playAuto()
             }
@@ -1476,6 +1474,7 @@ Item {
             anchors.top: parent.top
             anchors.topMargin: 20
             border.color: Dex.CurrentTheme.accentColor
+            opacity: 1
             text: qsTr("View Game")
             onClicked: viewArena()
         }
@@ -1486,6 +1485,7 @@ Item {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 20
             border.color: Dex.CurrentTheme.accentColor
+            opacity: 1
             text: qsTr("View Stats")
             onClicked: viewStats()
         }

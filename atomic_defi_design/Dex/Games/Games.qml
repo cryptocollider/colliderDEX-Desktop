@@ -153,13 +153,7 @@ Item {
         if(autoHedge.hasColliderData){
             if(autoHedge.colliderJsonData.seenVids == "1"){
                 autoHedge.colliderJsonData.seenVids = "2";
-                var colliderJsonFilename = app.currentWalletName + ".col.json"
-                var overWright = true
-                if(API.qt_utilities.save_collider_data(colliderJsonFilename, autoHedge.colliderJsonData, overWright)){
-                    //testLabel.text = "set collider data"
-                }else{
-                    //testLabel.text = "failed set collider data"
-                }
+                autoHedge.setColliderData();
             }else{
             }
         }
@@ -307,6 +301,7 @@ Item {
                 weight: Font.Medium
             })
             border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
+            opacity: 1
             text: qsTr("Play")
             onClicked: openChallenge()
         }
@@ -412,7 +407,7 @@ Item {
             text: qsTr("Throw & Grow your Assets!")
         }
         DexButton{
-            enabled: autoHedge.colliderJsonData.seenVids == "2" ? true : autoHedge.doneInitialBoot ? true : false
+            enabled: autoHedge.colliderJsonData.waitedInitial == "2" ? true : false
             width: 240
             height: 60
             anchors.horizontalCenter: parent.horizontalCenter
@@ -425,7 +420,8 @@ Item {
                 weight: Font.Medium
             })
             border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
-            text: autoHedge.colliderJsonData.seenVids == "2" ? g2 : autoHedge.doneInitialBoot ? g2 : g1 + autoHedge.initialBootTime
+            opacity: 1
+            text: enabled ? g2 : g1 + autoHedge.initialBootTime
             onClicked: openArena()
         }
         Rectangle{
@@ -490,7 +486,7 @@ Item {
             GradientStop { position: 1; color: Dex.CurrentTheme.backgroundColor }
         }
         DexButton{
-            enabled: autoHedge.colliderJsonData.seenVids == "2" ? true : autoHedge.doneInitialBoot ? true : false
+            enabled: autoHedge.colliderJsonData.waitedInitial == "2" ? true : false
             width: API.app.settings_pg.lang == "ru" || "tr" ? 460 : 320
             height: 60
             anchors.horizontalCenter: parent.horizontalCenter
@@ -503,7 +499,8 @@ Item {
                 weight: Font.Medium
             })
             border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
-            text: autoHedge.colliderJsonData.seenVids == "2" ? g3 : autoHedge.doneInitialBoot ? g3 : g1 + autoHedge.initialBootTime
+            opacity: 1
+            text: enabled ? g2 : g1 + autoHedge.initialBootTime
             onClicked: openAutoPlay()
         }
         ColumnLayout{
