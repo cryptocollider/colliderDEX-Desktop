@@ -59,6 +59,7 @@ Item {
     {
         "KMD": addyKMD,
         "CLC": addyCLC,
+        "CC": addyCLC,
         "BTC": addyBTC,
         "VRSC": addyVRSC,
         "CHIPS": addyCHIPS,
@@ -76,6 +77,7 @@ Item {
     {
         "KMD": balKMD,
         "CLC": balCLC,
+        "CC": balCLC,
         "BTC": balBTC,
         "VRSC": balVRSC,
         "CHIPS": balCHIPS,
