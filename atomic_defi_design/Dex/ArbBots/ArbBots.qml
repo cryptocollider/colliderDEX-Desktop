@@ -439,6 +439,8 @@ Item {
         anchors.horizontalCenter: arb_overview_panel.horizontalCenter
         anchors.top: arb_overview_panel.bottom
         anchors.topMargin: 20
+        border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
+        opacity: 1
         text: qsTr("NEW BOT")
         font.pixelSize: Style.textSize
         onClicked: openCreateBot()

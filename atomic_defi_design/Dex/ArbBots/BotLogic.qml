@@ -5,6 +5,7 @@ import QtGraphicalEffects 1.0
 import QtQml.Models 2.15
 import QtQml 2.2
 import Qaterial 1.0 as Qaterial
+import "arbibot.js" as Arbibot
 
 import "../Components"
 import "../Constants"
@@ -18,6 +19,10 @@ Item {
     property bool inBotStats: false
     property bool hasArbData: false
     property var arbData
+
+    function qmResponse(tempReq){
+        console.log(tempReq);
+    }
 
     function countApi(){
         apiCount = 0;
@@ -46,9 +51,13 @@ Item {
         var arbJsonFilename = app.currentWalletName + ".arb.json"
         var overWright = true
         if(API.qt_utilities.save_arbibot_data(arbJsonFilename, arbData, overWright)){
-            countApi()
         }else{
-            //
         }
+        arbData = API.qt_utilities.load_arbibot_data(app.currentWalletName)
+        countApi()
+    }
+
+    function checkUserApi(){
+        Arbibot.kcInitCheck();
     }
 }

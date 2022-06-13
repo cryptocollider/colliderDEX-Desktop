@@ -29,6 +29,14 @@ Item {
         }
     }
 
+    function resetApi(){
+        create_bot_cexName.text = "";
+        create_bot_secretKey.text = "";
+        create_bot_apiKey.text = "";
+        create_bot_passPhrase.text = "";
+        createApi = false;
+    }
+
     DexLabel{
         anchors.horizontalCenter: create_bot_panel.horizontalCenter
         y: 20
@@ -91,13 +99,13 @@ Item {
                     DefaultImage {
                         width: 32
                         height: 32
-                        x: 10
+                        x: 2
                         y: 4
                         source: General.image_path + create_bot_cexSelect_combo.currentText.toLowerCase() + ".png"
                     }
                     DexLabel {
                         width: 140
-                        x: 40
+                        x: 30
                         horizontalAlignment: Text.AlignHCenter
                         anchors.verticalCenter: parent.verticalCenter
                         font: DexTypo.head6
@@ -234,7 +242,7 @@ Item {
                 }
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: parent.color = 'steelblue'
+                    onClicked: resetApi()
                 }
             }
             DexAppButton{
@@ -259,12 +267,17 @@ Item {
                 }
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: parent.color = 'steelblue'
-                    //bot_logic.arbData.apiKucoin = Object.assign(bot_logic.arbData.apiKucoin, new bot_logic.createObj('first', "shhh", 54, "hushhh"))
+                    onClicked: {
+                        bot_logic.checkUserApi()
+                        bot_logic.arbData.apiKucoin = Object.assign(bot_logic.arbData.apiKucoin, new bot_logic.createApi('first', "shhh", 54, "hushhh"))
+                        resetApi()
+                    }
                 }
             }
         }
         Item{ //CEX NAME
+            enabled: createApi ? true : false
+            visible: createApi ? true : false
             width: 520
             height: 40
             y: 30
@@ -283,7 +296,6 @@ Item {
                 anchors.top: parent.top
                 width: 360
                 height: 40
-                readOnly: createApi ? false : true
                 font: Qt.font({
                     pixelSize: 14,
                     letterSpacing: 0.1,
@@ -299,12 +311,12 @@ Item {
                     border.width: 1
                     radius: 6
                 }
-                placeholderText: "N/A"
-                placeholderTextColor: 'white'
                 //onEditingFinished: validateMinBalance(text)
             }
         }
         Item{ //CEX SECRET KEY
+            enabled: createApi ? true : false
+            visible: createApi ? true : false
             width: 520
             height: 40
             y: 80
@@ -324,7 +336,6 @@ Item {
                 width: 360
                 height: 40
                 rightPadding: 36
-                readOnly: createApi ? false : true
                 font: Qt.font({
                     pixelSize: 14,
                     letterSpacing: 0.1,
@@ -341,8 +352,6 @@ Item {
                     border.width: 1
                     radius: 6
                 }
-                placeholderText: "N/A"
-                placeholderTextColor: 'white'
                 //onEditingFinished: validateMinBalance(text)
                 Qaterial.AppBarButton {
                     width: 40
@@ -368,6 +377,8 @@ Item {
             }
         }
         Item{ //CEX API KEY
+            enabled: createApi ? true : false
+            visible: createApi ? true : false
             width: 520
             height: 40
             y: 130
@@ -387,7 +398,6 @@ Item {
                 width: 360
                 height: 40
                 rightPadding: 36
-                readOnly: createApi ? false : true
                 font: Qt.font({
                     pixelSize: 14,
                     letterSpacing: 0.1,
@@ -404,8 +414,6 @@ Item {
                     border.width: 1
                     radius: 6
                 }
-                placeholderText: "N/A"
-                placeholderTextColor: 'white'
                 //onEditingFinished: validateMinBalance(text)
                 Qaterial.AppBarButton {
                     width: 40
@@ -431,6 +439,8 @@ Item {
             }
         }
         Item{ //CEX PASSPHRASE
+            enabled: createApi ? true : false
+            visible: createApi ? true : false
             width: 520
             height: 40
             y: 180
@@ -450,7 +460,6 @@ Item {
                 width: 360
                 height: 40
                 rightPadding: 36
-                readOnly: createApi ? false : true
                 font: Qt.font({
                     pixelSize: 14,
                     letterSpacing: 0.1,
@@ -467,8 +476,6 @@ Item {
                     border.width: 1
                     radius: 6
                 }
-                placeholderText: "N/A"
-                placeholderTextColor: 'white'
                 //onEditingFinished: validateMinBalance(text)
                 Qaterial.AppBarButton {
                     width: 40
@@ -753,8 +760,10 @@ Item {
         anchors.horizontalCenter: create_bot_panel.horizontalCenter
         anchors.top: create_bot_panel.bottom
         anchors.topMargin: 20
-        text: qsTr("CREATE BOT")
         font.pixelSize: Style.textSize
+        border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
+        opacity: 1
+        text: qsTr("CREATE BOT")
         //onClicked:
     }
     DexAppButton{
@@ -767,6 +776,8 @@ Item {
         anchors.top: create_bot_create.bottom
         anchors.topMargin: 20
         font.pixelSize: Style.textSize
+        border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
+        opacity: 1
         text: qsTr("BACK")
         onClicked: closeCreateBot()
     }
