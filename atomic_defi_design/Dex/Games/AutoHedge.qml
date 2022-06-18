@@ -944,11 +944,14 @@ Item {
                             onEntered: {minBalanceTip.visible = true}
                             onExited: {minBalanceTip.visible = false}
                         }
-                        ToolTip{
+                        DexTooltip{
                             id: minBalanceTip
-                            width: 600
-                            x: 20
-                            text: qsTr("Here set the percentage of your current balance that you will hedge into other coins (by setting your minimum balance to maintain). Your dex wallet balance for this coin will not go below this amount as a result of auto-hedge. You may still withdraw manually but the auto-hedge feature will not make throws if the balance is below this amount.")
+                            contentItem: DefaultText{
+                               width: 600
+                               text: qsTr("Here set the percentage of your current balance that you will hedge into other coins (by setting your minimum balance to maintain). Your dex wallet balance for this coin will not go below this amount as a result of auto-hedge. You may still withdraw manually but the auto-hedge feature will not make throws if the balance is below this amount.")
+                               x: 20
+                               padding: 5
+                            }
                         }
                     }
                     DexSlider {
@@ -1071,11 +1074,14 @@ Item {
                             onEntered: {throwAmountTip.visible = true}
                             onExited: {throwAmountTip.visible = false}
                         }
-                        ToolTip{
+                        DexTooltip{
                             id: throwAmountTip
-                            width: 600
-                            x: 20
-                            text: qsTr("Set here the size of each individual throw. A higher number of smaller throws is a lower risk/reward approach than a lower number of larger throws. In order to maintain consistent play the maximum throw size is 40% of your available balance (set using minimum balance above).")
+                            contentItem: DefaultText{
+                               width: 600
+                               text: qsTr("Set here the size of each individual throw. A higher number of smaller throws is a lower risk/reward approach than a lower number of larger throws. In order to maintain consistent play the maximum throw size is 40% of your available balance (set using minimum balance above).")
+                               x: 20
+                               padding: 5
+                            }
                         }
                     }
                     DexSlider {
@@ -1268,11 +1274,14 @@ Item {
                             onEntered: {throwRateTip.visible = true}
                             onExited: {throwRateTip.visible = false}
                         }
-                        ToolTip{
+                        DexTooltip{
                             id: throwRateTip
-                            width: 600
-                            x: 20
-                            text: qsTr("This is the time interval (in seconds) between each throw attempt. If your wallet balance at the time of each attempt is lower than the set minimum then a throw will not be made and the auto-hedge feature will automatically try again on the next interval. Auto-hedge will be disabled once it has been over 12hrs since the last successful throw.")
+                            contentItem: DefaultText{
+                               width: 600
+                               text: qsTr("This is the time interval (in seconds) between each throw attempt. If your wallet balance at the time of each attempt is lower than the set minimum then a throw will not be made and the auto-hedge feature will automatically try again on the next interval. Auto-hedge will be disabled once it has been over 12hrs since the last successful throw.")
+                               x: 20
+                               padding: 5
+                            }
                         }
                     }
                     DexSlider {
