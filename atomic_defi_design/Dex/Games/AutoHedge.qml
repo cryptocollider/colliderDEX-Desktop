@@ -49,6 +49,7 @@ Item {
     property real throwRateValue: 0.55
     property string setAmountPercentage: hasAutoAddress && hasEnoughBalance ? "" + Math.floor(set_amount_slider.position * 100) : ""
     property string minBalancePercentage: hasAutoAddress && hasEnoughBalance ? "" + ((100 / localSetAmount) * set_amount_slider.value).toFixed(2) : "x"
+    property bool setInitialBoot: false
     property bool gettingAutoAddress: false
     property bool localAutoAddress: false
     property bool hasAutoAddress: localAutoAddress ? true : gettingAutoAddress || General.apAddress === undefined ? false : !General.apAddress.result ? false : true
@@ -506,6 +507,10 @@ Item {
     }
 
     function initialBootWait(){
+        if(!setInitialBoot){
+            initialBootTime = 15;
+            setInitialBoot = true;
+        }
         initialBootTime--;
         if(initialBootTime < 1){
             initial_boot_timer.stop();
