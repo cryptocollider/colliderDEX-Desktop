@@ -18,7 +18,7 @@ import "../Support"
 import "../Sidebar" as Sidebar
 import "../Fiat"
 import "../Games"
-import "../ArbBots"
+import "../ArbBot"
 import "../Settings" as SettingsPage
 import "../Screens"
 import Dex.Themes 1.0 as Dex

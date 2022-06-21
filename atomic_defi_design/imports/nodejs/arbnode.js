@@ -2,12 +2,12 @@ const http = require("http");
 const url = require('url');
 const api = require('kucoin-node-api');
 
-const config = {
-  apiKey: '61f12ccca2de0c0001b8e19d',
-  secretKey: '1f99379e-f478-47f3-9edb-400f2fd7ad05',
-  passphrase: 'f99ac6kz4',
-  environment: 'live'
-}
+//const config = {
+//  apiKey: '61f12ccca2de0c0001b8e19d',
+//  secretKey: '1f99379e-f478-47f3-9edb-400f2fd7ad05',
+//  passphrase: 'f99ac6kz4',
+//  environment: 'live'
+//}
 
 const host = 'localhost';
 const port = 8020;
@@ -19,14 +19,16 @@ const requestListener = function (req, res) {
     var answr;
     switch(decodeURI(queryObject.kcreq)){
         case "init":
-            api.init(config);
+            const confgA = JSON.parse(decodeURI(queryObject.filvar));
+            api.init(confgA);
             console.log("success init");
             answr = "initialized from node";
             res.writeHead(240);
             res.end(JSON.stringify(answr));
             break;
         case "initcheck":
-            api.init(config);
+            const confgB = JSON.parse(decodeURI(queryObject.filvar));
+            api.init(confgB);
             console.log("success init");
             answr = "initialized from node";
             res.writeHead(241);

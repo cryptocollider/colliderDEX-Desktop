@@ -12,7 +12,7 @@ import Dex.Themes 1.0 as Dex
 
 
 Item {
-    id: arb_bot
+    id: arb_bots
     anchors.fill: parent
     property var mdlist: ["KMD", "CLC", "RVN", "TKL", "VRSC", "XPM", "DASH", "DOGE", "ETH", "BTC", "LTC", "DGB", "CHIPS"]
 
@@ -25,11 +25,8 @@ Item {
         onActivated: bot_logic.setArbData()
     }
 
-    CreateArb{
-        id: create_arb
-        enabled: bot_logic.inCreateBot
-        visible: bot_logic.inCreateBot
-    }
+    CreateArb{}
+
     DexLabel{
         enabled: bot_logic.inCreateBot || bot_logic.inBotStats ? false : true
         visible: bot_logic.inCreateBot || bot_logic.inBotStats ? false : true

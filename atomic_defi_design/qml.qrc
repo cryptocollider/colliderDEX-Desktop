@@ -390,10 +390,10 @@
         <file>assets/languages/atomic_defi_tr.qm</file>
         <file>Dex/App.qml</file>
         <file>Dex/String.js</file>
-		<file>Dex/ArbBots/ArbBots.qml</file>
-		<file>Dex/ArbBots/arbibot.js</file>
-		<file>Dex/ArbBots/BotLogic.qml</file>
-		<file>Dex/ArbBots/CreateArb.qml</file>
+		<file>Dex/ArbBot/ArbBots.qml</file>
+		<file>Dex/ArbBot/arbibot.js</file>
+		<file>Dex/ArbBot/BotLogic.qml</file>
+		<file>Dex/ArbBot/CreateArb.qml</file>
         <file>Dex/Components/AddressField.qml</file>
         <file>Dex/Components/AddressFieldWithTitle.qml</file>
         <file>Dex/Components/AmountField.qml</file>

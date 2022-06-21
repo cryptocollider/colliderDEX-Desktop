@@ -12,20 +12,22 @@ import Dex.Themes 1.0 as Dex
 
 
 Item {
-    id: create_arb
+    id: createArb
+    enabled: bot_logic.inCreateBot
+    visible: bot_logic.inCreateBot
     anchors.fill: parent
     property bool createApi: false
-    property var apiList: []
 
     function closeCreateBot(){
         bot_logic.inCreateBot = false;
     }
 
     function verifyApi(){
-        if(create_bot_cexName.length > 0 && create_bot_secretKey.length > 0 && create_bot_apiKey.length > 0 && create_bot_passPhrase.text > 0){
-            return true
+        //check for duplicate API (if API already exists/saved)
+        if(create_bot_cexName.length > 0 && create_bot_secretKey.length > 0 && create_bot_apiKey.length > 0 && create_bot_passPhrase.length > 0){
+            return true;
         }else{
-            return false
+            return false;
         }
     }
 
@@ -35,6 +37,41 @@ Item {
         create_bot_apiKey.text = "";
         create_bot_passPhrase.text = "";
         createApi = false;
+    }
+
+    function checkApi(){
+        create_bot_api_msg.text = "";
+        if(verifyApi()){
+            var tmpCon = {
+                apiKey: create_bot_apiKey.text,
+                secretKey: create_bot_secretKey.text,
+                passphrase: create_bot_passPhrase.text,
+                environment: "live"
+            }
+            bot_logic.checkUserApi(tmpCon);
+        }else{
+            create_bot_api_msg.color = 'darkred';
+            create_bot_api_msg.text = "Please Fill All Details.";
+        }
+    }
+
+    function setUserApi(resp){
+        if(resp == "1"){
+            modApiKucoin.append({"name": create_bot_cexName.text});
+            create_bot_api_select_combo.currentIndex = modApiKucoin.count - 1;
+            bot_logic.arbData.apiKucoin = Object.assign(bot_logic.arbData.apiKucoin, new bot_logic.createApi(create_bot_cexName.text, create_bot_apiKey.text, create_bot_passPhrase.text, create_bot_secretKey.text));
+            bot_logic.setArbData();
+            resetApi();
+            create_bot_api_msg.color = 'forestgreen';
+            create_bot_api_msg.text = "API Added Successfully";
+        }else{
+            create_bot_api_msg.color = 'darkred';
+            create_bot_api_msg.text = "API Unreachable. Please Check Details.";
+        }
+    }
+
+    ListModel{
+        id: modApiKucoin
     }
 
     DexLabel{
@@ -138,13 +175,39 @@ Item {
                 anchors.rightMargin: 100
                 width: 180
                 height: 40
-                displayText: (bot_logic.apiCount > 0) ? currentText : "Create new API"
-                model: (bot_logic.apiCount > 0) ? bot_logic.arbData.apiKucoin : null
+                model: modApiKucoin //(bot_logic.apiCount > 0) ? bot_logic.arbData.apiKucoin : null
+                delegate: ItemDelegate {
+                    width: create_bot_api_select_combo.width
+                    height: create_bot_api_select_combo.height
+                    highlighted: create_bot_api_select_combo.highlightedIndex === index
+                    DexLabel {
+                        //Layout.alignment: Qt.AlignHCenter
+                        width: parent.width
+                        x: 2
+                        horizontalAlignment: Text.AlignHCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        font: DexTypo.head7
+                        text: name
+                    }
+                }
+                contentItem: Text {
+                    width: create_bot_api_select_combo.width
+                    height: create_bot_api_select_combo.height
+                    Label {
+                        width: parent.width
+                        x: 2
+                        horizontalAlignment: Text.AlignHCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        font: DexTypo.head7
+                        text: (bot_logic.apiCount > 0) ? modApiKucoin.get(create_bot_api_select_combo.currentIndex).name : "Add API -->"
+                    }
+                }
 //                onActivated: {
 //                    setAutoTicker(currentText)
 //                }
             }
             DexAppButton{
+                id: create_bot_button_new
                 enabled: createApi ? false : true
                 visible: createApi ? false : true
                 width: 40
@@ -153,10 +216,13 @@ Item {
                 color: DexTheme.iconButtonColor
                 //foregroundColor: DexTheme.iconButtonForegroundColor
                 opacity: containsMouse ? .7 : 1
-                ToolTip.delay: 500
-                ToolTip.timeout: 5000
-                ToolTip.visible: containsMouse
-                ToolTip.text: "New"
+                DexTooltip{
+                    contentItem: DefaultText{
+                       text: "New"
+                       padding: 5
+                    }
+                    visible: create_bot_button_new.containsMouse
+                }
                 Image{
                     width: 40
                     height: 40
@@ -169,6 +235,7 @@ Item {
                 }
             }
             DexAppButton{
+                id: create_bot_button_delete
                 enabled: createApi ? false : (bot_logic.apiCount > 0) ? true : false
                 visible: createApi ? false : (bot_logic.apiCount > 0) ? true : false
                 width: 40
@@ -178,10 +245,13 @@ Item {
                 color: DexTheme.iconButtonColor
                 //foregroundColor: DexTheme.iconButtonForegroundColor
                 opacity: containsMouse ? .7 : 1
-                ToolTip.delay: 500
-                ToolTip.timeout: 5000
-                ToolTip.visible: containsMouse
-                ToolTip.text: "Delete"
+                DexTooltip{
+                    contentItem: DefaultText{
+                       text: "Delete"
+                       padding: 5
+                    }
+                    visible: create_bot_button_delete.containsMouse
+                }
                 Image{
                     width: 36
                     height: 36
@@ -191,8 +261,9 @@ Item {
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        delete bot_logic.arbData.apiKucoin[create_bot_api_select_combo.currentText]
-                        bot_logic.countApi()
+                        delete bot_logic.arbData.apiKucoin[modApiKucoin.get(create_bot_api_select_combo.currentIndex).name];
+                        modApiKucoin.remove(create_bot_api_select_combo.currentIndex);
+                        bot_logic.setArbData();
                     }
                 }
             }
@@ -222,6 +293,7 @@ Item {
 //                }
 //            }
             DexAppButton{
+                id: create_bot_button_cancel
                 enabled: createApi ? true : false
                 visible: createApi ? true : false
                 width: 40
@@ -230,10 +302,13 @@ Item {
                 color: DexTheme.iconButtonColor
                 //foregroundColor: DexTheme.iconButtonForegroundColor
                 opacity: containsMouse ? .7 : 1
-                ToolTip.delay: 500
-                ToolTip.timeout: 5000
-                ToolTip.visible: containsMouse
-                ToolTip.text: "Cancel"
+                DexTooltip{
+                    contentItem: DefaultText{
+                       text: "Cancel"
+                       padding: 5
+                    }
+                    visible: create_bot_button_cancel.containsMouse
+                }
                 Image{
                     width: 40
                     height: 40
@@ -246,6 +321,7 @@ Item {
                 }
             }
             DexAppButton{
+                id: create_bot_button_accept
                 enabled: createApi ? true : false
                 visible: createApi ? true : false
                 width: 40
@@ -255,10 +331,13 @@ Item {
                 color: DexTheme.iconButtonColor
                 //foregroundColor: DexTheme.iconButtonForegroundColor
                 opacity: containsMouse ? .7 : 1
-                ToolTip.delay: 500
-                ToolTip.timeout: 5000
-                ToolTip.visible: containsMouse
-                ToolTip.text: "Accept"
+                DexTooltip{
+                    contentItem: DefaultText{
+                       text: "Accept"
+                       padding: 5
+                    }
+                    visible: create_bot_button_accept.containsMouse
+                }
                 Image{
                     width: 40
                     height: 40
@@ -267,12 +346,27 @@ Item {
                 }
                 MouseArea{
                     anchors.fill: parent
-                    onClicked: {
-                        bot_logic.checkUserApi()
-                        bot_logic.arbData.apiKucoin = Object.assign(bot_logic.arbData.apiKucoin, new bot_logic.createApi('first', "shhh", 54, "hushhh"))
-                        resetApi()
-                    }
+                    onClicked: checkApi();
                 }
+            }
+        }
+        Item{
+            width: 340
+            height: 40
+            y: 192
+            anchors.left: create_bot_coinA.left
+            anchors.leftMargin: -60
+            DexLabel{
+                id: create_bot_api_msg
+                horizontalAlignment: Text.AlignHCenter
+                font: Qt.font({
+                    pixelSize: 14,
+                    letterSpacing: 0.1,
+                    family: "Ubuntu",
+                    weight: Font.Normal
+                })
+                color: 'darkred'
+                text: ""
             }
         }
         Item{ //CEX NAME

@@ -5,10 +5,12 @@ import QtGraphicalEffects 1.0
 import QtQml.Models 2.15
 import QtQml 2.2
 import Qaterial 1.0 as Qaterial
-import "arbibot.js" as Arbibot
+//import "CreateArb.qml" as CrArb
 
+import "../ArbBot"
 import "../Components"
 import "../Constants"
+import "arbibot.js" as Arbibot
 
 
 Item {
@@ -33,6 +35,7 @@ Item {
 
     function createApi(propName, propApi, propPhrase, propSec){
         this[propName] = {
+            name: propName,
             apiKey: propApi,
             passPhrase: propPhrase,
             secretKey: propSec
@@ -57,7 +60,8 @@ Item {
         countApi()
     }
 
-    function checkUserApi(){
-        Arbibot.kcInitCheck();
+    function checkUserApi(checkConf){
+        var tmpInCh = Arbibot.kcInitCheck(checkConf);
+        createArb.setUserApi(tmpInCh);
     }
 }
