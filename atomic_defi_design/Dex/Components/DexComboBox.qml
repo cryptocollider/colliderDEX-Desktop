@@ -18,6 +18,7 @@ ComboBox
     property color lineHoverColor: DexTheme.hoverColor
     property color mainBackgroundColor: Dex.CurrentTheme.floatingBackgroundColor
     property int dropDownMaxHeight: 300
+    property bool dropDownMin: false
     property color dropdownBackgroundColor: Dex.CurrentTheme.floatingBackgroundColor
     property
     var dropdownLineText: m => textRole === "" ?
@@ -68,7 +69,7 @@ ComboBox
     popup: Popup
     {
         width: control.width
-        height: _list.contentHeight > control.dropDownMaxHeight ? control.dropDownMaxHeight : _list.contentHeight
+        height: _list.contentHeight > control.dropDownMaxHeight ? control.dropDownMaxHeight : dropDownMin ? 160 : _list.contentHeight
         leftPadding: 0
         rightPadding: 0
         topPadding: 16

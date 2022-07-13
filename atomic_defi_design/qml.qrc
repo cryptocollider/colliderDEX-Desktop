@@ -391,9 +391,11 @@
         <file>Dex/App.qml</file>
         <file>Dex/String.js</file>
 		<file>Dex/ArbBot/ArbBots.qml</file>
+		<file>Dex/ArbBot/arbcreate.js</file>
 		<file>Dex/ArbBot/arbibot.js</file>
 		<file>Dex/ArbBot/BotLogic.qml</file>
 		<file>Dex/ArbBot/CreateArb.qml</file>
+		<file>Dex/ArbBot/OverviewArb.qml</file>
         <file>Dex/Components/AddressField.qml</file>
         <file>Dex/Components/AddressFieldWithTitle.qml</file>
         <file>Dex/Components/AmountField.qml</file>

@@ -389,6 +389,14 @@ Item {
             id: bot_logic
         }
 
+        CreateArb{
+            id: create_arb
+        }
+
+        OverviewArb{
+            id: overview_arb
+        }
+
         // -------------------------------------------------------------------------------------
 
         QtObject {

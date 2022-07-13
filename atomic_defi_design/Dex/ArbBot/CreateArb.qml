@@ -1,25 +1,32 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
+import QtQuick.Controls.impl 2.15
+import QtQuick.Controls.Universal 2.15
 import QtGraphicalEffects 1.0
-import QtQml.Models 2.15
+import QtQml.Models 2.1
 import QtQml 2.2
 import Qaterial 1.0 as Qaterial
 
 import "../Components"
 import "../Constants"
+import "arbcreate.js" as Crbot
+import App 1.0
 import Dex.Themes 1.0 as Dex
 
 
 Item {
-    id: createArb
-    enabled: bot_logic.inCreateBot
-    visible: bot_logic.inCreateBot
+    id: create_arb
+    enabled: bot_logic.inArbBot && bot_logic.inCreateBot
+    visible: bot_logic.inArbBot && bot_logic.inCreateBot
     anchors.fill: parent
     property bool createApi: false
+    property real targetSliderVal: 5.5
 
     function closeCreateBot(){
+        bot_logic.inBotStats = false;
         bot_logic.inCreateBot = false;
+        bot_logic.inViewBot = true;
     }
 
     function verifyApi(){
@@ -39,6 +46,13 @@ Item {
         createApi = false;
     }
 
+    function resetFields(){
+        create_bot_coinA_min.text = "1.0";
+        create_bot_coinB_min.text = "1.0";
+        targetSliderVal = 5.5;
+        create_bot_status_switch.checked = false;
+    }
+
     function checkApi(){
         create_bot_api_msg.text = "";
         if(verifyApi()){
@@ -47,17 +61,33 @@ Item {
                 secretKey: create_bot_secretKey.text,
                 passphrase: create_bot_passPhrase.text,
                 environment: "live"
-            }
-            bot_logic.checkUserApi(tmpCon);
+            };
+            Crbot.kcCbotInit(tmpCon);
         }else{
             create_bot_api_msg.color = 'darkred';
             create_bot_api_msg.text = "Please Fill All Details.";
         }
     }
 
+    function setDbugTxt(respDbug){
+        create_bot_dbug_txt.text = JSON.parse(respDbug);
+    }
+
+    function getDbugTxt(){
+        var rpcPss = "bleh";
+        const reslt = API.app.settings_pg.retrieve_seed(API.app.wallet_mgr.wallet_default_name, inputPassword.field.text);
+        if (reslt.length === 2){
+            rpcPss = result[1];
+            create_bot_dbug_txt.text = rpcPss;
+            Crbot.adOrderBook(rpcPss);
+        }else{
+            create_bot_dbug_txt.text = "result length < 2";
+        }
+    }
+
     function setUserApi(resp){
-        if(resp == "1"){
-            modApiKucoin.append({"name": create_bot_cexName.text});
+        if(JSON.parse(resp) === "1"){
+            modApiKucoin.append({name: create_bot_cexName.text});
             create_bot_api_select_combo.currentIndex = modApiKucoin.count - 1;
             bot_logic.arbData.apiKucoin = Object.assign(bot_logic.arbData.apiKucoin, new bot_logic.createApi(create_bot_cexName.text, create_bot_apiKey.text, create_bot_passPhrase.text, create_bot_secretKey.text));
             bot_logic.setArbData();
@@ -68,6 +98,22 @@ Item {
             create_bot_api_msg.color = 'darkred';
             create_bot_api_msg.text = "API Unreachable. Please Check Details.";
         }
+    }
+
+    function packBot(){
+        var tmpB = {
+            exch: create_bot_cexSelect_combo.currentText.toLowerCase(),
+            apiNum: create_bot_api_select_combo.currentIndex,
+            cnA: create_bot_coinA_combo.currentText,
+            aMin: Number(create_bot_coinA_min.text),
+            cnB: create_bot_coinB_combo.currentText,
+            bMin: Number(create_bot_coinB_min.text),
+            targ: Number(create_bot_target_slider.value.toFixed(1)),
+            crStatus: create_bot_status_switch.checked
+        };
+        overview_arb.addBotMod(tmpB);
+        resetFields();
+        closeCreateBot();
     }
 
     ListModel{
@@ -109,6 +155,7 @@ Item {
                 width: 180
                 height: 40
                 //displayText: someObject.coinData === undefined ? "Loading.." : General.apHasSelected ? currentText : "Select a Coin"
+                dropDownMin: true
                 model: ["Kucoin"]
                 delegate: ItemDelegate {
                     width: create_bot_cexSelect_combo.width
@@ -175,6 +222,7 @@ Item {
                 anchors.rightMargin: 100
                 width: 180
                 height: 40
+                dropDownMin: true
                 model: modApiKucoin //(bot_logic.apiCount > 0) ? bot_logic.arbData.apiKucoin : null
                 delegate: ItemDelegate {
                     width: create_bot_api_select_combo.width
@@ -199,7 +247,7 @@ Item {
                         horizontalAlignment: Text.AlignHCenter
                         anchors.verticalCenter: parent.verticalCenter
                         font: DexTypo.head7
-                        text: (bot_logic.apiCount > 0) ? modApiKucoin.get(create_bot_api_select_combo.currentIndex).name : "Add API -->"
+                        text: (modApiKucoin.count > 0) ? modApiKucoin.get(create_bot_api_select_combo.currentIndex).name : "Add API -->"
                     }
                 }
 //                onActivated: {
@@ -236,8 +284,8 @@ Item {
             }
             DexAppButton{
                 id: create_bot_button_delete
-                enabled: createApi ? false : (bot_logic.apiCount > 0) ? true : false
-                visible: createApi ? false : (bot_logic.apiCount > 0) ? true : false
+                enabled: createApi ? false : (modApiKucoin.count > 0) ? true : false
+                visible: createApi ? false : (modApiKucoin.count > 0) ? true : false
                 width: 40
                 height: 40
                 anchors.right: parent.right
@@ -263,13 +311,16 @@ Item {
                     onClicked: {
                         delete bot_logic.arbData.apiKucoin[modApiKucoin.get(create_bot_api_select_combo.currentIndex).name];
                         modApiKucoin.remove(create_bot_api_select_combo.currentIndex);
+                        if(modApiKucoin.count >= 1){
+                            create_bot_api_select_combo.currentIndex = modApiKucoin.count - 1;
+                        }
                         bot_logic.setArbData();
                     }
                 }
             }
 //            DexAppButton{
-//                enabled: createApi ? false : (bot_logic.apiCount > 0) ? true : false
-//                visible: createApi ? false : (bot_logic.apiCount > 0) ? true : false
+//                enabled: createApi ? false : (modApiKucoin.count > 0) ? true : false
+//                visible: createApi ? false : (modApiKucoin.count > 0) ? true : false
 //                width: 40
 //                height: 40
 //                anchors.right: parent.right
@@ -614,7 +665,7 @@ Item {
                 width: 180
                 height: 50
                 //displayText: someObject.coinData === undefined ? "Loading.." : General.apHasSelected ? currentText : "Select a Coin"
-                model: ["KMD", "RVN", "TKL", "VRSC", "XPM"]
+                model: ["KMD", "DASH", "DOGE", "ETH", "BTC", "LTC", "DGB"]
                 delegate: ItemDelegate {
                     width: create_bot_coinA_combo.width
                     height: create_bot_coinA_combo.height
@@ -692,8 +743,9 @@ Item {
                     border.width: 1
                     radius: 6
                 }
-                placeholderText: "N/A"
-                placeholderTextColor: 'white'
+                //placeholderText: "N/A"
+                //placeholderTextColor: 'white'
+                text: "1.0"
                 //onEditingFinished: validateMinBalance(text)
             }
         }
@@ -717,7 +769,8 @@ Item {
                 width: 180
                 height: 50
                 //displayText: someObject.coinData === undefined ? "Loading.." : General.apHasSelected ? currentText : "Select a Coin"
-                model: ["KMD", "RVN", "TKL", "VRSC", "XPM"]
+                model: ["KMD", "DASH", "DOGE", "ETH", "BTC", "LTC", "DGB"]
+                currentIndex: 1
                 delegate: ItemDelegate {
                     width: create_bot_coinB_combo.width
                     height: create_bot_coinB_combo.height
@@ -795,8 +848,9 @@ Item {
                     border.width: 1
                     radius: 6
                 }
-                placeholderText: "N/A"
-                placeholderTextColor: 'white'
+                //placeholderText: "N/A"
+                //placeholderTextColor: 'white'
+                text: "1.0"
                 //onEditingFinished: validateMinBalance(text)
             }
         }
@@ -819,12 +873,31 @@ Item {
                 id: create_bot_target_slider
                 anchors.right: parent.right
                 anchors.top: parent.top
+                anchors.rightMargin: 80
                 width: 280
                 height: 50
-//                from: hasAutoAddress && hasEnoughBalance ? currentMinWager : 0.5
-//                to: hasAutoAddress && hasEnoughBalance ? ((localSetAmount - (set_amount_slider.valueAt(set_amount_slider.position))) * 0.4) : 100
-//                value: throwAmountValue
+                from: 1.0
+                to: 10.0
+                value: targetSliderVal
 //                onMoved: slideThrowSize()
+            }
+            TextField{
+                id: create_bot_target_value
+                anchors.right: parent.right
+                anchors.top: parent.top
+                width: 64
+                height: 50
+                readOnly: true
+                font: DexTypo.head6
+                color: 'white'
+                background: DexRectangle {
+                    color: "#252a4d"
+                    border.color: create_bot_coinB_min.focus ? "#2B6680" : 'white'
+                    border.width: 1
+                    radius: 6
+                }
+                text: create_bot_target_slider.value.toFixed(1) + "%"
+                //onEditingFinished: validateMinBalance(text)
             }
             DexLabel{
                 id: create_bot_status_text
@@ -836,6 +909,7 @@ Item {
                 color: 'white'
             }
             DefaultSwitch {
+                id: create_bot_status_switch
                 anchors.horizontalCenter: create_bot_target_slider.horizontalCenter
                 anchors.verticalCenter:  create_bot_status_text.verticalCenter
                 width: 140
@@ -847,7 +921,7 @@ Item {
     }
     DexAppButton{
         id: create_bot_create
-        enabled: true
+        enabled: modApiKucoin.count > 0 ? true : false //also check for all green on coinA & B
         width: 180
         height: 50
         radius: 16
@@ -858,7 +932,7 @@ Item {
         border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
         opacity: 1
         text: qsTr("CREATE BOT")
-        //onClicked:
+        onClicked: packBot()
     }
     DexAppButton{
         id: create_bot_exit
@@ -876,10 +950,11 @@ Item {
         onClicked: closeCreateBot()
     }
     DexLabel{
+        id: create_bot_dbug_txt
         x: 10
         anchors.top: create_bot_create.bottom
         anchors.topMargin: 20
-        text: create_arb.height
+        text: "default"
         color: 'white'
     }
 }
