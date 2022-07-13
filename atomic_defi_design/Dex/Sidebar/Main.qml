@@ -70,10 +70,21 @@ Item
 
         y:
         {
-            if (currentLineType === Main.LineType.Support) return bottom.y + lineHeight + bottom.spacing;
-            else if(currentLineType === Main.LineType.Addressbook) return center.y + (Main.LineType.Wallet) * (lineHeight + center.spacing);
-            else if(currentLineType === Main.LineType.Portfolio || Main.LineType.Wallet || Main.LineType.DEX) return center.y + (currentLineType) * (lineHeight + center.spacing);
-            else if(currentLineType === Main.LineType.Arbibot || Main.LineType.Games || Main.LineType.CoinSight || Main.LineType.Discord) return center.y + (currentLineType - 1) * (lineHeight + center.spacing);
+            if (currentLineType === Main.LineType.Support){
+                return bottom.y + lineHeight + bottom.spacing;
+            }else if(currentLineType === Main.LineType.Addressbook){
+                return center.y + Main.LineType.Wallet * (lineHeight + center.spacing);
+            }
+            if(currentLineType === Main.LineType.Portfolio || Main.LineType.Wallet || Main.LineType.DEX){
+                //lineTypes from 'Arbibot' and onwards, all get caught here.
+                //Also they are now positioned up one spot due to removal of 'Addressbook' from the sidebar navigation.
+                var yVal = center.y + (currentLineType) * (lineHeight + center.spacing);
+                if(yVal > 400){ //all linetypes from 'Arbibot' and onwards
+                    return yVal - 49; //return a spot upwards
+                }else{
+                    return center.y + (currentLineType) * (lineHeight + center.spacing);
+                }
+            }
         }
 
         anchors.left: parent.left
