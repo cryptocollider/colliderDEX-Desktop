@@ -275,7 +275,7 @@ Item {
         }else{
             waitFinishTime -= 1
             if(waitFinishTime >= 1){
-                ahTopStatus.text = s3 + waitFinishTime + s4 + General.apThrows
+                ahTopStatus.text = s3 + waitFinishTime + "m " + s4 + General.apThrows
             }else{
                 General.apCanThrow = true
                 waitFinishTime = 720
