@@ -20,7 +20,7 @@ import Dex.Themes 1.0 as Dex
 Item {
     id: games
     anchors.fill: parent
-    property string g1: qsTr("Waiting: ")
+    property string g1: qsTr("Waiting..")
     property string g2: qsTr("Play")
     property string g3: qsTr("Auto Hedging")
     property string tempTickr: "t"
@@ -30,9 +30,9 @@ Item {
     property string addyCLC: "t"
     property string addyBTC: "t"
     property string addyVRSC: "t"
-    property string addyCHIPS: "t"
-    property string addyDASH: "t"
-    property string addyDGB: "t"
+    //property string addyCHIPS: "t"
+    //property string addyDASH: "t"
+    //property string addyDGB: "t"
     property string addyDOGE: "t"
     property string addyETH: "t"
     property string addyLTC: "t"
@@ -45,9 +45,9 @@ Item {
     property string balCLC: "t"
     property string balBTC: "t"
     property string balVRSC: "t"
-    property string balCHIPS: "t"
-    property string balDASH: "t"
-    property string balDGB: "t"
+    //property string balCHIPS: "t"
+    //property string balDASH: "t"
+    //property string balDGB: "t"
     property string balDOGE: "t"
     property string balETH: "t"
     property string balLTC: "t"
@@ -62,9 +62,9 @@ Item {
         "CC": addyCLC,
         "BTC": addyBTC,
         "VRSC": addyVRSC,
-        "CHIPS": addyCHIPS,
-        "DASH": addyDASH,
-        "DGB": addyDGB,
+        //"CHIPS": addyCHIPS,
+        //"DASH": addyDASH,
+        //"DGB": addyDGB,
         "DOGE": addyDOGE,
         "ETH": addyETH,
         "LTC": addyLTC,
@@ -80,9 +80,9 @@ Item {
         "CC": balCLC,
         "BTC": balBTC,
         "VRSC": balVRSC,
-        "CHIPS": balCHIPS,
-        "DASH": balDASH,
-        "DGB": balDGB,
+        //"CHIPS": balCHIPS,
+        //"DASH": balDASH,
+        //"DGB": balDGB,
         "DOGE": balDOGE,
         "ETH": balETH,
         "LTC": balLTC,
@@ -193,21 +193,21 @@ Item {
         dashboard.current_ticker = api_wallet_page.ticker
         addyVRSC = current_ticker_infos.address
         balVRSC = current_ticker_infos.balance
-        tempTickr = "CHIPS"
-        api_wallet_page.ticker = tempTickr
-        dashboard.current_ticker = api_wallet_page.ticker
-        addyCHIPS = current_ticker_infos.address
-        balCHIPS = current_ticker_infos.balance
-        tempTickr = "DASH"
-        api_wallet_page.ticker = tempTickr
-        dashboard.current_ticker = api_wallet_page.ticker
-        addyDASH = current_ticker_infos.address
-        balDASH = current_ticker_infos.balance
-        tempTickr = "DGB"
-        api_wallet_page.ticker = tempTickr
-        dashboard.current_ticker = api_wallet_page.ticker
-        addyDGB = current_ticker_infos.address
-        balDGB = current_ticker_infos.balance
+//        tempTickr = "CHIPS"
+//        api_wallet_page.ticker = tempTickr
+//        dashboard.current_ticker = api_wallet_page.ticker
+//        addyCHIPS = current_ticker_infos.address
+//        balCHIPS = current_ticker_infos.balance
+//        tempTickr = "DASH"
+//        api_wallet_page.ticker = tempTickr
+//        dashboard.current_ticker = api_wallet_page.ticker
+//        addyDASH = current_ticker_infos.address
+//        balDASH = current_ticker_infos.balance
+//        tempTickr = "DGB"
+//        api_wallet_page.ticker = tempTickr
+//        dashboard.current_ticker = api_wallet_page.ticker
+//        addyDGB = current_ticker_infos.address
+//        balDGB = current_ticker_infos.balance
         tempTickr = "DOGE"
         api_wallet_page.ticker = tempTickr
         dashboard.current_ticker = api_wallet_page.ticker
@@ -423,7 +423,7 @@ Item {
             })
             border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
             opacity: 1
-            text: enabled ? g2 : g1 + autoHedge.initialBootTime
+            text: enabled ? g2 : g1
             onClicked: openArena()
         }
         Rectangle{
@@ -502,7 +502,7 @@ Item {
             })
             border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
             opacity: 1
-            text: enabled ? g2 : g1 + autoHedge.initialBootTime
+            text: enabled ? g2 : g1
             onClicked: openAutoPlay()
         }
         ColumnLayout{

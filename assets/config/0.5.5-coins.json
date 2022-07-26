@@ -1931,7 +1931,7 @@
     "currently_enabled": false
   },
   "DASH": {
-    "active": true,
+    "active": false,
     "coin": "DASH",
     "name": "Dash",
     "coingecko_id": "dash",
@@ -1985,7 +1985,7 @@
     "currently_enabled": false
   },
   "DGB": {
-    "active": true,
+    "active": false,
     "coin": "DGB",
     "name": "DigiByte",
     "coinpaprika_id": "dgb-digibyte",
@@ -5774,7 +5774,7 @@
     "explorer_url": [
       "https://explorer.chips.cash/"
     ],
-    "active": true,
+    "active": false,
     "currently_enabled": false
   },
   "SCA": {

@@ -44,12 +44,11 @@ Item {
     property int throwSeconds
     property var currentMinWager
     property int waitFinishTime: 720
-    property int initialBootTime: 15
+    property int initialBootDelay: 2 //seconds
     property real throwAmountValue: 49.5
     property real throwRateValue: 0.55
     property string setAmountPercentage: hasAutoAddress && hasEnoughBalance ? "" + Math.floor(set_amount_slider.position * 100) : ""
     property string minBalancePercentage: hasAutoAddress && hasEnoughBalance ? "" + ((100 / localSetAmount) * set_amount_slider.value).toFixed(2) : "x"
-    property bool setInitialBoot: false
     property bool gettingAutoAddress: false
     property bool localAutoAddress: false
     property bool hasAutoAddress: localAutoAddress ? true : gettingAutoAddress || General.apAddress === undefined ? false : !General.apAddress.result ? false : true
@@ -310,14 +309,14 @@ Item {
             case "VRSC":
                 currentMinWager = someObject.coinData.vrsc.minWager
                 break
-            case "CHIPS":
-                currentMinWager = someObject.coinData.chips.minWager
-                break
-            case "DASH":
-                currentMinWager = someObject.coinData.dash.minWager
-                break
-            case "DGB":
-                currentMinWager = someObject.coinData.dgb.minWager
+//            case "CHIPS":
+//                currentMinWager = someObject.coinData.chips.minWager
+//                break
+//            case "DASH":
+//                currentMinWager = someObject.coinData.dash.minWager
+//                break
+//            case "DGB":
+//                currentMinWager = someObject.coinData.dgb.minWager
                 break
             case "DOGE":
                 currentMinWager = someObject.coinData.doge.minWager
@@ -507,18 +506,18 @@ Item {
     }
 
     function initialBootWait(){
-        if(!setInitialBoot){
-            initialBootTime = 15;
-            setInitialBoot = true;
-        }
-        initialBootTime--;
-        if(initialBootTime < 1){
-            initial_boot_timer.stop();
-            if(colliderJsonData.waitedInitial == "1"){
-                colliderJsonData.waitedInitial = "2";
-                setColliderData();
-            }else{
+        if(colliderJsonData.waitedInitial == "1"){
+            var portCount = API.app.portfolio_pg.portfolio_mdl.length;
+            if(portCount === 10){
+                if(initialBootDelay < 1){
+                    colliderJsonData.waitedInitial = "2";
+                    setColliderData();
+                }else{
+                    initialBootDelay--;
+                }
             }
+        }else{
+            initial_boot_timer.stop();
         }
     }
 

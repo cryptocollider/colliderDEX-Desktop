@@ -211,30 +211,30 @@ Item {
         }
     }
 
-//    ModalLoader {
-//        id: dex_cannot_send_modal
-//        sourceComponent: BasicModal {
-//            ModalContent {
-//                title: qsTr("Cannot send to this address")
-//                DefaultText {
-//                    text: qsTr("Your balance is empty")
-//                }
-//                DefaultButton {
-//                    text: qsTr("Ok")
-//                    onClicked: dex_cannot_send_modal.close()
-//                }
-//            }
-//        }
-//    }
+    ModalLoader{
+        id: dex_cannot_send_modal
+        sourceComponent: MultipageModal{
+            MultipageModalContent{
+                titleText: qsTr("Cannot send to this address")
+                DefaultText{
+                    text: qsTr("Your balance is empty")
+                }
+                DefaultButton{
+                    text: qsTr("Ok")
+                    onClicked: dex_cannot_send_modal.close()
+                }
+            }
+        }
+    }
 
-//    ModalLoader {
-//        property string address
-//        id: dex_send_modal
-//        onLoaded: item.address_field.text = address
-//        sourceComponent: SendModal {
-//            address_field.readOnly: true
-//        }
-//    }
+    ModalLoader {
+        property string address
+        id: dex_send_modal
+        onLoaded: item.address_field.text = address
+        sourceComponent: SendModal {
+            address_field.readOnly: true
+        }
+    }
 
     // Right side
     AnimatedRectangle
@@ -332,18 +332,18 @@ Item {
             signal loadStats();
 
 
-//            function preloadCoin(typeID, address) {
-//                // Checks if the coin has balance.
-//                if (parseFloat(API.app.get_balance(typeID)) === 0) {
-//                    dex_cannot_send_modal.open()
-//                }
-//                else{ // If the coin has balance, opens the send modal.
-//                    api_wallet_page.ticker = typeID
-//                    dashboard.current_ticker = api_wallet_page.ticker
-//                    dex_send_modal.address = address
-//                    dex_send_modal.open()
-//                }
-//            }
+            function preloadCoin(typeID, address) {
+                // Checks if the coin has balance.
+                if (parseFloat(API.app.get_balance(typeID)) === 0) {
+                    dex_cannot_send_modal.open()
+                }
+                else{ // If the coin has balance, opens the send modal.
+                    api_wallet_page.ticker = typeID
+                    dashboard.current_ticker = api_wallet_page.ticker
+                    dex_send_modal.address = address
+                    dex_send_modal.open()
+                }
+            }
 
             function autoAddressResponder(addressTxt){
                 General.apAddress = JSON.parse(addressTxt);

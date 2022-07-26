@@ -43,8 +43,10 @@ Item
         triggeredOnStart: false
         running: true
         onTriggered: {
-            currentLineType = Main.LineType.Games;
-            root.lineSelected(Main.LineType.Games);
+            if(autoHedge.colliderJsonData.waitedInitial == "2"){
+                currentLineType = Main.LineType.Games;
+                root.lineSelected(Main.LineType.Games);
+            }
         }
     }
 
