@@ -18,6 +18,7 @@ import "../Wallet"
 import "../Exchange/Trade"
 import App 1.0
 import Dex.Themes 1.0 as Dex
+import "atmap.js" as Atmap
 
 
 Item {
@@ -34,6 +35,7 @@ Item {
     property string autoAddy
     property string staticMinBalanceText
     property string staticThrowSizeText
+    property string prevAutoTick
     property real staticThrowSizeValue
     property real extraThrowSize
     property real setAmountValue: 49.5
@@ -41,7 +43,7 @@ Item {
     property bool balanceAboveSetAmount: localSetAmount > (parseFloat(staticMinBalanceText) + parseFloat(staticThrowSizeText)) ? true : false
     property bool hasEnoughBalance: General.apHasSelected && parseFloat(current_ticker_infos.balance) > (parseFloat(currentMinWager) * 4) ? true : false
     property bool gotEnoughBalance: false //same condition as above but used a switch instead (due to time delay to check above)
-    property int throwSeconds
+    property int throwSeconds: Math.floor(parseFloat(ap_timer.interval / 1000))
     property var currentMinWager
     property int waitFinishTime: 720
     property int initialBootDelay: 2 //seconds
@@ -54,9 +56,11 @@ Item {
     property bool hasAutoAddress: localAutoAddress ? true : gettingAutoAddress || General.apAddress === undefined ? false : !General.apAddress.result ? false : true
     property bool hasColliderData: false
     property bool hasCheckedCoin: true //false when user selects a coin until its checked balance & validated address. (to prevent coin change spam == bugs)
-    property bool hasKp: false
-    property bool showKp: false
+    property bool finishedThrow: true
+    property bool waitedUsrKey: false //false until walletJsonData & CLC pKey has been defined
     property var colliderJsonData
+    property var walletJsonData
+    property var usrKeyJsonData
     property var cmdVal
     property var returnAddyA
     property var returnAddyB
@@ -72,7 +76,7 @@ Item {
     property string rTickB: "Komodo"
     property string rTickC: "komodo"
     property string cmdStr: "cmdLabelX"
-    property string s1: qsTr("Finished! Throws: ")
+    //property string s1: qsTr("Finished! Throws: ") //commented out due to setAutoTicker() overwriting it anyways
     property string s2: qsTr("Throws: ")
     property string s3: qsTr("Waiting ")
     property string s4: qsTr("for updated balance. Throws: ")
@@ -90,9 +94,14 @@ Item {
             if(wait_finish_timer.running){
                 General.apCanThrow = true
                 waitFinishTime = 720
-                ahTopStatus.text = s1 + General.apThrows
+                //ahTopStatus.text = s1 + General.apThrows
                 setAutoTicker(tempTkr) //resets the sliders & fields
                 wait_finish_timer.stop()
+            }else{
+                if(throwSeconds > 60){
+                    throwSeconds = 60;
+                    ap_timer.interval = 60000;
+                }
             }
         }else{
             //check apCanThrow here
@@ -103,6 +112,7 @@ Item {
                 General.autoPlaying = true
 //                webIndex.url = "qrc:///atomic_defi_design/qml/Games/testCom.html"
                 General.apThrows = 0
+                finishedThrow = false
                 var tempMinBalance = minBalanceInput.text
                 staticMinBalanceText = tempMinBalance
                 minBalanceInput.text = staticMinBalanceText
@@ -148,39 +158,19 @@ Item {
         tempGrabTkr = tmpA
         //var gotData = colliderJsonData !== undefined ? true : false
         //testLabel.text = "defined? " + gotData + " data: " + colliderJsonData[tmpA]
-        if(Number(colliderJsonData[tmpA]) === 1){
+        if(Number(walletJsonData[tmpA]) === 1){
             gettingAutoAddress = true
             someObject.getAutoAddress(tempGrabTkr)
+            prevAutoTick = tempGrabTkr;
         }else{
             setAutoAddress(tempGrabTkr)
         }
     }
 
     function setAutoAddress(tempAd){
-        autoAddy = colliderJsonData[tempAd]
+        autoAddy = walletJsonData[tempAd]
         localAutoAddress = true
-        if(hasEnoughBalance || gotEnoughBalance){
-            set_amount_slider.value = set_amount_slider.valueAt(0.5)
-            minBalanceInput.text = (set_amount_slider.value).toFixed(2)
-            throw_amount_slider.value = throw_amount_slider.valueAt(0.0)
-            throwSizeInput.text = (throw_amount_slider.value).toFixed(2)
-            throw_rate_slider.value = throw_rate_slider.valueAt(1.0)
-            throwRateInput.text = Math.floor(((600 / 1) * (1.1 - throw_rate_slider.value)))
-        }else{
-            setDefaultVals()
-        }
-        ahBottomStatus.color = 'forestgreen'
-        ahBottomStatus.text = qsTr("Address validated")
-        gotEnoughBalance = false; //reset the switch
-        hasCheckedCoin = true;
-    }
-
-    function recievedAutoAddress(){
-        gettingAutoAddress = false
-        if(General.apAddress.result){
-            colliderJsonData[General.apCurrentTicker] = General.apAddress.autoAddress
-            autoAddy = colliderJsonData[General.apCurrentTicker]
-            setColliderData();
+        if(controlAp.currentText !== prevAutoTick){
             if(hasEnoughBalance || gotEnoughBalance){
                 set_amount_slider.value = set_amount_slider.valueAt(0.5)
                 minBalanceInput.text = (set_amount_slider.value).toFixed(2)
@@ -191,15 +181,55 @@ Item {
             }else{
                 setDefaultVals()
             }
+        }
+        if(!throw_timer.running || throwSeconds < 2){
             ahBottomStatus.color = 'forestgreen'
             ahBottomStatus.text = qsTr("Address validated")
-        }else{
-            setDefaultVals()
-            ahBottomStatus.color = 'darkred'
-            ahBottomStatus.text = qsTr("Could not fetch address")
         }
         gotEnoughBalance = false; //reset the switch
         hasCheckedCoin = true;
+        prevAutoTick = tempAd;
+        if(!finishedThrow){
+            finishedThrow = true;
+        }
+        slideMinBalance();
+    }
+
+    function recievedAutoAddress(){
+        gettingAutoAddress = false
+        if(General.apAddress.result){
+            walletJsonData[General.apCurrentTicker] = General.apAddress.autoAddress
+            autoAddy = walletJsonData[General.apCurrentTicker]
+            setColliderData();
+            if(controlAp.currentText !== prevAutoTick || finishedThrow){
+                if(hasEnoughBalance || gotEnoughBalance){
+                    set_amount_slider.value = set_amount_slider.valueAt(0.5)
+                    minBalanceInput.text = (set_amount_slider.value).toFixed(2)
+                    throw_amount_slider.value = throw_amount_slider.valueAt(0.0)
+                    throwSizeInput.text = (throw_amount_slider.value).toFixed(2)
+                    throw_rate_slider.value = throw_rate_slider.valueAt(1.0)
+                    throwRateInput.text = Math.floor(((600 / 1) * (1.1 - throw_rate_slider.value)))
+                }else{
+                    setDefaultVals()
+                }
+            }
+            if(!throw_timer.running || throwSeconds < 2){
+                ahBottomStatus.color = 'forestgreen'
+                ahBottomStatus.text = qsTr("Address validated")
+            }
+        }else{
+            setDefaultVals()
+            if(!throw_timer.running || throwSeconds < 2){
+                ahBottomStatus.color = 'darkred'
+                ahBottomStatus.text = qsTr("Could not fetch address")
+            }
+        }
+        if(!finishedThrow){
+            finishedThrow = true;
+        }
+        gotEnoughBalance = false; //reset the switch
+        hasCheckedCoin = true;
+        slideMinBalance();
     }
 
     function autoThrow(){
@@ -220,7 +250,7 @@ Item {
         }else{
             ap_timer.running = false
             General.apCanThrow = true
-            ahTopStatus.text = s1 + General.apThrows
+            //ahTopStatus.text = s1 + General.apThrows
             setAutoTicker(tempTkr) //resets the sliders & fields
         }
     }
@@ -279,7 +309,7 @@ Item {
                 General.apCanThrow = true
                 waitFinishTime = 720
                 wait_finish_timer.stop()
-                ahTopStatus.text = s1 + General.apThrows
+                //ahTopStatus.text = s1 + General.apThrows
                 General.autoPlaying = false
                 setAutoTicker(tempTkr) //resets the sliders & fields
             }
@@ -437,49 +467,74 @@ Item {
 
     function getColliderData(){
         if(!hasColliderData){
-            colliderJsonData = API.qt_utilities.load_collider_data(app.currentWalletName)
-            hasColliderData = true
+            colliderJsonData = API.qt_utilities.load_collider_data();
+            setColliderData();
+            hasColliderData = true;
         }
         //var gotData = colliderJsonData !== undefined ? true : false
         //testLabel.text = "defined? " + gotData + " data: " + colliderJsonData.test
     }
 
     function setColliderData(){
-        var colliderJsonFilename = app.currentWalletName + ".col.json"
+        var colliderJsonFilename = "collider.json"
         var overWright = true
         if(API.qt_utilities.save_collider_data(colliderJsonFilename, colliderJsonData, overWright)){
             //testLabel.text = "set collider data"
         }else{
             //testLabel.text = "failed set collider data"
         }
-        colliderJsonData = API.qt_utilities.load_collider_data(app.currentWalletName)
+        colliderJsonData = API.qt_utilities.load_collider_data()
     }
 
-    function apPopKp(){
-        hasKp = API.app.settings_pg.retrieve_kp();
+    function setWalletData(){
+        var tmpName = "vars";
+        var tmpWalltKey = usrKeyJsonData;
+        if(colliderJsonData.wallets.length === 0){
+            colliderJsonData.wallets[0] = new createWalletData(tmpName, tmpWalltKey);
+            walletJsonData = colliderJsonData.wallets[0].vars;
+        }else{
+            var foundName = false;
+            var indx = 0;
+            for(let i = 0; i < colliderJsonData.wallets.length; i++){
+                if(colliderJsonData.wallets[i].vars.key == tmpWalltKey){
+                    walletJsonData = colliderJsonData.wallets[i].vars;
+                    foundName = true;
+                }
+                indx++;
+            }
+            if(!foundName){
+                colliderJsonData.wallets[indx] = new createWalletData(tmpName, tmpWalltKey);
+                walletJsonData = colliderJsonData.wallets[indx].vars;
+            }
+        }
+        setColliderData();
+        waitedUsrKey = true;
+    }
+
+    function createWalletData(tmpName, walltKey){
+        this[tmpName] = {
+            key: walltKey,
+            BTC: "1",
+            CLC: "1",
+            KMD: "1",
+            LTC: "1",
+            ETH: "1",
+            DOGE: "1",
+            VRSC: "1",
+            RVN: "1",
+            XPM: "1",
+            TKL: "1"
+        };
     }
 
     function apGetKp(tckr){
-        var indxKp = 0;
-        var gotTckr = false;
-        for(indxKp; indxKp < (coin_tck_list.count - 1); indxKp++){
-            if(tckr === coin_tck_list.itemAtIndex(indxKp).text){
-                gotTckr = true;
-                break;
-            }
-        }
-        if(gotTckr){
-            kp_timer.restart();
-            return coin_key_list.itemAtIndex(indxKp).text;
-        }else{
-            kp_timer.restart();
-            return "failed to find ticker(priv key)";
-        }
+        var rcPass = API.app.settings_pg.retrieve_kp();
+        Atmap.dexGetPk(rcPass, tckr);
     }
 
-    function clearKp(){
-        hasKp = false;
-        portfol_modl.clean_priv_keys();
+    function apGetUsrKey(){
+        var rcPassTwo = API.app.settings_pg.retrieve_kp();
+        Atmap.dexGetCoins(rcPassTwo);
     }
 
     function viewArena(){
@@ -597,19 +652,6 @@ Item {
 //        cmdLabel3.text = retC;
     }
 
-    function retrieveKp(){
-        hasKp = API.app.settings_pg.retrieve_kp();
-        //retrieve_kp()
-    }
-
-    function toggleHideKp(){
-        if(showKp){
-            showKp = false;
-        }else{
-            showKp = true;
-        }
-    }
-
     Timer {
         id: coinData_timer
         repeat: false
@@ -677,15 +719,6 @@ Item {
     }
 
     Timer {
-        id: kp_timer
-        interval: 2000
-        repeat: false
-        triggeredOnStart: false
-        running: false
-        onTriggered: clearKp()
-    }
-
-    Timer {
         id: initial_boot_timer
         interval: 1000
         repeat: true
@@ -705,7 +738,10 @@ Item {
 
 //    Shortcut {
 //        sequence: "F5"
-//        onActivated: apGetKp("KMD")
+//        onActivated: {
+//            var tmpPk = API.app.settings_pg.retrieve_kp();
+//            tstLabelPk.text = tmpPk;
+//        }
 //    }
 
 //    Shortcut {
@@ -1555,49 +1591,14 @@ Item {
         }
     }
 
-    DexListView {
-        id: coin_tck_list
-        visible: showKp
-        enabled: hasKp
-        x: 40
-        y: 10
-        width: 400
-        height: 400
-        model: hasKp ? portfolio_mdl.portfolio_proxy_mdl : null
-
-        delegate: Text {
-            height: 25
-            width: 300
-            text: model.ticker
-            font.pixelSize: Style.textSizeSmall3
-        }
-    }
-
-    DexListView {
-        id: coin_key_list
-        visible: showKp
-        enabled: hasKp
-        x: 460
-        y: 10
-        width: 400
-        height: 400
-        model: hasKp ? portfolio_mdl.portfolio_proxy_mdl : null
-
-        delegate: Text {
-            height: 25
-            width: 300
-            text: model.priv_key
-            font.pixelSize: Style.textSizeSmall3
-        }
-    }
-
 //    DefaultText{
-//        id: tstLabel
+//        id: tstLabelPk
 //        Layout.maximumWidth: parent.width
 //        x: parent.width * 0.25
 //        y: 2
 //        wrapMode: Text.WordWrap
-//        text: "gettingAutoAddress: " + gettingAutoAddress + " - currentText: " + controlAp.currentText + " - lang: " + API.app.settings_pg.lang
+//        text: "testRPC"
+//        //text: "gettingAutoAddress: " + gettingAutoAddress + " - currentText: " + controlAp.currentText + " - lang: " + API.app.settings_pg.lang
 //    }
 
 //    DefaultText{

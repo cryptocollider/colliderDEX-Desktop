@@ -388,9 +388,17 @@ Item
                 Layout.preferredWidth: 180
                 Layout.preferredHeight: 48
 
+                MouseArea{
+                    id: wallt_mouse
+                    enabled: !wallt_send.enabled
+                    anchors.fill: parent
+                    hoverEnabled: true
+                }
+
                 // Send Button
                 DexAppButton
                 {
+                    id: wallt_send
                     enabled: API.app.wallet_pg.send_available && !General.autoPlaying && General.apCanThrow
 
                     anchors.fill: parent
@@ -422,6 +430,15 @@ Item
                 {
                     visible: API.app.wallet_pg.send_availability_state !== ""
                     tooltipText: API.app.wallet_pg.send_availability_state
+                }
+
+                DexTooltip{
+                    contentItem: DefaultText{
+                       width: 300
+                       text: qsTr("Stop Auto-Hedge and wait for the throw timer to finish.")
+                       padding: 5
+                    }
+                    visible: !wallt_send.enabled && wallt_mouse.containsMouse
                 }
             }
 

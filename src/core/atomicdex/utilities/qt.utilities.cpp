@@ -188,11 +188,11 @@ namespace atomic_dex
     }
 
     QVariantMap
-    atomic_dex::qt_utilities::load_collider_data(const QString& wallet_name) const
+    atomic_dex::qt_utilities::load_collider_data() const
     {
         QVariantMap out;
         using namespace std::string_literals;
-        fs::path file_path = atomic_dex::utils::get_atomic_dex_collider_folder() / (wallet_name.toStdString() + ".col.json"s);
+        fs::path file_path = atomic_dex::utils::get_atomic_dex_collider_folder() / "collider.json"s;
         if (fs::exists(file_path))
         {
             LOG_PATH("load user collider data: {}", file_path);

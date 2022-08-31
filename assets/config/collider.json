@@ -1,15 +1,5 @@
  {
- "BTC": "1",
- "CLC": "1",
- "KMD": "1",
- "LTC": "1",
- "ETH": "1",
- "DOGE": "1",
- "VRSC": "1",
- "RVN": "1",
- "XPM": "1",
- "TKL": "1",
+ "wallets": [],
  "seenVids": "1",
- "waitedInitial": "1",
- "test": "testing"
+ "waitedInitial": "1"
 }

@@ -103,7 +103,7 @@ namespace atomic_dex
          * @param wallet_name
          * @return user collider data as a json object
          */
-        Q_INVOKABLE QVariantMap load_collider_data(const QString& wallet_name) const;
+        Q_INVOKABLE QVariantMap load_collider_data() const;
 
         Q_INVOKABLE QStringList load_cmd_data() const;
 

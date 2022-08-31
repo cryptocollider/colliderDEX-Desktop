@@ -22,6 +22,7 @@ import "../ArbBots"
 import "../Settings" as SettingsPage
 import "../Screens"
 import Dex.Themes 1.0 as Dex
+import Qaterial 1.0 as Qaterial
 //import Dex.Sidebar 1.0 as Dex
 
 
@@ -162,19 +163,41 @@ Item {
 //    }
 
     Timer {
-        interval: 250
+        interval: 100
         repeat: false
         triggeredOnStart: false
         running: true
         onTriggered: {
             General.origLang = API.app.settings_pg.lang;
-            autoHedge.getColliderData()
+            autoHedge.getColliderData();
+        }
+    }
+
+    Timer {
+        interval: 3000
+        repeat: false
+        triggeredOnStart: false
+        running: true
+        onTriggered: {
+            autoHedge.apGetKp("CLC");
+            autoHedge.apGetUsrKey();
+        }
+    }
+
+    Timer {
+        interval: 3300
+        repeat: false
+        triggeredOnStart: false
+        running: true
+        onTriggered: {
+            autoHedge.setWalletData();
         }
     }
 
 //    Shortcut {
 //        sequence: "F8"
-//        onActivated: checkClc()
+//        //onActivated: arena_info.open();
+//        //onActivated: checkClc()
 //    }
 
 //    Shortcut {
@@ -233,6 +256,46 @@ Item {
         onLoaded: item.address_field.text = address
         sourceComponent: SendModal {
             address_field.readOnly: true
+        }
+    }
+
+    Popup {
+        id: arena_info
+        x: 70
+        y: 50
+        width: parent.width - 140
+        height: parent.height - 100
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        onOpened: {
+            arena_info_web.enabled = true;
+            arena_info_web.url = someObject.popUrl;
+        }
+        onClosed: {
+            arena_info_web.url = "";
+            arena_info_web.enabled = false;
+        }
+        WebEngineView {
+            id: arena_info_web
+            enabled: false
+            width: parent.width
+            height: parent.height
+            url: ""
+        }
+        Qaterial.FlatButton{
+            x: parent.width - 89
+            y: 8
+            topInset: 0
+            leftInset: 0
+            rightInset: 0
+            bottomInset: 0
+            radius: 0
+            opacity: 1.0
+            accentRipple: Qaterial.Colors.red
+            foregroundColor: Dex.CurrentTheme.foregroundColor
+            icon.source: Qaterial.Icons.windowClose
+            onClicked: arena_info.close()
         }
     }
 
@@ -323,11 +386,14 @@ Item {
             property string someProperty: "QML property string"
             property var autoplayAddress
             property string dexUserData: JSON.stringify(dashboard.dexList)
+            property string popUrl; //url address for popup
+            property string clcPrivKey: "cleared"
             property var coinData
             signal someSignal(string message);
             signal apSignal(string apMessage);
             signal getAutoAddress(string tickText);
             signal dexAutoLogin(string tempText);
+            signal setKp(string kpText, string kpCoin);
             signal getCoinData();
             signal loadStats();
 
@@ -355,12 +421,14 @@ Item {
                 return JSON.stringify(dexList);
             }
 
-            function popKp(){
-                autoHedge.apPopKp();
+            function clearKp(){
+                clcPrivKey = "cleared";
             }
 
-            function getKp(ticker){
-                return autoHedge.apGetKp(ticker);
+
+            function popInfo(urlAddy){
+                popUrl = urlAddy;
+                arena_info.open();
             }
 
 //            function getKpTwo(tickerTwo){

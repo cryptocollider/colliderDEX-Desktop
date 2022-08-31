@@ -593,6 +593,7 @@
         <file>Dex/Exchange/Trade/Trading/Items/TotalView.qml</file>
         <file>Dex/Exchange/Trade/Trading/TradeViewHeader.qml</file>
         <file>Dex/Fiat/FiatRamp.qml</file>
+		<file>Dex/Games/atmap.js</file>
 		<file>Dex/Games/AutoHedge.qml</file>
 		<file>Dex/Games/CoinSight.qml</file>
 		<file>Dex/Games/ColliderDiscord.qml</file>

@@ -74,7 +74,7 @@ namespace atomic_dex
             const fs::path    wallet_object_path = utils::get_atomic_dex_export_folder() / (wallet_name.toStdString() + ".wallet.json"s);
             const std::string wallet_cfg_file    = std::string(atomic_dex::get_raw_version()) + "-coins"s + "."s + wallet_name.toStdString() + ".json"s;
             const fs::path    wallet_cfg_path    = utils::get_atomic_dex_config_folder() / wallet_cfg_file;
-            const fs::path    collider_file      = wallet_name.toStdString() + ".col.json"s;
+            const fs::path    collider_file      = "collider.json"s;
             const fs::path    collider_path      = utils::get_atomic_dex_collider_folder() / collider_file;
 
 

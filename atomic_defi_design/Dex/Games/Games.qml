@@ -22,7 +22,7 @@ Item {
     anchors.fill: parent
     property string g1: qsTr("Waiting..")
     property string g2: qsTr("Play")
-    property string g3: qsTr("Auto Hedging")
+    property string g3: qsTr("Auto-Play")
     property string tempTickr: "t"
 
     //strings for coins pub address
@@ -291,6 +291,7 @@ Item {
             text: qsTr("Fun way to learn Crypto")
         }
         DexButton{
+            enabled: autoHedge.colliderJsonData.waitedInitial != "2" ? false : autoHedge.waitedUsrKey ? true : false
             width: 240
             height: 60
             anchors.horizontalCenter: parent.horizontalCenter
@@ -304,7 +305,7 @@ Item {
             })
             border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
             opacity: 1
-            text: qsTr("Play")
+            text: enabled ? g2 : g1
             onClicked: openChallenge()
         }
         Rectangle{
@@ -409,7 +410,7 @@ Item {
             text: qsTr("Throw & Grow your Assets!")
         }
         DexButton{
-            enabled: autoHedge.colliderJsonData.waitedInitial == "2" ? true : false
+            enabled: autoHedge.colliderJsonData.waitedInitial != "2" ? false : autoHedge.waitedUsrKey ? true : false
             width: 240
             height: 60
             anchors.horizontalCenter: parent.horizontalCenter
@@ -488,7 +489,7 @@ Item {
             GradientStop { position: 1; color: Dex.CurrentTheme.backgroundColor }
         }
         DexButton{
-            enabled: autoHedge.colliderJsonData.waitedInitial == "2" ? true : false
+            enabled: autoHedge.colliderJsonData.waitedInitial != "2" ? false : autoHedge.waitedUsrKey ? true : false
             width: API.app.settings_pg.lang == "ru" || "tr" ? 460 : 320
             height: 60
             anchors.horizontalCenter: parent.horizontalCenter
@@ -502,7 +503,7 @@ Item {
             })
             border.color: enabled ? Dex.CurrentTheme.accentColor : DexTheme.contentColorTopBold
             opacity: 1
-            text: enabled ? g2 : g1
+            text: enabled ? g3 : g1
             onClicked: openAutoPlay()
         }
         ColumnLayout{
